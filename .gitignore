@@ -1,0 +1,43 @@
+# Ignore this folder completely
+/__repo__/
+
+# Ignore build trees (but not specific files we re-include later)
+# Use /* so we can re-include children
+/armgcc/debug/*
+/armgcc/release/*
+
+# Generic CMake/Ninja junk (anywhere)
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/build.ninja
+**/.ninja_deps
+**/.ninja_log
+**/.cmake/
+
+# Build artifacts (anywhere)
+**/*.o
+**/*.obj
+**/*.a
+**/*.lib
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.exe
+**/*.axf
+**/*.bin
+**/*.elf
+**/*.hex
+**/*.s19
+**/*.out
+**/*.map
+**/*.lst
+**/*.d
+**/*.log
+
+# --- Re-include the two tracked artifacts (must be AFTER the ignores above) ---
+!/armgcc/debug/*.bin
+!/armgcc/debug/*.elf
+
+!/armgcc/release/*.bin
+!/armgcc/release/*.elf
