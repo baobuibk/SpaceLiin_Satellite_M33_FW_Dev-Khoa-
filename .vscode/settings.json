@@ -5,5 +5,8 @@
   "cmake.useCMakePresets": "always",
   "cmake.buildTask": true,
   "cmake.skipConfigureIfCachePresent": true,
-  "cmake.sourceDirectory": "${workspaceFolder}/armgcc"
+  "cmake.sourceDirectory": "${workspaceFolder}/armgcc",
+  "files.associations": {
+    "cmd_line.h": "c"
+  }
 }

@@ -65,7 +65,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/App/app.c"
     "${UserSourceDirPath}/App/app.h"
 
-    "${UserSourceDirPath}/App/task_common.h"
+    "${UserSourceDirPath}/App/task/task_common.h"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.c"
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.h"
@@ -110,6 +110,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     # User define
     # App
     ${UserSourceDirPath}/App
+    ${UserSourceDirPath}/App/task
     ${UserSourceDirPath}/App/task/task_cmd_line
 
     # BoardSupport
