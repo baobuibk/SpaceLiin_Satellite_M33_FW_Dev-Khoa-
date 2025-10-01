@@ -166,7 +166,7 @@ void bsp_libcsp_can_send_buffer(const flexcan_frame_t *p_buff, uint32_t frame_co
 //! Get a char from the buffer.
 //
 //*****************************************************************************
-void bsp_libcsp_can_get_frame(const flexcan_frame_t* p_return_frame)
+void bsp_libcsp_can_get_frame(flexcan_frame_t* p_return_frame)
 {
 	CAN_Get_Frame(&LIBCSP_CAN_stdio, p_return_frame);
 }

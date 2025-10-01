@@ -19,11 +19,11 @@
 
 #define TX_BUFFER_FULL(p_can)              (ring_buffer_is_full((p_can)->p_TX_buffer))
 
-#define TX_BUFFER_PUSH(p_can, p_buff)        (ring_buffer_push((p_can)->p_TX_buffer, (p_buff)))
+#define TX_BUFFER_PUSH(p_can, p_buff)      (ring_buffer_push((p_can)->p_TX_buffer, (p_buff)))
 
 #define TX_BUFFER_POP(p_can, p_buff)       (ring_buffer_pop((p_can)->p_TX_buffer, (void*)(p_buff)))
 
-#define TX_BUFFER_OVERWRITE(p_can, p_buff)   (ring_buffer_overwrite((p_can)->p_TX_buffer, (p_buff)))
+#define TX_BUFFER_OVERWRITE(p_can, p_buff) (ring_buffer_overwrite((p_can)->p_TX_buffer, (p_buff)))
 
 #define TX_BUFFER_PEAK(p_can, p_buff)      (ring_buffer_peak((p_can)->p_TX_buffer, (p_buff)))
 
@@ -42,11 +42,11 @@
 
 #define RX_BUFFER_FULL(p_can)              (ring_buffer_is_full((p_can)->p_RX_buffer))
 
-#define RX_BUFFER_PUSH(p_can, p_buff)        (ring_buffer_push((p_can)->p_RX_buffer, (p_buff)))
+#define RX_BUFFER_PUSH(p_can, p_buff)      (ring_buffer_push((p_can)->p_RX_buffer, (p_buff)))
 
 #define RX_BUFFER_POP(p_can, p_buff)       (ring_buffer_pop((p_can)->p_RX_buffer, (void*)(p_buff)))
 
-#define RX_BUFFER_OVERWRITE(p_can, p_buff)   (ring_buffer_overwrite((p_can)->p_RX_buffer, (p_buff)))
+#define RX_BUFFER_OVERWRITE(p_can, p_buff) (ring_buffer_overwrite((p_can)->p_RX_buffer, (p_buff)))
 
 #define RX_BUFFER_PEAK(p_can, p_buff)      (ring_buffer_peak((p_can)->p_RX_buffer, (p_buff)))
 
@@ -64,7 +64,7 @@ static void CAN_Prime_Transmit(can_stdio_t* p_can);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void CAN_stdio_Init(  
                 can_stdio_t *p_can,
-                CAN_Type*   _handle,
+                CAN_Type*   _p_base,
                 IRQn_Type   _irqn,
                 flexcan_handle_t*      _p_flexcan_handle,
                 flexcan_mb_transfer_t* _p_TX_mb,
@@ -72,8 +72,8 @@ void CAN_stdio_Init(
                 ring_buffer_t *_p_TX_buffer,
                 ring_buffer_t *_p_RX_buffer)
 {
-    p_can->handle  = _handle;
-    p_can->irqn    = _irqn;
+    p_can->p_base     = _p_base;
+    p_can->irqn     = _irqn;
 
     p_can->p_flexcan_handle = _p_flexcan_handle;
     p_can->p_TX_mb          = _p_TX_mb;
@@ -84,6 +84,8 @@ void CAN_stdio_Init(
 
     p_can->is_TX_busy   = false;
     p_can->is_RX_busy   = false;
+
+    FLEXCAN_TransferReceiveNonBlocking(p_can->p_base, p_can->p_flexcan_handle, p_can->p_RX_mb);
 }
 
 void CAN_Send_Frame(can_stdio_t* p_can, const flexcan_frame_t* p_frame)
@@ -96,7 +98,7 @@ void CAN_Send_Buffer(can_stdio_t *p_can, const flexcan_frame_t *p_buff, uint32_t
     CAN_Enqueue(p_can, p_buff, frame_count);
 }
 
-void CAN_Get_Frame(can_stdio_t* p_can, const flexcan_frame_t* p_return_frame)
+void CAN_Get_Frame(can_stdio_t* p_can, flexcan_frame_t* p_return_frame)
 {
     if (RX_BUFFER_EMPTY(p_can))
     {
@@ -118,24 +120,25 @@ void CAN_stdio_TX_idle_subhandle(can_stdio_t* p_can)
 {
     if(TX_BUFFER_EMPTY(p_can))
     {
-        // Buffer empty, do nothing
+        // Buffer empty, no more queue
+        p_can->is_TX_busy = false;
         return;
     }
 
     // There is more data in the output buffer. Send the next byte
+    p_can->is_TX_busy = true;
     CAN_Prime_Transmit(p_can);
     return;
 }
 
 void CAN_stdio_RX_idle_subhandle(can_stdio_t* p_can)
 {
-    if(RX_BUFFER_FULL(p_can))
+    if(!RX_BUFFER_FULL(p_can))
     {
-        // Buffer full, do nothing
-        return;
+        RX_BUFFER_PUSH(p_can, p_can->p_RX_mb->frame);
     }
 
-    RX_BUFFER_PUSH(p_can, p_can->p_RX_mb->frame);
+    FLEXCAN_TransferReceiveNonBlocking(p_can->p_base, p_can->p_flexcan_handle, p_can->p_RX_mb);
     return;
 }
 
@@ -184,7 +187,7 @@ static void CAN_Prime_Transmit(can_stdio_t* p_can)
     TX_BUFFER_POP(p_can, &tx_frame);
     p_can->p_TX_mb->frame = &tx_frame;
 
-    FLEXCAN_TransferSendNonBlocking(p_can->handle, p_can->p_flexcan_handle, p_can->p_TX_mb);
+    FLEXCAN_TransferSendNonBlocking(p_can->p_base, p_can->p_flexcan_handle, p_can->p_TX_mb);
 }
 
 

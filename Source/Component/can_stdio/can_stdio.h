@@ -41,7 +41,7 @@
 typedef struct _can_stdio_t_
 {
     /* Hardware handles (provided by core init code) */
-    CAN_Type                *handle;
+    CAN_Type                *p_base;
     IRQn_Type               irqn;
 
     /* Which resources can_stdio owns/uses */
@@ -63,7 +63,7 @@ typedef struct _can_stdio_t_
 /* One-time attach: can_stdio does NOT set bit timing or pins. Do that in core_*. */
 void CAN_stdio_Init( 
                 can_stdio_t *p_can,
-                CAN_Type*   _handle,
+                CAN_Type*   _p_base,
                 IRQn_Type   _irqn,
                 flexcan_handle_t*      _p_flexcan_handle,
                 flexcan_mb_transfer_t* _p_TX_mb,
@@ -75,7 +75,7 @@ void CAN_Send_Frame(can_stdio_t* p_can, const flexcan_frame_t* p_frame);
 
 void CAN_Send_Buffer(can_stdio_t *p_can, const flexcan_frame_t* p_buff, uint32_t frame_count);
 
-void CAN_Get_Frame(can_stdio_t* p_can, const flexcan_frame_t* p_return_frame);
+void CAN_Get_Frame(can_stdio_t* p_can, flexcan_frame_t* p_return_frame);
 
 void CAN_stdio_TX_idle_subhandle(can_stdio_t* p_can);
 

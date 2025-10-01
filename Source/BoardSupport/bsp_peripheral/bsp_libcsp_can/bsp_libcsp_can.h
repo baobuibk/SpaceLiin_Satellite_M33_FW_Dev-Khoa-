@@ -21,6 +21,6 @@ void bsp_libcsp_can_send_frame(const flexcan_frame_t* p_frame);
 
 void bsp_libcsp_can_send_buffer(const flexcan_frame_t* p_buff, uint32_t frame_count);
 
-void bsp_libcsp_can_get_frame(const flexcan_frame_t* p_return_frame);
+void bsp_libcsp_can_get_frame(flexcan_frame_t* p_return_frame);
 
 #endif /* _BSP_LIBCSP_CAN_H_ */
