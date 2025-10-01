@@ -23,7 +23,7 @@ typedef struct _uart_stdio_t_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void UART_Init( uart_stdio_t* p_uart, LPUART_Type* _handle,
+void UART_stdio_Init( uart_stdio_t* p_uart, LPUART_Type* _handle,
                 IRQn_Type _irqn, ring_char_buffer_t* _p_TX_buffer, ring_char_buffer_t* _p_RX_buffer);
 
 void        UART_Send_Char(uart_stdio_t* p_uart, const char Char);

@@ -79,7 +79,7 @@ static const char * const HEX_reference = "0123456789abcdef";
  * for storing incoming data in the UARTConfig function. This buffer will be initialized using the
  * QUEUE_Init function to manage incoming data efficiently.
  */
-void UART_Init( uart_stdio_t* p_uart, LPUART_Type* _handle,
+void UART_stdio_Init( uart_stdio_t* p_uart, LPUART_Type* _handle,
                 IRQn_Type _irqn, ring_char_buffer_t* _p_TX_buffer, ring_char_buffer_t* _p_RX_buffer)
 {
     p_uart->handle  = _handle;

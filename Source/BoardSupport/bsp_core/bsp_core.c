@@ -45,10 +45,11 @@ static void bsp_core_init_uart(void)
     
     /* clang-format off */
 
-    const clock_root_config_t lpuartClkCfg = {
+    const clock_root_config_t lpuartClkCfg =
+    {
         .clockOff = false,
-	.mux = 0,
-	.div = 1
+	    .mux = 0,
+	    .div = 1
     };
     /* clang-format on */
 
@@ -69,7 +70,7 @@ static void bsp_core_init_uart(void)
     config.enableTx     = true;
     config.enableRx     = true;
 
-    LPUART_Init(DEBUG_DB9_LPUART_HANDLE, &config, DEBUG_DB9_LPUART_CLK_FREQ);
+    LPUART_Init(DEBUG_DB9_LPUART_BASE, &config, DEBUG_DB9_LPUART_CLK_FREQ);
 }
 
 static void bsp_core_init_can(void)
@@ -79,10 +80,11 @@ static void bsp_core_init_can(void)
 
     /* clang-format off */
 
-    const clock_root_config_t flexcanClkCfg = {
+    const clock_root_config_t flexcanClkCfg =
+    {
         .clockOff = false,
-	.mux = 2,
-	.div = 10
+	    .mux = 2,
+	    .div = 10
     };
     /* clang-format on */
 
@@ -107,12 +109,12 @@ static void bsp_core_init_can(void)
     // Config Improved Timing Values
     memset(&flexcan_timing_config, 0, sizeof(flexcan_timing_config_t));
 
-    if (FLEXCAN_CalculateImprovedTimingValues(LIBCSP_CAN_HANDLE, flexcanConfig.bitRate, LIBCSP_CAN_CLK_FREQ, &flexcan_timing_config))
+    if (FLEXCAN_CalculateImprovedTimingValues(LIBCSP_CAN_BASE, flexcanConfig.bitRate, LIBCSP_CAN_CLK_FREQ, &flexcan_timing_config))
     {
         /* Update the improved timing configuration*/
         memcpy(&(flexcanConfig.timingConfig), &flexcan_timing_config, sizeof(flexcan_timing_config_t));
     }
 
     // Load the default flexcan config and improved timing configuration to init flex can
-    FLEXCAN_Init(LIBCSP_CAN_HANDLE, &flexcanConfig, LIBCSP_CAN_CLK_FREQ);
+    FLEXCAN_Init(LIBCSP_CAN_BASE, &flexcanConfig, LIBCSP_CAN_CLK_FREQ);
 }

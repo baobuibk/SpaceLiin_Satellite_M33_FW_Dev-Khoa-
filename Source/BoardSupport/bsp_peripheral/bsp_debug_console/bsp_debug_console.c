@@ -90,8 +90,8 @@ void bsp_debug_console_init()
     ring_char_buffer_init(&DEBUG_DB9_UART_TX_ring_buffer, g_DEBUG_DB9_UART_TX_buffer, sizeof(g_DEBUG_DB9_UART_TX_buffer));
     ring_char_buffer_init(&DEBUG_DB9_UART_RX_ring_buffer, g_DEBUG_DB9_UART_RX_buffer, sizeof(g_DEBUG_DB9_UART_RX_buffer));
 
-    UART_Init(  &DEBUG_DB9_UART, DEBUG_DB9_LPUART_HANDLE, DEBUG_DB9_LPUART_IRQn,
-                &DEBUG_DB9_UART_TX_ring_buffer, &DEBUG_DB9_UART_RX_ring_buffer);
+    UART_stdio_Init(&DEBUG_DB9_UART, DEBUG_DB9_LPUART_BASE, DEBUG_DB9_LPUART_IRQn,
+                    &DEBUG_DB9_UART_TX_ring_buffer, &DEBUG_DB9_UART_RX_ring_buffer);
 
     EnableIRQ(DEBUG_DB9_LPUART_IRQn);
 }
@@ -103,12 +103,12 @@ void bsp_debug_console_init()
 //*****************************************************************************
 void DEBUG_DB9_IRQHandler(void)
 {
-    if((kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_HANDLE)) == kLPUART_TxDataRegEmptyFlag)
+    if((kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_TxDataRegEmptyFlag)
     {
         if(TX_BUFFER_EMPTY(&DEBUG_DB9_UART))
         {
             // Buffer empty, so disable interrupts
-            LPUART_DisableInterrupts(DEBUG_DB9_LPUART_HANDLE, kLPUART_TxDataRegEmptyInterruptEnable);
+            LPUART_DisableInterrupts(DEBUG_DB9_LPUART_BASE, kLPUART_TxDataRegEmptyInterruptEnable);
         }
         else
         {
@@ -117,9 +117,9 @@ void DEBUG_DB9_IRQHandler(void)
         }
     }
 
-    if((kLPUART_RxDataRegFullFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_HANDLE)) == kLPUART_RxDataRegFullFlag)
+    if((kLPUART_RxDataRegFullFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_RxDataRegFullFlag)
     {
-        DEBUG_DB9_UART.RX_irq_char = (char)LPUART_ReadByte(DEBUG_DB9_LPUART_HANDLE);
+        DEBUG_DB9_UART.RX_irq_char = (char)LPUART_ReadByte(DEBUG_DB9_LPUART_BASE);
 
         // NOTE: On win 10, default PUTTY when hit enter only send back '\r',
         // while on default HERCULES when hit enter send '\r\n' in that order.

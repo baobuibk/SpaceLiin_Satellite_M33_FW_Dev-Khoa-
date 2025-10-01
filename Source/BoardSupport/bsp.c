@@ -23,7 +23,6 @@ void BSP_Init(void)
     /* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_BootClockRUN();
-    BOARD_InitDebugConsole();
 
     /* Init core peripheral. */
     bsp_core_init();

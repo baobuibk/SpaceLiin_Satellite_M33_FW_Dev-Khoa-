@@ -56,10 +56,10 @@ static FLEXCAN_CALLBACK(libcsp_can_callback);
 void bsp_libcsp_can_init()
 {
     /* Create FlexCAN handle structure and set call back function. */
-    FLEXCAN_TransferCreateHandle(LIBCSP_CAN_HANDLE, &libcsp_can_handle, libcsp_can_callback, NULL);
+    FLEXCAN_TransferCreateHandle(LIBCSP_CAN_BASE, &libcsp_can_handle, libcsp_can_callback, NULL);
 
     /* Set RX Message Buffer Masking mechanism. */
-    FLEXCAN_SetRxMbGlobalMask(LIBCSP_CAN_HANDLE, FLEXCAN_RX_MB_STD_MASK(RX_IDENTIFIER, 0, 0));
+    FLEXCAN_SetRxMbGlobalMask(LIBCSP_CAN_BASE, FLEXCAN_RX_MB_STD_MASK(RX_IDENTIFIER, 0, 0));
 
     /* Config RX Message Buffer. */
     flexcan_rx_mb_config_t RX_mb_Config;
@@ -67,10 +67,10 @@ void bsp_libcsp_can_init()
     RX_mb_Config.type   = kFLEXCAN_FrameTypeData;
     RX_mb_Config.id     = FLEXCAN_ID_STD(RX_IDENTIFIER);
 
-    FLEXCAN_SetRxMbConfig(LIBCSP_CAN_HANDLE, RX_MESSAGE_BUFFER_NUM, &RX_mb_Config, true);
+    FLEXCAN_SetRxMbConfig(LIBCSP_CAN_BASE, RX_MESSAGE_BUFFER_NUM, &RX_mb_Config, true);
 
     /* Setup Tx Message Buffer. */
-    FLEXCAN_SetTxMbConfig(LIBCSP_CAN_HANDLE, TX_MESSAGE_BUFFER_NUM, true);
+    FLEXCAN_SetTxMbConfig(LIBCSP_CAN_BASE, TX_MESSAGE_BUFFER_NUM, true);
 
     /* Setup TX and RX frame for CAN TX and RX */
     TX_frame.id     = FLEXCAN_ID_STD(TX_IDENTIFIER);
@@ -95,7 +95,7 @@ void bsp_libcsp_can_init()
 
     CAN_stdio_Init(
                 &LIBCSP_CAN_stdio,
-                LIBCSP_CAN_HANDLE,
+                LIBCSP_CAN_BASE,
                 LIBCSP_CAN_IRQn,
                 &libcsp_can_handle,
                 &TX_mb_handle,

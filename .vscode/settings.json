@@ -19,6 +19,7 @@
     "bsp_libcsp_can.h": "c",
     "timers.h": "c",
     "bsp_board.h": "c",
-    "bsp_debug_console.h": "c"
+    "bsp_debug_console.h": "c",
+    "fsl_clock.h": "c"
   }
 }
