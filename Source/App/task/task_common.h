@@ -2,12 +2,17 @@
 #define _TASK_COMMON_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* Common lib inludes. */
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-
-/* Freescale inludes. */
-#include "fsl_common.h"
+#include "queue.h"
+#include "timers.h"
 
 /* BoardSupport includes. */
 #include "bsp.h"

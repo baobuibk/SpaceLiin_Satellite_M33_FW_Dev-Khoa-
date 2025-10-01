@@ -7,6 +7,18 @@
   "cmake.skipConfigureIfCachePresent": true,
   "cmake.sourceDirectory": "${workspaceFolder}/armgcc",
   "files.associations": {
-    "cmd_line.h": "c"
+    "cmd_line.h": "c",
+    "task_common.h": "c",
+    "task_cmd_line.h": "c",
+    "fsl_common.h": "c",
+    "assert.h": "c",
+    "stdbool.h": "c",
+    "stdint.h": "c",
+    "task.h": "c",
+    "bsp.h": "c",
+    "bsp_libcsp_can.h": "c",
+    "timers.h": "c",
+    "bsp_board.h": "c",
+    "bsp_debug_console.h": "c"
   }
 }

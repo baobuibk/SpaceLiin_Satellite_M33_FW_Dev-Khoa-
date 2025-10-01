@@ -7,9 +7,6 @@
 /* BoardSupport includes. */
 #include "bsp.h"
 
-// /* Component includes. */
-// #include "uart_stdio.h"
-
 /* Task includes. */
 #include "task_cmd_line.h"
 
