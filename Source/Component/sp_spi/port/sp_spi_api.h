@@ -1,5 +1,5 @@
-#ifndef _SP_SPI_STDIO_API_H_
-#define _SP_SPI_STDIO_API_H_
+#ifndef _SP_SPI_API_H_
+#define _SP_SPI_API_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdint.h>
@@ -79,11 +79,11 @@ typedef struct _sp_spi_init_t_ sp_spi_init_t;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void sp_spi_master_init(sp_spi_t* me, const sp_spi_init_t* init);
+void SP_SPI_master_init(sp_spi_t* me, const sp_spi_init_t* init);
 
-void sp_spi_master_write_blocking	 (sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length);
-void sp_spi_master_read_blocking	 (sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length);
-void sp_spi_master_transfer_blocking (sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length);
+void SP_SPI_master_write_blocking	 (sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length);
+void SP_SPI_master_read_blocking	 (sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length);
+void SP_SPI_master_transfer_blocking (sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length);
 // void sp_spi_write_and_read_sync(sp_spi_t* me, uint8_t* pui8TxBuff, uint32_t ui32TxLength, uint8_t* pui8RxBuff,uint32_t ui32RxLength);
 
 // uint32_t sp_spi_read_async(sp_spi_t *me, uint8_t	*pui8RxBuff, uint32_t ui32Length);
@@ -96,6 +96,6 @@ void sp_spi_master_transfer_blocking (sp_spi_t* me, const uint8_t* p_TX_buff, ui
 // uint32_t sp_spi_transfer_dma(sp_spi_t *me, uint8_t	*pui8TxBuff, uint8_t	*pui8RxBuff, uint32_t ui32Length);
 // uint32_t sp_spi_write_and_read_dma(sp_spi_t *me, uint8_t	*pui8TxBuff, uint32_t ui32TxLength, uint8_t	*pui8RxBuff,uint32_t ui32RxLength);
 
-bool sp_spi_is_busy(sp_spi_t* me);
+bool SP_SPI_is_busy(sp_spi_t* me);
 
-#endif /* _SP_SPI_STDIO_API_H_ */
+#endif /* _SP_SPI_API_H_ */

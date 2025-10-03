@@ -37,6 +37,8 @@
     "mimx9352_cm33.h": "c",
     "random": "c",
     "sp_spi_stdio_api.h": "c",
-    "sp_gpio_stdio_api.h": "c"
+    "sp_gpio_stdio_api.h": "c",
+    "cstdlib": "c",
+    "sp_spi_api.h": "c"
   }
 }

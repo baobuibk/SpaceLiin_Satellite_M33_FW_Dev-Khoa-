@@ -1,9 +1,9 @@
-#ifndef _SP_SPI_STDIO_PORT_H_
-#define _SP_SPI_STDIO_PORT_H_
+#ifndef _SP_SPI_PORT_H_
+#define _SP_SPI_PORT_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Standard API for SP SPI STDIO includes. */
-#include "sp_spi_stdio_api.h"
+#include "sp_spi_api.h"
 
 /* Port specific includes. */
 #include "fsl_lpspi.h"
@@ -53,4 +53,4 @@ typedef struct _sp_spi_init_t_
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* _SP_SPI_STDIO_PORT_H_ */
+#endif /* _SP_SPI_PORT_H_ */

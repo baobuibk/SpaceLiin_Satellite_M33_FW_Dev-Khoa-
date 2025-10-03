@@ -1,5 +1,5 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Include~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#include "sp_spi_stdio_port.h"
+#include "sp_spi_port.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -17,7 +17,7 @@
  * @param init Pointer to the SPI_IoInit_t structure containing initialization parameters
  * @return ERROR_OK on success, or an error code on failure
  */
-void sp_spi_master_init(sp_spi_t *me, const sp_spi_init_t *init)
+void SP_SPI_master_init(sp_spi_t *me, const sp_spi_init_t *init)
 {
     if (!me || !init || !init->p_spi_base) 
     {
@@ -44,17 +44,17 @@ void sp_spi_master_init(sp_spi_t *me, const sp_spi_init_t *init)
     return;
 }
 
-void sp_spi_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length)
+void SP_SPI_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length)
 {
-	sp_spi_master_transfer_blocking(me, p_TX_buff, NULL, length);
+	SP_SPI_master_transfer_blocking(me, p_TX_buff, NULL, length);
 }
 
-void sp_spi_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length)
+void SP_SPI_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length)
 {
-	sp_spi_master_transfer_blocking(me, NULL, p_RX_buff, length);
+	SP_SPI_master_transfer_blocking(me, NULL, p_RX_buff, length);
 }
 
-void sp_spi_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length)
+void SP_SPI_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length)
 {
 	NVIC_DisableIRQ(me->irqn);
 	me->bBusy = true;
