@@ -44,17 +44,17 @@ void sp_spi_master_init(sp_spi_t *me, const sp_spi_init_t *init)
     return;
 }
 
-void sp_spi_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length)
+void sp_spi_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t byte_count)
 {
-	sp_spi_master_transfer_blocking(me, p_TX_buff, NULL, length);
+	sp_spi_master_transfer_blocking(me, p_TX_buff, NULL, byte_count);
 }
 
-void sp_spi_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length)
+void sp_spi_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t byte_count)
 {
-	sp_spi_master_transfer_blocking(me, NULL, p_RX_buff, length);
+	sp_spi_master_transfer_blocking(me, NULL, p_RX_buff, byte_count);
 }
 
-void sp_spi_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length)
+void sp_spi_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t byte_count)
 {
 	NVIC_DisableIRQ(me->irqn);
 	me->bBusy = true;
@@ -63,7 +63,7 @@ void sp_spi_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uin
     lpspi_transfer_t transfer_handle;
     transfer_handle.txData      = (uint8_t*)p_TX_buff;
     transfer_handle.rxData      = p_RX_buff;
-    transfer_handle.dataSize    = length;
+    transfer_handle.dataSize    = byte_count;
 
     transfer_handle.configFlags = ((me->pcs & 3u) << LPSPI_MASTER_PCS_SHIFT) |
             (me->pcsContinuous ? kLPSPI_MasterPcsContinuous : 0);

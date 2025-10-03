@@ -112,6 +112,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.c"
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.h"
+
+    "${UserSourceDirPath}/Component/devices/lt8722/lt8722.c"
+    "${UserSourceDirPath}/Component/devices/lt8722/lt8722.h"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -150,6 +153,8 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/uart_stdio
     ${UserSourceDirPath}/Component/can_stdio
     ${UserSourceDirPath}/Component/cmd_line
+
+    ${UserSourceDirPath}/Component/devices/lt8722
 
     # MiddleWare
     ${UserSourceDirPath}/MiddleWare/FreeRTOS

@@ -9,10 +9,10 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef struct _sp_gpio_stdio_t_ sp_gpio_stdio_t;
+typedef struct _sp_gpio_t_ sp_gpio_t;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void SP_GPIO_PinWrite(sp_gpio_stdio_t* p_gpio, uint32_t pin, uint8_t output);
+void SP_GPIO_PinWrite(sp_gpio_t* p_gpio, uint32_t pin, uint8_t output);
 
 #endif /* _SP_GPIO_STDIO_API_H_ */

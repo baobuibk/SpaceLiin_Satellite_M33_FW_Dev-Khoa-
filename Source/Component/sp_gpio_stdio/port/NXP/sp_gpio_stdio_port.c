@@ -20,7 +20,7 @@
   *        - 1: corresponding pin output high-logic level.
   * @retval None
   */
-void SP_GPIO_PinWrite(sp_gpio_stdio_t* p_gpio, uint32_t pin, uint8_t output)
+void SP_GPIO_PinWrite(sp_gpio_t* p_gpio, uint32_t pin, uint8_t output)
 {
     RGPIO_PinWrite(p_gpio->p_base, pin, output);
 }
