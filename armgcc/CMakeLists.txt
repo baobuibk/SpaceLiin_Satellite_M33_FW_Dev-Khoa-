@@ -94,8 +94,18 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/ring_char_buffer/ring_char_buffer.c"
     "${UserSourceDirPath}/Component/ring_char_buffer/ring_char_buffer.h"
 
+    "${UserSourceDirPath}/Component/sp_gpio_stdio/sp_gpio_stdio.h"
+    "${UserSourceDirPath}/Component/sp_gpio_stdio/port/sp_gpio_stdio_api.h"
+    "${UserSourceDirPath}/Component/sp_gpio_stdio/port/NXP/sp_gpio_stdio_port.c"
+    "${UserSourceDirPath}/Component/sp_gpio_stdio/port/NXP/sp_gpio_stdio_port.h"
+
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.c"
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.h"
+
+    "${UserSourceDirPath}/Component/sp_spi_stdio/sp_spi_stdio.h"
+    "${UserSourceDirPath}/Component/sp_spi_stdio/port/sp_spi_stdio_api.h"
+    "${UserSourceDirPath}/Component/sp_spi_stdio/port/NXP/sp_spi_stdio_port.c"
+    "${UserSourceDirPath}/Component/sp_spi_stdio/port/NXP/sp_spi_stdio_port.h"
 
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.c"
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.h"
@@ -128,6 +138,15 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/error_code
     ${UserSourceDirPath}/Component/ring_buffer
     ${UserSourceDirPath}/Component/ring_char_buffer
+
+    ${UserSourceDirPath}/Component/sp_gpio_stdio
+    ${UserSourceDirPath}/Component/sp_gpio_stdio/port
+    ${UserSourceDirPath}/Component/sp_gpio_stdio/port/NXP
+
+    ${UserSourceDirPath}/Component/sp_spi_stdio
+    ${UserSourceDirPath}/Component/sp_spi_stdio/port
+    ${UserSourceDirPath}/Component/sp_spi_stdio/port/NXP
+
     ${UserSourceDirPath}/Component/uart_stdio
     ${UserSourceDirPath}/Component/can_stdio
     ${UserSourceDirPath}/Component/cmd_line

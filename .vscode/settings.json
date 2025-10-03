@@ -20,6 +20,23 @@
     "timers.h": "c",
     "bsp_board.h": "c",
     "bsp_debug_console.h": "c",
-    "fsl_clock.h": "c"
+    "fsl_clock.h": "c",
+    "array": "c",
+    "string": "c",
+    "string_view": "c",
+    "span": "c",
+    "cstdint": "c",
+    "sp_gpio_stdio.h": "c",
+    "sp_gpio_stdio_port.h": "c",
+    "fsl_rgpio.h": "c",
+    "sp_spi_stdio_port.h": "c",
+    "fsl_lpspi.h": "c",
+    "sp_spi_stdio.h": "c",
+    "fsl_common_arm.h": "c",
+    "fsl_device_registers.h": "c",
+    "mimx9352_cm33.h": "c",
+    "random": "c",
+    "sp_spi_stdio_api.h": "c",
+    "sp_gpio_stdio_api.h": "c"
   }
 }
