@@ -81,9 +81,9 @@ typedef struct _sp_spi_init_t_ sp_spi_init_t;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void SP_SPI_master_init(sp_spi_t* me, const sp_spi_init_t* init);
 
-void SP_SPI_master_write_blocking	 (sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length);
-void SP_SPI_master_read_blocking	 (sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length);
-void SP_SPI_master_transfer_blocking (sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length);
+void SP_SPI_master_write_blocking	 (sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t byte_count);
+void SP_SPI_master_read_blocking	 (sp_spi_t* me, uint8_t* p_RX_buff, uint32_t byte_count);
+void SP_SPI_master_transfer_blocking (sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t byte_count);
 // void sp_spi_write_and_read_sync(sp_spi_t* me, uint8_t* pui8TxBuff, uint32_t ui32TxLength, uint8_t* pui8RxBuff,uint32_t ui32RxLength);
 
 // uint32_t sp_spi_read_async(sp_spi_t *me, uint8_t	*pui8RxBuff, uint32_t ui32Length);

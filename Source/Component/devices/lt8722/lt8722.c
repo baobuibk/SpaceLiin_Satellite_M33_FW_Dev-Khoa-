@@ -1,6 +1,9 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Include~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include "lt8722.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -60,7 +63,9 @@ static inline void csHIGH(struct lt8722_dev *dev)
 
 static uint8_t SPI_LL_Transmit(struct lt8722_dev *dev, uint8_t data)
 {
-	sp_spi_master_transfer_blocking(dev->hspi, &data, NULL, 1);
+	uint8_t receive_data = 0;
+	SP_SPI_master_transfer_blocking(dev->hspi, &data, &receive_data, 1);
+	return receive_data;
 }
 
 uint8_t SPI_write_and_read_buffer(struct lt8722_dev *dev, uint8_t *buffer, uint8_t byte_number)
@@ -78,6 +83,20 @@ uint8_t SPI_write_and_read_buffer(struct lt8722_dev *dev, uint8_t *buffer, uint8
     csHIGH(dev);
 
     return received_data;
+}
+
+static inline void sp_delay_ms(uint32_t delay_ms)
+{
+    TickType_t ticks = pdMS_TO_TICKS(delay_ms);
+
+    if (ticks == 0)
+	
+	{
+		// if tick rate < 1 kHz, ensure at least 1 tick
+		ticks = 1;
+	}
+	
+    vTaskDelay(ticks);
 }
 
 /* Private support function prototype -----------------------------------*/
@@ -405,7 +424,7 @@ int8_t lt8722_init(struct lt8722_dev *dev)
 	 * 4. Write all SPIS_STATUS registers to 0
 	 */
 	ret = lt8722_reg_write(dev, LT8722_SPIS_STATUS, 0);
-	LL_mDelay(1);
+	sp_delay_ms(1);
 	ret = lt8722_reg_write(dev, LT8722_SPIS_COMMAND, 0x00003A01);
 	/*
 	 * 5. Ramp the output voltage control DAC from 0xFF000000 to 0x00000000
@@ -417,7 +436,7 @@ int8_t lt8722_init(struct lt8722_dev *dev)
 		voltage = (start_voltage + (end_voltage - start_voltage) * i / 4);
 		dac = lt8722_voltage_to_dac(voltage);
 		ret = lt8722_set_dac(dev, dac);
-		LL_mDelay(1);
+		sp_delay_ms(1);
 	}
 	/*
 	 * 6. Enable the PWM switching behavior
@@ -426,7 +445,7 @@ int8_t lt8722_init(struct lt8722_dev *dev)
 	SP_GPIO_PinWrite(dev->swen_port, dev->swen_pin, 1);
 	ret = lt8722_set_swen_req(dev, LT8722_SWEN_REQ_ENABLED);
 //	delay_us(200);
-	LL_mDelay(1);
+	sp_delay_ms(1);
 
 	/*
 	 * 7. Set the desired output voltage

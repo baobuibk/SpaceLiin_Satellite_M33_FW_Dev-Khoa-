@@ -44,17 +44,17 @@ void SP_SPI_master_init(sp_spi_t *me, const sp_spi_init_t *init)
     return;
 }
 
-void SP_SPI_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t length)
+void SP_SPI_master_write_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint32_t byte_count)
 {
-	SP_SPI_master_transfer_blocking(me, p_TX_buff, NULL, length);
+	SP_SPI_master_transfer_blocking(me, p_TX_buff, NULL, byte_count);
 }
 
-void SP_SPI_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t length)
+void SP_SPI_master_read_blocking(sp_spi_t* me, uint8_t* p_RX_buff, uint32_t byte_count)
 {
-	SP_SPI_master_transfer_blocking(me, NULL, p_RX_buff, length);
+	SP_SPI_master_transfer_blocking(me, NULL, p_RX_buff, byte_count);
 }
 
-void SP_SPI_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t length)
+void SP_SPI_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uint8_t* p_RX_buff, uint32_t byte_count)
 {
 	NVIC_DisableIRQ(me->irqn);
 	me->bBusy = true;
@@ -77,7 +77,7 @@ void SP_SPI_master_transfer_blocking(sp_spi_t* me, const uint8_t* p_TX_buff, uin
 	return;
 }
 
-bool sp_spi_is_busy(sp_spi_t *me)
+bool SP_SPI_is_busy(sp_spi_t *me)
 {
 	return me->bBusy;
 }

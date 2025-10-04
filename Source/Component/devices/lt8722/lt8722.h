@@ -4,8 +4,8 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include "bsp_board.h"
 
-#include "sp_gpio_stdio.h"
-#include "sp_spi_stdio.h"
+#include "sp_gpio.h"
+#include "sp_spi.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define LT8722_CRC_POLYNOMIAL          			 0x07
