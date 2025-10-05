@@ -102,6 +102,11 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.c"
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.h"
 
+    "${UserSourceDirPath}/Component/sp_uart/sp_uart.h"
+    "${UserSourceDirPath}/Component/sp_uart/port/sp_uart_api.h"
+    "${UserSourceDirPath}/Component/sp_uart/port/NXP/sp_uart_port.c"
+    "${UserSourceDirPath}/Component/sp_uart/port/NXP/sp_uart_port.h"
+
     "${UserSourceDirPath}/Component/sp_spi/sp_spi.h"
     "${UserSourceDirPath}/Component/sp_spi/port/sp_spi_api.h"
     "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.c"
@@ -153,6 +158,10 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/uart_stdio
     ${UserSourceDirPath}/Component/can_stdio
     ${UserSourceDirPath}/Component/cmd_line
+
+    ${UserSourceDirPath}/Component/sp_uart
+    ${UserSourceDirPath}/Component/sp_uart/port
+    ${UserSourceDirPath}/Component/sp_uart/port/NXP
 
     ${UserSourceDirPath}/Component/devices/lt8722
 

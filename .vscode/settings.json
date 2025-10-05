@@ -38,6 +38,12 @@
     "random": "c",
     "sp_spi_stdio_api.h": "c",
     "sp_gpio_stdio_api.h": "c",
-    "lt8722.h": "c"
+    "lt8722.h": "c",
+    "sp_uart_port.h": "c",
+    "sp_uart_api.h": "c",
+    "format": "c",
+    "thread": "c",
+    "cstdio": "c",
+    "fsl_lpuart.h": "c"
   }
 }

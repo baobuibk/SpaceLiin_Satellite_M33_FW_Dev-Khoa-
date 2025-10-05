@@ -10,7 +10,7 @@
 #include "bsp_debug_console.h"
 
 /* Component includes. */
-#include "uart_stdio.h"
+#include "sp_uart.h"
 #include "ring_buffer.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -69,7 +69,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-uart_stdio_t        DEBUG_DB9_UART;
+sp_uart_t           DEBUG_DB9_UART;
 
 ring_char_buffer_t  DEBUG_DB9_UART_TX_ring_buffer;
 uint8_t             g_DEBUG_DB9_UART_TX_buffer[2048];
@@ -90,10 +90,17 @@ void bsp_debug_console_init()
     ring_char_buffer_init(&DEBUG_DB9_UART_TX_ring_buffer, g_DEBUG_DB9_UART_TX_buffer, sizeof(g_DEBUG_DB9_UART_TX_buffer));
     ring_char_buffer_init(&DEBUG_DB9_UART_RX_ring_buffer, g_DEBUG_DB9_UART_RX_buffer, sizeof(g_DEBUG_DB9_UART_RX_buffer));
 
-    UART_stdio_Init(&DEBUG_DB9_UART, DEBUG_DB9_LPUART_BASE, DEBUG_DB9_LPUART_IRQn,
-                    &DEBUG_DB9_UART_TX_ring_buffer, &DEBUG_DB9_UART_RX_ring_buffer);
+    sp_uart_init_t debug_uart_init =
+    {
+        .handle = DEBUG_DB9_LPUART_BASE,
+        .irqn   = DEBUG_DB9_LPUART_IRQn,
+        .p_TX_buffer = &DEBUG_DB9_UART_TX_ring_buffer,
+        .p_RX_buffer = &DEBUG_DB9_UART_RX_ring_buffer,
+    };
 
-    EnableIRQ(DEBUG_DB9_LPUART_IRQn);
+    SP_UART_Init(&DEBUG_DB9_UART, &debug_uart_init);
+
+    EnableIRQ(DEBUG_DB9_UART.irqn);
 }
 
 //*****************************************************************************
@@ -113,7 +120,7 @@ void DEBUG_DB9_IRQHandler(void)
         else
         {
             // There is more data in the output buffer. Send the next byte
-            UART_Prime_Transmit(&DEBUG_DB9_UART);
+            SP_UART_Prime_Transmit(&DEBUG_DB9_UART);
         }
     }
 
@@ -160,12 +167,13 @@ void bsp_debug_console_printf(const char * format, ...)
     va_end(args);
 
     // Kiểm tra độ dài hợp lệ
-    if (len < 0 || len >= DEBUG_DB9_PRINTF_BUFFER_SIZE) {
+    if (len < 0 || len >= DEBUG_DB9_PRINTF_BUFFER_SIZE)
+    {
         return ;
     }
 
     // Gửi chuỗi đã định dạng qua UART
-    UART_Write(&DEBUG_DB9_UART, temp_buffer, (uint16_t)len);
+    SP_UART_Send_Buffer(&DEBUG_DB9_UART, temp_buffer, (uint32_t)len);
 }
 
 //*****************************************************************************
@@ -175,7 +183,7 @@ void bsp_debug_console_printf(const char * format, ...)
 //*****************************************************************************
 void bsp_debug_console_send_char(const char Char)
 {
-	UART_Send_Char(&DEBUG_DB9_UART, Char);
+	SP_UART_Send_Char(&DEBUG_DB9_UART, Char);
 }
 
 //*****************************************************************************
@@ -187,7 +195,7 @@ void bsp_debug_console_send_char(const char Char)
 //*****************************************************************************
 void bsp_debug_console_send_string(const char *pcBuf)
 {
-	UART_Send_String(&DEBUG_DB9_UART, pcBuf);
+	SP_UART_Send_String(&DEBUG_DB9_UART, pcBuf);
 }
 
 //*****************************************************************************
@@ -197,7 +205,7 @@ void bsp_debug_console_send_string(const char *pcBuf)
 //*****************************************************************************
 char bsp_debug_console_get_char(void)
 {
-	return UART_Get_Char(&DEBUG_DB9_UART);
+	return SP_UART_Get_Char(&DEBUG_DB9_UART);
 }
 
 //*****************************************************************************
