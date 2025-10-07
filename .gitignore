@@ -34,10 +34,3 @@
 **/*.lst
 **/*.d
 **/*.log
-
-# --- Re-include the two tracked artifacts (must be AFTER the ignores above) ---
-# !/armgcc/debug/*.bin
-# !/armgcc/debug/*.elf
-
-# !/armgcc/release/*.bin
-# !/armgcc/release/*.elf
