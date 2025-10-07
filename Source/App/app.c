@@ -9,6 +9,7 @@
 
 /* Task includes. */
 #include "task_cmd_line.h"
+#include "task_test_can.h"
 
 /*******************************************************************************
  * Definitions
@@ -31,15 +32,8 @@ int app_main(void)
     /* Init board hardware. */
     BSP_Init();
 
-    /* Create task. */
-    // if (xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 100, NULL, Task_CMD_Line_PRIORITY, NULL) != pdPASS)
-    // {
-    //     bsp_debug_console_printf("Task creation failed!\r\n");
-    //     while (1)
-    //         ;
-    // }
-
-    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
+    xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
+    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
 
     /* Init task */
     Task_CMD_Line_Init();

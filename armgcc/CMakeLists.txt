@@ -73,6 +73,12 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/App/task/task_cmd_line/command/command.c"
     "${UserSourceDirPath}/App/task/task_cmd_line/command/command.h"
 
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.c"
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.h"
+
+    "${UserSourceDirPath}/App/task/task_test_can/task_test_can.c"
+    "${UserSourceDirPath}/App/task/task_test_can/task_test_can.h"
+
     # BoardSupport
     "${UserSourceDirPath}/BoardSupport/bsp.c"
     "${UserSourceDirPath}/BoardSupport/bsp.h"
@@ -134,6 +140,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App/task
     ${UserSourceDirPath}/App/task/task_cmd_line
     ${UserSourceDirPath}/App/task/task_cmd_line/command
+    ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can
+
+    ${UserSourceDirPath}/App/task/task_test_can
 
     # BoardSupport
     ${UserSourceDirPath}/BoardSupport

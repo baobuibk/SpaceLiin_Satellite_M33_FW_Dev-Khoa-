@@ -9,8 +9,6 @@
 #include "task_cmd_line.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define TASK_CMD_LINE_LPUART_IRQHandler LPUART2_IRQHandler
-
 #define TASK_CMD_LINE_PRINTF            bsp_debug_console_printf
 #define TASK_CMD_LINE_SEND_CHAR         bsp_debug_console_send_char
 #define TASK_CMD_LINE_SEND_STRING       bsp_debug_console_send_string
@@ -36,15 +34,21 @@ cmd_line_t          task_cmd_line;
 char                g_task_cmd_line_buffer[64];
 static uint8_t      g_command_return = CMDLINE_OK;
 
-static const char * ErrorCode[7] = 
+static const char * ErrorCode[] = 
 {
-    "OK\n",
-    "CMDLINE_BAD_CMD\n",
-    "CMDLINE_TOO_MANY_ARGS\n",
-    "CMDLINE_TOO_FEW_ARGS\n",
-    "CMDLINE_INVALID_ARG\n",
-    "CMDLINE_INVALID_CMD\n",
-    "CALIB IS RUNNING, USE CALIB_EXIT TO EXIT CALIB\n",
+    /* STANDARD ERROR CODE */
+    "> OK\n",
+    "> CMDLINE_BAD_CMD\n",
+    "> CMDLINE_TOO_MANY_ARGS\n",
+    "> CMDLINE_TOO_FEW_ARGS\n",
+    "> CMDLINE_INVALID_ARG\n",
+    "> CMDLINE_INVALID_CMD\n",
+    "> CALIB IS RUNNING, USE CALIB_EXIT TO EXIT CALIB\n",
+    "> CMDLINE IS PROCESSING",
+    "> CMDLINE NO RESPONSE",
+
+    /* USER DEFINE ERROR CODE */
+    "",
 };
 
 const char SPLASH[][65] = 
@@ -127,7 +131,6 @@ for(;;)
 
                 task_cmd_line.write_index = 0;
 
-                TASK_CMD_LINE_SEND_STRING("> ");
                 TASK_CMD_LINE_SEND_STRING(ErrorCode[g_command_return]);
 
                 TASK_CMD_LINE_SEND_STRING("> ");
