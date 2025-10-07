@@ -19,8 +19,8 @@ typedef struct _ring_buffer_t_
     uint32_t item_size;  /* Kích thước của mỗi phần tử (byte) */
     uint32_t max_items;  /* Số lượng phần tử tối đa */
 
-    uint32_t head;      /* Vị trí đầu (để thêm phần tử) */
-    uint32_t tail;      /* Vị trí đuôi (để lấy phần tử) */
+    volatile uint32_t head;      /* Vị trí đầu (để thêm phần tử) */
+    volatile uint32_t tail;      /* Vị trí đuôi (để lấy phần tử) */
 } ring_buffer_t;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

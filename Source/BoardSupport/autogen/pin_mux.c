@@ -50,7 +50,10 @@ BOARD_InitPins:
  * Description   : Configures pin routing and optionally pin electrical features.
  *
  * END ****************************************************************************************************************/
-void BOARD_InitPins(void) {                                /*!< Function assigned for the core: undefined[cm33] */
+void BOARD_InitPins(void)
+{                                
+    /*!< Function assigned for the core: undefined[cm33] */
+    /* LPUART2 Init Pin. */
     IOMUXC_SetPinMux(IOMUXC_PAD_UART2_RXD__LPUART2_RX, 0U);
     IOMUXC_SetPinMux(IOMUXC_PAD_UART2_TXD__LPUART2_TX, 0U);
 
@@ -58,6 +61,19 @@ void BOARD_InitPins(void) {                                /*!< Function assigne
                         IOMUXC_PAD_PD_MASK);
     IOMUXC_SetPinConfig(IOMUXC_PAD_UART2_TXD__LPUART2_TX, 
                         IOMUXC_PAD_DSE(15U));
+
+    /* FLEXCAN2 Init Pin. */
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO25__CAN2_TX, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO27__CAN2_RX, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO25__CAN2_TX, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO27__CAN2_RX, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
 }
 
 /***********************************************************************************************************************

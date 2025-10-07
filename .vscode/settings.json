@@ -46,6 +46,9 @@
     "cstdio": "c",
     "fsl_lpuart.h": "c",
     "ring_char_buffer.h": "c",
-    "freertos.h": "c"
+    "freertos.h": "c",
+    "command.h": "c",
+    "can_stdio.h": "c",
+    "task_test_can.h": "c"
   }
 }

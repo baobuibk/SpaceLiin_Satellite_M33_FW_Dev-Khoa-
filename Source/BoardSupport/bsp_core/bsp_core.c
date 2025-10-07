@@ -16,8 +16,7 @@
  * Prototypes
  ******************************************************************************/
 static void bsp_core_init_uart(void);
-
-// static void bsp_core_init_can(void);
+static void bsp_core_init_can(void);
 
 /*******************************************************************************
  * Variables
@@ -33,7 +32,7 @@ static void bsp_core_init_uart(void);
 void bsp_core_init(void)
 {
     bsp_core_init_uart();
-    // bsp_core_init_can();
+    bsp_core_init_can();
 }
 
 /*!
@@ -73,48 +72,48 @@ static void bsp_core_init_uart(void)
     LPUART_Init(DEBUG_DB9_LPUART_BASE, &config, DEBUG_DB9_LPUART_CLK_FREQ);
 }
 
-// static void bsp_core_init_can(void)
-// {
-//     flexcan_config_t flexcanConfig;
-//     flexcan_timing_config_t flexcan_timing_config;
+static void bsp_core_init_can(void)
+{
+    flexcan_config_t flexcanConfig;
+    flexcan_timing_config_t flexcan_timing_config;
 
-//     /* clang-format off */
+    /* clang-format off */
 
-//     const clock_root_config_t flexcanClkCfg =
-//     {
-//         .clockOff = false,
-// 	    .mux = 2,
-// 	    .div = 10
-//     };
-//     /* clang-format on */
+    const clock_root_config_t flexcanClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 2,
+	    .div = 10
+    };
+    /* clang-format on */
 
-//     CLOCK_SetRootClock(LIBCSP_CAN_CLOCK_ROOT, &flexcanClkCfg);
-//     CLOCK_EnableClock(LIBCSP_CAN_CLOCK_GATE);
+    CLOCK_SetRootClock(LIBCSP_CAN_CLOCK_ROOT, &flexcanClkCfg);
+    CLOCK_EnableClock(LIBCSP_CAN_CLOCK_GATE);
 
-//     /* Get FlexCAN module default Configuration. */
-//     /*
-//      * flexcanConfig.clkSrc                 = kFLEXCAN_ClkSrc0;
-//      * flexcanConfig.bitRate               = 1000000U;
-//      * flexcanConfig.bitRateFD             = 2000000U;
-//      * flexcanConfig.maxMbNum               = 16;
-//      * flexcanConfig.enableLoopBack         = false;
-//      * flexcanConfig.enableSelfWakeup       = false;
-//      * flexcanConfig.enableIndividMask      = false;
-//      * flexcanConfig.disableSelfReception   = false;
-//      * flexcanConfig.enableListenOnlyMode   = false;
-//      * flexcanConfig.enableDoze             = false;
-//      */
-//     FLEXCAN_GetDefaultConfig(&flexcanConfig);
+    /* Get FlexCAN module default Configuration. */
+    /*
+     * flexcanConfig.clkSrc                 = kFLEXCAN_ClkSrc0;
+     * flexcanConfig.bitRate               = 1000000U;
+     * flexcanConfig.bitRateFD             = 2000000U;
+     * flexcanConfig.maxMbNum               = 16;
+     * flexcanConfig.enableLoopBack         = false;
+     * flexcanConfig.enableSelfWakeup       = false;
+     * flexcanConfig.enableIndividMask      = false;
+     * flexcanConfig.disableSelfReception   = false;
+     * flexcanConfig.enableListenOnlyMode   = false;
+     * flexcanConfig.enableDoze             = false;
+     */
+    FLEXCAN_GetDefaultConfig(&flexcanConfig);
 
-//     // Config Improved Timing Values
-//     memset(&flexcan_timing_config, 0, sizeof(flexcan_timing_config_t));
+    // Config Improved Timing Values
+    memset(&flexcan_timing_config, 0, sizeof(flexcan_timing_config_t));
 
-//     if (FLEXCAN_CalculateImprovedTimingValues(LIBCSP_CAN_BASE, flexcanConfig.bitRate, LIBCSP_CAN_CLK_FREQ, &flexcan_timing_config))
-//     {
-//         /* Update the improved timing configuration*/
-//         memcpy(&(flexcanConfig.timingConfig), &flexcan_timing_config, sizeof(flexcan_timing_config_t));
-//     }
+    if (FLEXCAN_CalculateImprovedTimingValues(LIBCSP_CAN_BASE, flexcanConfig.bitRate, LIBCSP_CAN_CLK_FREQ, &flexcan_timing_config))
+    {
+        /* Update the improved timing configuration*/
+        memcpy(&(flexcanConfig.timingConfig), &flexcan_timing_config, sizeof(flexcan_timing_config_t));
+    }
 
-//     // Load the default flexcan config and improved timing configuration to init flex can
-//     FLEXCAN_Init(LIBCSP_CAN_BASE, &flexcanConfig, LIBCSP_CAN_CLK_FREQ);
-// }
+    // Load the default flexcan config and improved timing configuration to init flex can
+    FLEXCAN_Init(LIBCSP_CAN_BASE, &flexcanConfig, LIBCSP_CAN_CLK_FREQ);
+}

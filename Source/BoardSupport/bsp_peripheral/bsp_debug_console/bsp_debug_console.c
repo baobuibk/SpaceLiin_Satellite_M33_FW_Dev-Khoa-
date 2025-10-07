@@ -69,6 +69,14 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+//*****************************************************************************
+//
+// A mapping from an integer between 0 and 15 to its ASCII character
+// equivalent.
+//
+//*****************************************************************************
+static const char * const HEX_reference = "0123456789abcdef";
+
 sp_uart_t           DEBUG_DB9_UART;
 
 ring_char_buffer_t  DEBUG_DB9_UART_TX_ring_buffer;
@@ -156,26 +164,399 @@ void DEBUG_DB9_IRQHandler(void)
 //*****************************************************************************
 void bsp_debug_console_printf(const char * format, ...)
 {
-    char temp_buffer[DEBUG_DB9_PRINTF_BUFFER_SIZE];
-    va_list args;
+    uint16_t ui16Idx, ui16Value, ui16Pos, ui16Count, ui16Base, ui16Neg;
+    char *pcStr, pcBuf[16], cFill;
+    
+    //
+    // Check the arguments.
+    //
 
-    // Khởi tạo danh sách tham số biến đổi
-    va_start(args, format);
+    va_list vaArgP;
 
-    // Định dạng chuỗi vào bộ đệm tạm
-    int len = vsnprintf(temp_buffer, DEBUG_DB9_PRINTF_BUFFER_SIZE, format, args);
+    va_start(vaArgP, format);
 
-    // Kết thúc danh sách tham số
-    va_end(args);
-
-    // Kiểm tra độ dài hợp lệ
-    if (len < 0 || len >= DEBUG_DB9_PRINTF_BUFFER_SIZE)
+    //
+    // Loop while there are more characters in the string.
+    //
+    while(*format)
     {
-        return ;
-    }
+        //
+        // Find the first non-% character, or the end of the string.
+        //
+        for(ui16Idx = 0;
+            (format[ui16Idx] != '%') && (format[ui16Idx] != '\0');
+            ui16Idx++)
+        {
+        }
 
-    // Gửi chuỗi đã định dạng qua UART
-    SP_UART_Send_Buffer(&DEBUG_DB9_UART, temp_buffer, (uint32_t)len);
+        //
+        // Write this portion of the string.
+        //
+        SP_UART_Send_Buffer(&DEBUG_DB9_UART, format, ui16Idx);
+
+        //
+        // Skip the portion of the string that was written.
+        //
+        format += ui16Idx;
+
+        //
+        // See if the next character is a %.
+        //
+        if(*format == '%')
+        {
+            //
+            // Skip the %.
+            //
+            format++;
+
+            //
+            // Set the digit count to zero, and the fill character to space
+            // (in other words, to the defaults).
+            //
+            ui16Count = 0;
+            cFill = ' ';
+
+            //
+            // It may be necessary to get back here to process more characters.
+            // Goto's aren't pretty, but effective.  I feel extremely dirty for
+            // using not one but two of the beasts.
+            //
+again:
+
+            //
+            // Determine how to handle the next character.
+            //
+            switch(*format++)
+            {
+                //
+                // Handle the digit characters.
+                //
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                {
+                    //
+                    // If this is a zero, and it is the first digit, then the
+                    // fill character is a zero instead of a space.
+                    //
+                    if((format[-1] == '0') && (ui16Count == 0))
+                    {
+                        cFill = '0';
+                    }
+
+                    //
+                    // Update the digit count.
+                    //
+                    ui16Count *= 10;
+                    ui16Count += format[-1] - '0';
+
+                    //
+                    // Get the next character.
+                    //
+                    goto again;
+                }
+
+                //
+                // Handle the %c command.
+                //
+                case 'c':
+                {
+                    //
+                    // Get the value from the varargs.
+                    //
+                    ui16Value = va_arg(vaArgP, int);
+
+                    //
+                    // Print out the character.
+                    //
+                    SP_UART_Send_Buffer(&DEBUG_DB9_UART, (char *)&ui16Value, 1);
+
+                    //
+                    // This command has been handled.
+                    //
+                    break;
+                }
+
+                //
+                // Handle the %d and %i commands.
+                //
+                case 'd':
+                case 'i':
+                {
+                    //
+                    // Get the value from the varargs.
+                    //
+                    ui16Value = va_arg(vaArgP, int);
+
+                    //
+                    // Reset the buffer position.
+                    //
+                    ui16Pos = 0;
+
+                    //
+                    // If the value is negative, make it positive and indicate
+                    // that a minus sign is needed.
+                    //
+                    if((int16_t)ui16Value < 0)
+                    {
+                        //
+                        // Make the value positive.
+                        //
+                        ui16Value = -(int16_t)ui16Value;
+
+                        //
+                        // Indicate that the value is negative.
+                        //
+                        ui16Neg = 1;
+                    }
+                    else
+                    {
+                        //
+                        // Indicate that the value is positive so that a minus
+                        // sign isn't inserted.
+                        //
+                        ui16Neg = 0;
+                    }
+
+                    //
+                    // Set the base to 10.
+                    //
+                    ui16Base = 10;
+
+                    //
+                    // Convert the value to ASCII.
+                    //
+                    goto convert;
+                }
+
+                //
+                // Handle the %s command.
+                //
+                case 's':
+                {
+                    //
+                    // Get the string pointer from the varargs.
+                    //
+                    pcStr = va_arg(vaArgP, char *);
+
+                    //
+                    // Determine the length of the string.
+                    //
+                    for(ui16Idx = 0; pcStr[ui16Idx] != '\0'; ui16Idx++)
+                    {
+                    }
+
+                    //
+                    // Write the string.
+                    //
+                    SP_UART_Send_Buffer(&DEBUG_DB9_UART, pcStr, ui16Idx);
+
+                    //
+                    // Write any required padding spaces
+                    //
+                    if(ui16Count > ui16Idx)
+                    {
+                        ui16Count -= ui16Idx;
+                        while(ui16Count--)
+                        {
+                            SP_UART_Send_Buffer(&DEBUG_DB9_UART, " ", 1);
+                        }
+                    }
+
+                    //
+                    // This command has been handled.
+                    //
+                    break;
+                }
+
+                //
+                // Handle the %u command.
+                //
+                case 'u':
+                {
+                    //
+                    // Get the value from the varargs.
+                    //
+                    ui16Value = va_arg(vaArgP, int);
+
+                    //
+                    // Reset the buffer position.
+                    //
+                    ui16Pos = 0;
+
+                    //
+                    // Set the base to 10.
+                    //
+                    ui16Base = 10;
+
+                    //
+                    // Indicate that the value is positive so that a minus sign
+                    // isn't inserted.
+                    //
+                    ui16Neg = 0;
+
+                    //
+                    // Convert the value to ASCII.
+                    //
+                    goto convert;
+                }
+
+                //
+                // Handle the %x and %X commands.  Note that they are treated
+                // identically; in other words, %X will use lower case letters
+                // for a-f instead of the upper case letters it should use.  We
+                // also alias %p to %x.
+                //
+                case 'x':
+                case 'X':
+                case 'p':
+                {
+                    //
+                    // Get the value from the varargs.
+                    //
+                    ui16Value = va_arg(vaArgP, int);
+
+                    //
+                    // Reset the buffer position.
+                    //
+                    ui16Pos = 0;
+
+                    //
+                    // Set the base to 16.
+                    //
+                    ui16Base = 16;
+
+                    //
+                    // Indicate that the value is positive so that a minus sign
+                    // isn't inserted.
+                    //
+                    ui16Neg = 0;
+
+                    //
+                    // Determine the number of digits in the string version of
+                    // the value.
+                    //
+convert:
+                    for(ui16Idx = 1;
+                        (((ui16Idx * ui16Base) <= ui16Value) &&
+                         (((ui16Idx * ui16Base) / ui16Base) == ui16Idx));
+                        ui16Idx *= ui16Base, ui16Count--)
+                    {
+                    }
+
+                    //
+                    // If the value is negative, reduce the count of padding
+                    // characters needed.
+                    //
+                    if(ui16Neg)
+                    {
+                        ui16Count--;
+                    }
+
+                    //
+                    // If the value is negative and the value is padded with
+                    // zeros, then place the minus sign before the padding.
+                    //
+                    if(ui16Neg && (cFill == '0'))
+                    {
+                        //
+                        // Place the minus sign in the output buffer.
+                        //
+                        pcBuf[ui16Pos++] = '-';
+
+                        //
+                        // The minus sign has been placed, so turn off the
+                        // negative flag.
+                        //
+                        ui16Neg = 0;
+                    }
+
+                    //
+                    // Provide additional padding at the beginning of the
+                    // string conversion if needed.
+                    //
+                    if((ui16Count > 1) && (ui16Count < 16))
+                    {
+                        for(ui16Count--; ui16Count; ui16Count--)
+                        {
+                            pcBuf[ui16Pos++] = cFill;
+                        }
+                    }
+
+                    //
+                    // If the value is negative, then place the minus sign
+                    // before the number.
+                    //
+                    if(ui16Neg)
+                    {
+                        //
+                        // Place the minus sign in the output buffer.
+                        //
+                        pcBuf[ui16Pos++] = '-';
+                    }
+
+                    //
+                    // Convert the value into a string.
+                    //
+                    for(; ui16Idx; ui16Idx /= ui16Base)
+                    {
+                        pcBuf[ui16Pos++] =
+                            HEX_reference[(ui16Value / ui16Idx) % ui16Base];
+                    }
+
+                    //
+                    // Write the string.
+                    //
+                    SP_UART_Send_Buffer(&DEBUG_DB9_UART, pcBuf, ui16Pos);
+
+                    //
+                    // This command has been handled.
+                    //
+                    break;
+                }
+
+                //
+                // Handle the %% command.
+                //
+                case '%':
+                {
+                    //
+                    // Simply write a single %.
+                    //
+                    SP_UART_Send_Buffer(&DEBUG_DB9_UART, format - 1, 1);
+
+                    //
+                    // This command has been handled.
+                    //
+                    break;
+                }
+
+                //
+                // Handle all other commands.
+                //
+                default:
+                {
+                    //
+                    // Indicate an error.
+                    //
+                    SP_UART_Send_Buffer(&DEBUG_DB9_UART, "ERROR", 5);
+
+                    //
+                    // This command has been handled.
+                    //
+                    break;
+                }
+            }
+        }
+    }
+    va_end(vaArgP);
 }
 
 //*****************************************************************************
@@ -221,3 +602,27 @@ bool bsp_debug_console_RX_buffer_empty(void)
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+// void bsp_debug_console_printf(const char * format, ...)
+// {
+//     char temp_buffer[DEBUG_DB9_PRINTF_BUFFER_SIZE];
+//     va_list args;
+
+//     // Khởi tạo danh sách tham số biến đổi
+//     va_start(args, format);
+
+//     // Định dạng chuỗi vào bộ đệm tạm
+//     int len = vsnprintf(temp_buffer, DEBUG_DB9_PRINTF_BUFFER_SIZE, format, args);
+
+//     // Kết thúc danh sách tham số
+//     va_end(args);
+
+//     // Kiểm tra độ dài hợp lệ
+//     if (len < 0 || len >= DEBUG_DB9_PRINTF_BUFFER_SIZE)
+//     {
+//         return ;
+//     }
+
+//     // Gửi chuỗi đã định dạng qua UART
+//     SP_UART_Send_Buffer(&DEBUG_DB9_UART, temp_buffer, (uint32_t)len);
+// }

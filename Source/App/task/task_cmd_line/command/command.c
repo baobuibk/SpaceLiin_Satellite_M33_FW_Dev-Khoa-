@@ -7,6 +7,7 @@
 
 /* USER include. */
 #include "command.h"
+#include "cmd_test_can.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -19,12 +20,16 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 tCmdLineEntry g_psCmdTable[] =
 {
-        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Ultility Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		{ "help", 					CMD_HELP,					" : Display list of commands" },
-		{ "clear",           		CMD_CLEAR_SCREEN,           " : Clear console screen" },
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
+	{ "can_send_2byte", 		CMD_CAN_SEND_2BYTE,			" : Send 2 byte of user input" },
 
-        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End Of Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-        { 0, 0, 0 }
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Ultility Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "help", 					CMD_HELP,					" : Display list of commands" },
+	{ "clear",           		CMD_CLEAR_SCREEN,           " : Clear console screen" },
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End Of Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ 0, 0, 0 }
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -64,7 +69,7 @@ int CMD_CLEAR_SCREEN(int argc, char *argv[])
     bsp_debug_console_send_string("\033[2J");
 	bsp_debug_console_send_string("\033[1;1H");
 
-	return CMDLINE_OK;
+	return CMDLINE_CLEAR_SCREEN;
     // return CMDLINE_NO_RESPONSE;
 }
 
