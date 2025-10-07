@@ -32,12 +32,14 @@ int app_main(void)
     BSP_Init();
 
     /* Create task. */
-    if (xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 100, NULL, Task_CMD_Line_PRIORITY, NULL) != pdPASS)
-    {
-        bsp_debug_console_printf("Task creation failed!.\r\n");
-        while (1)
-            ;
-    }
+    // if (xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 100, NULL, Task_CMD_Line_PRIORITY, NULL) != pdPASS)
+    // {
+    //     bsp_debug_console_printf("Task creation failed!\r\n");
+    //     while (1)
+    //         ;
+    // }
+
+    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
 
     /* Init task */
     Task_CMD_Line_Init();

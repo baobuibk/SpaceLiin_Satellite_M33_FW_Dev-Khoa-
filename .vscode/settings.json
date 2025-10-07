@@ -44,6 +44,7 @@
     "format": "c",
     "thread": "c",
     "cstdio": "c",
-    "fsl_lpuart.h": "c"
+    "fsl_lpuart.h": "c",
+    "ring_char_buffer.h": "c"
   }
 }

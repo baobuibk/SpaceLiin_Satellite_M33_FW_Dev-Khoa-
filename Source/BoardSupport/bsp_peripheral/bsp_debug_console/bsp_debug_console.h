@@ -48,7 +48,7 @@ void bsp_debug_console_send_string(const char *pcBuf);
 //! Get a char from the buffer.
 //
 //*****************************************************************************
-char bsp_debug_console_get_char(void);
+uint8_t bsp_debug_console_get_char(void);
 
 //*****************************************************************************
 //

@@ -35,7 +35,7 @@ typedef struct _cmd_line_t_
 cmd_line_t          task_cmd_line;
 char                g_task_cmd_line_buffer[64];
 
-static bool         is_warned_user = false;
+// static bool         is_warned_user = false;
 
 static const char * ErrorCode[7] = 
 {
@@ -80,7 +80,7 @@ uint8_t g_RF_CMD_line_return = CMDLINE_OK;
 
 tCmdLineEntry g_psCmdTable[] =
 {
-
+    { 0, 0, 0 }
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -102,25 +102,15 @@ void Task_CMD_Line(void *pvParameters)
 {
     uint8_t time_out;
     const TickType_t delay_period = pdMS_TO_TICKS(50);   // 50 ms
-          TickType_t last_delay   = xTaskGetTickCount();
+          TickType_t last_delay;
+
+for(;;)
+{
+    last_delay = xTaskGetTickCount();
 
     for(time_out = 50; (!TASK_CMD_LINE_RX_EMPTY()) && (time_out != 0); time_out--)
     {
-        task_cmd_line.RX_char = TASK_CMD_LINE_GET_CHAR();
-
-        if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
-        {
-            if (is_warned_user == false)
-            {
-                TASK_CMD_LINE_SEND_STRING("> ");
-            }
-            
-			TASK_CMD_LINE_SEND_STRING("COMMAND IS BEING PROCESSED, PLEASE WAIT\n");
-			TASK_CMD_LINE_SEND_STRING("> ");
-			is_warned_user = true;
-
-            break;
-		}
+        task_cmd_line.RX_char = (char)TASK_CMD_LINE_GET_CHAR();
         
         if(((task_cmd_line.RX_char == 8) || (task_cmd_line.RX_char == 127)))
         {
@@ -134,26 +124,6 @@ void Task_CMD_Line(void *pvParameters)
 
         TASK_CMD_LINE_SEND_CHAR(task_cmd_line.RX_char);
 
-        // if (is_streaming_enable == true)
-        // {
-        //     char buffer_temp[] = "SET_AUTO_ACCEL 0";
-        //     // CMD_line_handle = &RF_UART;
-        //     g_RF_CMD_line_return = CmdLineProcess(buffer_temp);
-
-        //     if (g_RF_CMD_line_return == CMDLINE_NO_RESPONSE)
-        //     {
-        //         TASK_CMD_LINE_SEND_STRING("\033[1;1H");
-        //     }
-        //     else
-        //     {
-        //         TASK_CMD_LINE_SEND_STRING("> ");
-        //         TASK_CMD_LINE_PRINTF(ErrorCode[g_RF_CMD_line_return]);
-        //     }
-
-        //     TASK_CMD_LINE_SEND_STRING("> ");
-        //     return;
-        // }
-
         if((task_cmd_line.RX_char == '\r') || (task_cmd_line.RX_char == '\n'))
         {
             if(task_cmd_line.write_index > 0)
@@ -165,22 +135,15 @@ void Task_CMD_Line(void *pvParameters)
                 // CMD_line_handle   = &RF_UART;
                 g_RF_CMD_line_return = CmdLineProcess(task_cmd_line.p_buffer);
 
-                if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
-                {
-					return;
-				}
+                // if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
+                // {
+				// 	return;
+				// }
 
                 task_cmd_line.write_index = 0;
 
-				if (g_RF_CMD_line_return == CMDLINE_NO_RESPONSE)
-                {
-					TASK_CMD_LINE_SEND_STRING("\033[1;1H");
-				}
-                else
-                {
-					TASK_CMD_LINE_SEND_STRING("> ");
-					TASK_CMD_LINE_PRINTF(ErrorCode[g_RF_CMD_line_return]);
-				}
+                TASK_CMD_LINE_SEND_STRING("> ");
+				TASK_CMD_LINE_SEND_STRING(ErrorCode[g_RF_CMD_line_return]);
 
                 TASK_CMD_LINE_SEND_STRING("> ");
             }
@@ -206,33 +169,9 @@ void Task_CMD_Line(void *pvParameters)
         }
     }
 
-    // if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
-    // {
-	// 	g_RF_CMD_line_return = CmdLineProcess(task_cmd_line.p_buffer);
-
-	// 	if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
-    //     {
-	// 		return;
-	// 	}
-
-	// 	task_cmd_line.write_index = 0;
-
-	// 	TASK_CMD_LINE_SEND_STRING("> ");
-	// 	TASK_CMD_LINE_PRINTF(ErrorCode[g_RF_CMD_line_return]);
-	// 	TASK_CMD_LINE_SEND_STRING("> ");
-
-	// 	if (is_warned_user == true)
-    //     {
-	// 		TASK_CMD_LINE_SEND_STRING("FINISH PROCESS COMMAND, PLEASE CONTINUE\n");
-
-	// 		TASK_CMD_LINE_SEND_STRING("> ");
-	// 		is_warned_user = false;
-	// 	}
-
-	// }
-
     // wake up exactly every 100 ms
     vTaskDelayUntil(&last_delay, delay_period);
+}
 }
 
 //static void CMD_send_splash()
