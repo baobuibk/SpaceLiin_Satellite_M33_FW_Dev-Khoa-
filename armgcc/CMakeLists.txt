@@ -70,6 +70,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.c"
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.h"
 
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/command.c"
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/command.h"
+
     # BoardSupport
     "${UserSourceDirPath}/BoardSupport/bsp.c"
     "${UserSourceDirPath}/BoardSupport/bsp.h"
@@ -130,6 +133,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App
     ${UserSourceDirPath}/App/task
     ${UserSourceDirPath}/App/task/task_cmd_line
+    ${UserSourceDirPath}/App/task/task_cmd_line/command
 
     # BoardSupport
     ${UserSourceDirPath}/BoardSupport

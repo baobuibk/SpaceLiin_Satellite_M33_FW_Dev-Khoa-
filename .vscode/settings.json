@@ -45,6 +45,7 @@
     "thread": "c",
     "cstdio": "c",
     "fsl_lpuart.h": "c",
-    "ring_char_buffer.h": "c"
+    "ring_char_buffer.h": "c",
+    "freertos.h": "c"
   }
 }

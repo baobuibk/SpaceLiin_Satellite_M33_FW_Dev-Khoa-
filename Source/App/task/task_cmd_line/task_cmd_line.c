@@ -34,8 +34,7 @@ typedef struct _cmd_line_t_
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 cmd_line_t          task_cmd_line;
 char                g_task_cmd_line_buffer[64];
-
-// static bool         is_warned_user = false;
+static uint8_t      g_command_return = CMDLINE_OK;
 
 static const char * ErrorCode[7] = 
 {
@@ -76,13 +75,6 @@ const char SPLASH[][65] =
 //static void CMD_send_splash();
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-uint8_t g_RF_CMD_line_return = CMDLINE_OK;
-
-tCmdLineEntry g_psCmdTable[] =
-{
-    { 0, 0, 0 }
-};
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: CMD Line Task Init :::::::: */
 void Task_CMD_Line_Init(void)
@@ -130,20 +122,13 @@ for(;;)
             {
                 // Add a NUL char at the end of the CMD
                 task_cmd_line.p_buffer[task_cmd_line.write_index] = 0;
-                //task_cmd_line.write_index++;
 
-                // CMD_line_handle   = &RF_UART;
-                g_RF_CMD_line_return = CmdLineProcess(task_cmd_line.p_buffer);
-
-                // if (g_RF_CMD_line_return == CMDLINE_IS_PROCESSING)
-                // {
-				// 	return;
-				// }
+                g_command_return = CmdLineProcess(task_cmd_line.p_buffer);
 
                 task_cmd_line.write_index = 0;
 
                 TASK_CMD_LINE_SEND_STRING("> ");
-				TASK_CMD_LINE_SEND_STRING(ErrorCode[g_RF_CMD_line_return]);
+                TASK_CMD_LINE_SEND_STRING(ErrorCode[g_command_return]);
 
                 TASK_CMD_LINE_SEND_STRING("> ");
             }
