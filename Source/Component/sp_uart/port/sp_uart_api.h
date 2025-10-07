@@ -28,7 +28,7 @@ void SP_UART_Send_String    (sp_uart_t* p_uart, const char *pcBuf);
 void SP_UART_Send_Buffer    (sp_uart_t* p_uart, const char *pcBuf, uint32_t byte_count);
 void SP_UART_Printf 	    (sp_uart_t* p_uart, const char *pc_string, ...);
 
-char SP_UART_Get_Char	    (sp_uart_t* p_uart);
+uint8_t SP_UART_Get_Char	(sp_uart_t* p_uart);
 
 void SP_UART_Prime_Transmit	(sp_uart_t* p_uart);
 

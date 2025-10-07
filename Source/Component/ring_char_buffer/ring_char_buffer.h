@@ -15,8 +15,8 @@ typedef struct _ring_char_buffer_t_
 {
     uint8_t *buffer;    /* Con trỏ đến mảng tĩnh do người dùng cung cấp */
 
-    uint32_t head;      /* Vị trí đầu (để thêm phần tử) */
-    uint32_t tail;      /* Vị trí đuôi (để lấy phần tử) */
+    volatile uint32_t head;      /* Vị trí đầu (để thêm phần tử) */
+    volatile uint32_t tail;      /* Vị trí đuôi (để lấy phần tử) */
     uint32_t max_items; /* Số lượng phần tử tối đa */
 
 } ring_char_buffer_t;

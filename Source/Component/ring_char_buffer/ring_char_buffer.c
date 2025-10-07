@@ -13,7 +13,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline void ring_char_buffer_advance_index(volatile uint32_t* p_index, uint32_t max_items);
+static void ring_char_buffer_advance_index(volatile uint32_t* p_index, uint32_t max_items);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -185,7 +185,7 @@ uint32_t ring_char_buffer_get_free_space(ring_char_buffer_t const * const me)
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline void ring_char_buffer_advance_index(volatile uint32_t* p_index, uint32_t max_items)
+static void ring_char_buffer_advance_index(volatile uint32_t* p_index, uint32_t max_items)
 {
     *p_index = (*p_index + 1) % max_items;
 }

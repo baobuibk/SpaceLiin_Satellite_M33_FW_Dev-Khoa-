@@ -211,7 +211,7 @@ void SP_UART_Printf(sp_uart_t* p_uart, const char *pc_string, ...)
 //! \return Returns the character read.
 //
 //*****************************************************************************
-char SP_UART_Get_Char(sp_uart_t* p_uart)
+uint8_t SP_UART_Get_Char(sp_uart_t* p_uart)
 {
 
     uint8_t return_char;
@@ -287,7 +287,7 @@ void SP_UART_Prime_Transmit(sp_uart_t* p_uart)
 uint16_t SP_UART_Enqueue(sp_uart_t* p_uart, const char *pcBuf, uint32_t byte_count)
 {
 
-    uint8_t uIdx;
+    uint32_t uIdx;
 
     //
     // Check for valid arguments.
@@ -334,8 +334,15 @@ uint16_t SP_UART_Enqueue(sp_uart_t* p_uart, const char *pcBuf, uint32_t byte_cou
     // If the usart txe irq is disable, this mean an usart phase is finished
     // we need to enable the txe irq and kick start the transmit process.
     //
-    uint32_t is_TXE_enable = LPUART_GetEnabledInterrupts(p_uart->handle);
-    if ((kLPUART_TxDataRegEmptyInterruptEnable & is_TXE_enable) == kLPUART_TxDataRegEmptyInterruptEnable)
+    // uint32_t is_TXE_enable = LPUART_GetEnabledInterrupts(p_uart->handle);
+    // if ((kLPUART_TxDataRegEmptyInterruptEnable & is_TXE_enable) == kLPUART_TxDataRegEmptyInterruptEnable)
+
+    // uint32_t ien = LPUART_GetEnabledInterrupts(p_uart->handle);
+
+    // Is TXE interrupt enabled now?
+    bool txe_enabled = (LPUART_GetEnabledInterrupts(p_uart->handle) & (uint32_t)kLPUART_TxDataRegEmptyInterruptEnable) != 0U;
+
+    if (!txe_enabled)
     {
         // NOTE: Turn on TXE after prime transmit,
         // if turn on TXE b4 prime transmit create a

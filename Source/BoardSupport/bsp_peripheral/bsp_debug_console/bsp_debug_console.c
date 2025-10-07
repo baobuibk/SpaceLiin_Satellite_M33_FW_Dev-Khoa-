@@ -87,8 +87,8 @@ uint8_t             g_DEBUG_DB9_UART_RX_buffer[64];
 //*****************************************************************************
 void bsp_debug_console_init()
 {
-    ring_char_buffer_init(&DEBUG_DB9_UART_TX_ring_buffer, g_DEBUG_DB9_UART_TX_buffer, sizeof(g_DEBUG_DB9_UART_TX_buffer));
-    ring_char_buffer_init(&DEBUG_DB9_UART_RX_ring_buffer, g_DEBUG_DB9_UART_RX_buffer, sizeof(g_DEBUG_DB9_UART_RX_buffer));
+    ring_char_buffer_init(&DEBUG_DB9_UART_TX_ring_buffer, g_DEBUG_DB9_UART_TX_buffer, (uint32_t)sizeof(g_DEBUG_DB9_UART_TX_buffer));
+    ring_char_buffer_init(&DEBUG_DB9_UART_RX_ring_buffer, g_DEBUG_DB9_UART_RX_buffer, (uint32_t)sizeof(g_DEBUG_DB9_UART_RX_buffer));
 
     sp_uart_init_t debug_uart_init =
     {
@@ -110,7 +110,8 @@ void bsp_debug_console_init()
 //*****************************************************************************
 void DEBUG_DB9_IRQHandler(void)
 {
-    if((kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_TxDataRegEmptyFlag)
+    // if((kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_TxDataRegEmptyFlag)
+    if(kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE))
     {
         if(TX_BUFFER_EMPTY(&DEBUG_DB9_UART))
         {
@@ -124,7 +125,8 @@ void DEBUG_DB9_IRQHandler(void)
         }
     }
 
-    if((kLPUART_RxDataRegFullFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_RxDataRegFullFlag)
+    // if((kLPUART_RxDataRegFullFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE)) == kLPUART_RxDataRegFullFlag)
+    if(kLPUART_RxDataRegFullFlag & LPUART_GetStatusFlags(DEBUG_DB9_LPUART_BASE))
     {
         DEBUG_DB9_UART.RX_irq_char = (char)LPUART_ReadByte(DEBUG_DB9_LPUART_BASE);
 
@@ -203,7 +205,7 @@ void bsp_debug_console_send_string(const char *pcBuf)
 //! Get a char from the buffer.
 //
 //*****************************************************************************
-char bsp_debug_console_get_char(void)
+uint8_t bsp_debug_console_get_char(void)
 {
 	return SP_UART_Get_Char(&DEBUG_DB9_UART);
 }
