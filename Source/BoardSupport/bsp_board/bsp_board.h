@@ -21,4 +21,21 @@
 
 #define LIBCSP_CAN_BITRATE_BPS          (500000u)
 
+/*********************TEC SPI**********************/
+#define TEC_SPI_CLOCK_ROOT              kCLOCK_Root_Lpspi6
+#define TEC_SPI_CLOCK_GATE              kCLOCK_Lpspi6
+#define TEC_SPI_CLK_FREQ                CLOCK_GetIpFreq(TEC_SPI_CLOCK_ROOT)
+
+#define TEC_SPI_BASE                    LPSPI6
+#define TEC_SPI_IRQn                    LPSPI6_IRQn
+
+#define TEC_SPI_BAUDRATE                (500000u)
+
+#define TEC_SPI_GPIO_CS_CLOCK_ROOT      kCLOCK_Root_BusWakeup
+#define TEC_SPI_GPIO_CS_CLOCK_GATE      kCLOCK_Gpio2
+#define TEC_SPI_GPIO_CS_CLK_FREQ        CLOCK_GetIpFreq(TEC_SPI_GPIO_CS_CLOCK_ROOT)
+
+#define TEC_SPI_GPIO_CS_PORT            GPIO2
+#define TEC_SPI_GPIO_CS_PIN             0U
+
 #endif /* _BSP_BOARD_H_ */

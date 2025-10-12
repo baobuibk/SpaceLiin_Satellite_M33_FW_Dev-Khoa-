@@ -74,6 +74,30 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
+
+    /* SPI6 Init Pin. */
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO00__GPIO2_IO00, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO00__GPIO2_IO00, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
 }
 
 /***********************************************************************************************************************

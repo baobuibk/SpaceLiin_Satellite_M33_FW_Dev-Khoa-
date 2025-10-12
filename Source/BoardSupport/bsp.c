@@ -30,4 +30,5 @@ void BSP_Init(void)
     /* Init board peripheral. */
     bsp_debug_console_init();
     bsp_libcsp_can_init();
+    bsp_spi_sensor_init();
 }

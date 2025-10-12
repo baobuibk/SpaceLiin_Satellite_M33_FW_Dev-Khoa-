@@ -8,6 +8,7 @@
 /* USER include. */
 #include "command.h"
 #include "cmd_test_can.h"
+#include "cmd_test_spi.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -20,6 +21,9 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 tCmdLineEntry g_psCmdTable[] =
 {
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test SPI Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "spi_read_sensor", 		CMD_SPI_READ_SENSOR,		" : Test SPI read and write" },
+
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
 	{ "can_send_2byte", 		CMD_CAN_SEND_2BYTE,			" : Send 2 byte of user input" },

@@ -49,6 +49,11 @@
     "freertos.h": "c",
     "command.h": "c",
     "can_stdio.h": "c",
-    "task_test_can.h": "c"
+    "task_test_can.h": "c",
+    "sp_gpio_port.h": "c",
+    "bsp_spi_sensor.h": "c",
+    "bmp390.h": "c",
+    "bsp_core.h": "c",
+    "cmd_test_spi.h": "c"
   }
 }

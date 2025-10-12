@@ -76,6 +76,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.c"
     "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.h"
 
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.c"
+    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.h"
+
     "${UserSourceDirPath}/App/task/task_test_can/task_test_can.c"
     "${UserSourceDirPath}/App/task/task_test_can/task_test_can.h"
 
@@ -93,6 +96,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.h"
+
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.h"
 
     # Component
     "${UserSourceDirPath}/Component/error_code/error_code.h"
@@ -127,8 +133,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.c"
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.h"
 
-    "${UserSourceDirPath}/Component/devices/lt8722/lt8722.c"
-    "${UserSourceDirPath}/Component/devices/lt8722/lt8722.h"
+    # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.c"
+    # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.h"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -141,6 +147,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App/task/task_cmd_line
     ${UserSourceDirPath}/App/task/task_cmd_line/command
     ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can
+    ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi
 
     ${UserSourceDirPath}/App/task/task_test_can
 
@@ -154,6 +161,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
 
     # Component
     ${UserSourceDirPath}/Component/error_code
@@ -176,7 +184,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/sp_uart/port
     ${UserSourceDirPath}/Component/sp_uart/port/NXP
 
-    ${UserSourceDirPath}/Component/devices/lt8722
+    # ${UserSourceDirPath}/Component/devices/lt8722
 
     # MiddleWare
     ${UserSourceDirPath}/MiddleWare/FreeRTOS

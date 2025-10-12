@@ -36,3 +36,4 @@ set(CONFIG_DSP DSP)
 
 # User set
 set(CONFIG_USE_driver_flexcan true)
+set(CONFIG_USE_driver_lpspi true)
