@@ -31,4 +31,5 @@ void BSP_Init(void)
     bsp_debug_console_init();
     bsp_libcsp_can_init();
     bsp_spi_sensor_init();
+    bsp_i2c_sensor_init();
 }

@@ -31,7 +31,7 @@ int CMD_SPI_READ_SENSOR(int argc, char *argv[])
 	else if (argc > 1)
 		return CMDLINE_TOO_MANY_ARGS;
 
-    bsp_spi_sensor_read_value(SENSOR_READ_BMP390);
+    bsp_i2c_sensor_read_value(SENSOR_READ_BMP390);
 
     char pressure_string[16] = {0};
 	char temperature_string[16] = {0};

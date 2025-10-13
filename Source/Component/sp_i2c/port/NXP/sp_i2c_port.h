@@ -1,23 +1,29 @@
-#ifndef _BSUPPORT_H_
-#define _BSUPPORT_H_
+#ifndef _SP_I2C_PORT_H_
+#define _SP_I2C_PORT_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* User includes. */
-#include "bsp_board.h"
-#include "bsp_debug_console.h"
-#include "bsp_libcsp_can.h"
-#include "bsp_spi_sensor.h"
-#include "bsp_i2c_sensor.h"
+/* Standard API for SP I2C includes. */
+#include "sp_i2c_api.h"
+
+/* Port specific includes. */
+#include "fsl_lpi2c.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+typedef struct _sp_i2c_t_
+{
+    LPI2C_Type* p_base;
+} sp_i2c_t;
+
+typedef struct _sp_i2c_init_t_
+{
+    LPI2C_Type* p_base;
+} sp_i2c_init_t;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void BSP_Init(void);
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-#endif /* _BSUPPORT_H_ */
+#endif /* _SP_I2C_PORT_H_ */

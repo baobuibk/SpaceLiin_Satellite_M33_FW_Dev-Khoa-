@@ -38,4 +38,14 @@
 #define TEC_SPI_GPIO_CS_PORT            GPIO2
 #define TEC_SPI_GPIO_CS_PIN             0U
 
+/*********************I/O EXPANDER I2C**********************/
+#define IO_EXPAN_CLOCK_ROOT              kCLOCK_Root_Lpi2c6
+#define IO_EXPAN_CLOCK_GATE              kCLOCK_Lpi2c6
+#define IO_EXPAN_CLK_FREQ                CLOCK_GetIpFreq(IO_EXPAN_CLOCK_ROOT)
+
+#define IO_EXPAN_BASE                    LPI2C6
+#define IO_EXPAN_IRQn                    LPI2C6_IRQn
+
+#define IO_EXPAN_BAUDRATE_HZ             (100000U)
+
 #endif /* _BSP_BOARD_H_ */

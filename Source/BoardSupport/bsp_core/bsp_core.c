@@ -7,6 +7,8 @@
 #include "fsl_lpspi.h"
 #include "fsl_rgpio.h"
 
+#include "fsl_lpi2c.h"
+
 /* USER includes. */
 #include "bsp_core.h"
 #include "bsp_board.h"
@@ -22,6 +24,7 @@ static void bsp_core_init_uart(void);
 static void bsp_core_init_can(void);
 static void bsp_core_init_spi(void);
 static void bsp_core_init_gpio(void);
+static void bsp_core_init_i2c(void);
 
 /*******************************************************************************
  * Variables
@@ -40,6 +43,7 @@ void bsp_core_init(void)
     bsp_core_init_can();
     bsp_core_init_spi();
     bsp_core_init_gpio();
+    bsp_core_init_i2c();
 }
 
 /*!
@@ -196,4 +200,39 @@ static void bsp_core_init_gpio(void)
 
     /* Init output LED GPIO. */
     RGPIO_PinInit(TEC_SPI_GPIO_CS_PORT, TEC_SPI_GPIO_CS_PIN, &TEC_CS_config);
+}
+
+static void bsp_core_init_i2c(void)
+{
+    lpi2c_master_config_t i2c_masterConfig;
+
+    /* clang-format off */
+    const clock_root_config_t lpi2cClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0, // 24MHz oscillator source
+	    .div = 1
+    };
+    /* clang-format on */
+
+    CLOCK_SetRootClock(IO_EXPAN_CLOCK_ROOT, &lpi2cClkCfg);
+    CLOCK_EnableClock(IO_EXPAN_CLOCK_GATE);
+
+    /*
+     * i2c_masterConfig.debugEnable = false;
+     * i2c_masterConfig.ignoreAck = false;
+     * i2c_masterConfig.pinConfig = kLPI2C_2PinOpenDrain;
+     * i2c_masterConfig.baudRate_Hz = 100000U;
+     * i2c_masterConfig.busIdleTimeout_ns = 0;
+     * i2c_masterConfig.pinLowTimeout_ns = 0;
+     * i2c_masterConfig.sdaGlitchFilterWidth_ns = 0;
+     * i2c_masterConfig.sclGlitchFilterWidth_ns = 0;
+     */
+    LPI2C_MasterGetDefaultConfig(&i2c_masterConfig);
+
+    /* Change the default baudrate configuration */
+    i2c_masterConfig.baudRate_Hz = IO_EXPAN_BAUDRATE_HZ;
+
+    /* Initialize the LPI2C master peripheral */
+    LPI2C_MasterInit(IO_EXPAN_BASE, &i2c_masterConfig, IO_EXPAN_CLK_FREQ);
 }

@@ -100,6 +100,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.h"
 
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.h"
+
     # Component
     "${UserSourceDirPath}/Component/error_code/error_code.h"
 
@@ -126,6 +129,11 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/sp_spi/port/sp_spi_api.h"
     "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.c"
     "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.h"
+
+    "${UserSourceDirPath}/Component/sp_i2c/sp_i2c.h"
+    "${UserSourceDirPath}/Component/sp_i2c/port/sp_i2c_api.h"
+    "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.c"
+    "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.h"
 
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.c"
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.h"
@@ -162,6 +170,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
 
     # Component
     ${UserSourceDirPath}/Component/error_code
@@ -175,6 +184,10 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/sp_spi
     ${UserSourceDirPath}/Component/sp_spi/port
     ${UserSourceDirPath}/Component/sp_spi/port/NXP
+
+    ${UserSourceDirPath}/Component/sp_i2c
+    ${UserSourceDirPath}/Component/sp_i2c/port
+    ${UserSourceDirPath}/Component/sp_i2c/port/NXP
 
     ${UserSourceDirPath}/Component/uart_stdio
     ${UserSourceDirPath}/Component/can_stdio
