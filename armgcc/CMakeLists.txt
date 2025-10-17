@@ -117,6 +117,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/sp_gpio/port/NXP/sp_gpio_port.c"
     "${UserSourceDirPath}/Component/sp_gpio/port/NXP/sp_gpio_port.h"
 
+    "${UserSourceDirPath}/Component/dio/do.h"
+    "${UserSourceDirPath}/Component/dio/nxp/do.c"
+
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.c"
     "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.h"
 
@@ -180,6 +183,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/sp_gpio
     ${UserSourceDirPath}/Component/sp_gpio/port
     ${UserSourceDirPath}/Component/sp_gpio/port/NXP
+
+    ${UserSourceDirPath}/Component/dio
+    ${UserSourceDirPath}/Component/dio/nxp
 
     ${UserSourceDirPath}/Component/sp_spi
     ${UserSourceDirPath}/Component/sp_spi/port
