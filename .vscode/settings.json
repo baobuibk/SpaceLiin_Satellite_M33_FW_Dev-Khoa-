@@ -62,6 +62,7 @@
     "limits": "cpp",
     "utility": "cpp",
     "sp_i2c_port.h": "c",
-    "fsl_lpi2c.h": "c"
+    "fsl_lpi2c.h": "c",
+    "clock_config.h": "c"
   }
 }

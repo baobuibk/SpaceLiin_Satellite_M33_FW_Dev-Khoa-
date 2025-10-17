@@ -22,7 +22,7 @@
 tCmdLineEntry g_psCmdTable[] =
 {
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test SPI Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	{ "spi_read_sensor", 		CMD_SPI_READ_SENSOR,		" : Test SPI read and write" },
+	{ "spi_read_adc", 			CMD_SPI_READ_ADC,		" : Test SPI read and write" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },

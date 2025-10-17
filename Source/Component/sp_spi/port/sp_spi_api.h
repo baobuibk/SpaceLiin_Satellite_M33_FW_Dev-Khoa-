@@ -78,15 +78,28 @@ typedef struct _sp_spi_t_ 	 	sp_spi_t;
 typedef struct _sp_spi_init_t_  sp_spi_init_t;
 
 typedef enum   _sp_spi_command_t_ sp_spi_command_t;
-typedef struct _sp_spi_frame_t_   sp_spi_frame_t;
+typedef enum _sp_spi_byte_type_t_ sp_spi_byte_type_t;
+
+typedef struct _sp_spi_blocking_frame_t_ sp_spi_blocking_frame_t;
+typedef struct _sp_spi_irq_frame_t_      sp_spi_irq_frame_t;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void SP_SPI_master_init(sp_spi_t* me, const sp_spi_init_t* init);
+void SP_SPI_master_blocking_init(sp_spi_t* p_spi, const sp_spi_init_t* p_init);
+void SP_SPI_master_transfer_blocking(sp_spi_t* p_spi, sp_spi_blocking_frame_t* p_frame);
+void SP_SPI_build_default_blocking_frame(uint8_t addr, uint8_t* p_data_buff, sp_spi_command_t command, sp_spi_blocking_frame_t* p_frame);
 
-void SP_SPI_master_write_blocking(sp_spi_t* me, sp_spi_frame_t* p_frame);
-void SP_SPI_master_read_blocking(sp_spi_t* me, sp_spi_frame_t* p_frame);
-void SP_SPI_master_transfer_blocking(sp_spi_t* me, sp_spi_frame_t* p_frame, sp_spi_command_t command_type);
+void SP_SPI_master_irq_init(sp_spi_t* p_spi, const sp_spi_init_t *init);
+void SP_SPI_master_transfer_irq(sp_spi_t* p_spi);
+void SP_SPI_build_default_irq_frame(sp_spi_t* p_spi, uint8_t addr, uint8_t* p_data_buff, uint32_t data_count,sp_spi_command_t command);
+void SP_SPI_IRQ_subhandle(sp_spi_t* p_spi);
+
+// void SP_SPI_master_write_blocking(sp_spi_t* p_spi, sp_spi_frame_t* p_frame);
+// void SP_SPI_master_read_blocking(sp_spi_t* p_spi, sp_spi_frame_t* p_frame);
+
+// void SP_SPI_master_write_dma(sp_spi_t* p_spi, sp_spi_frame_t* p_frame);
+// void SP_SPI_master_read_dma(sp_spi_t* p_spi, sp_spi_frame_t* p_frame);
+
 // void sp_spi_write_and_read_sync(sp_spi_t* me, uint8_t* pui8TxBuff, uint32_t ui32TxLength, uint8_t* pui8RxBuff,uint32_t ui32RxLength);
 
 // uint32_t sp_spi_read_async(sp_spi_t *me, uint8_t	*pui8RxBuff, uint32_t ui32Length);

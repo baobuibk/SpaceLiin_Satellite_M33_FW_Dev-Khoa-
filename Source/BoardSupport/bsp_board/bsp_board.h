@@ -29,14 +29,14 @@
 #define TEC_SPI_BASE                    LPSPI6
 #define TEC_SPI_IRQn                    LPSPI6_IRQn
 
-#define TEC_SPI_BAUDRATE                (500000u)
+#define TEC_SPI_BAUDRATE                (25000000)
 
 #define TEC_SPI_GPIO_CS_CLOCK_ROOT      kCLOCK_Root_BusWakeup
 #define TEC_SPI_GPIO_CS_CLOCK_GATE      kCLOCK_Gpio2
 #define TEC_SPI_GPIO_CS_CLK_FREQ        CLOCK_GetIpFreq(TEC_SPI_GPIO_CS_CLOCK_ROOT)
 
-#define TEC_SPI_GPIO_CS_PORT            GPIO2
-#define TEC_SPI_GPIO_CS_PIN             0U
+#define TEC_SPI_GPIO_PORT               GPIO2
+#define TEC_SPI_GPIO_SPI_CS_PIN         0U
 
 /*********************I/O EXPANDER I2C**********************/
 #define IO_EXPAN_CLOCK_ROOT              kCLOCK_Root_Lpi2c6
@@ -47,5 +47,35 @@
 #define IO_EXPAN_IRQn                    LPI2C6_IRQn
 
 #define IO_EXPAN_BAUDRATE_HZ             (100000U)
+
+/*********************PHOTO ADC SPI**********************/
+#define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi6
+#define PHOTO_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi6
+#define PHOTO_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(PHOTO_ADC_SPI_CLOCK_ROOT)
+
+#define PHOTO_ADC_SPI_BASE              LPSPI6
+#define PHOTO_ADC_SPI_IRQn              LPSPI6_IRQn
+
+#define PHOTO_ADC_SPI_BAUDRATE          (25000000)
+
+#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
+#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_GATE    kCLOCK_Gpio2
+#define PHOTO_ADC_GPIO_SPI_CS_CLK_FREQ      CLOCK_GetIpFreq(PHOTO_ADC_GPIO_CS_CLOCK_ROOT)
+
+#define PHOTO_ADC_GPIO_PORT                 GPIO2
+#define PHOTO_ADC_GPIO_SPI_CS_PIN           16U
+#define PHOTO_ADC_GPIO_SPI_CV_PIN           7U
+
+/*********************PHOTO ADC TIM**********************/
+#define PHOTO_ADC_TIM_CLOCK_ROOT        kCLOCK_Root_Tpm2
+#define PHOTO_ADC_TIM_CLOCK_GATE        kCLOCK_Tpm2
+#define PHOTO_ADC_TIM_CLK_FREQ          CLOCK_GetIpFreq(PHOTO_ADC_TIM_CLOCK_ROOT)
+
+#define PHOTO_ADC_TIM_BASE              TPM2
+#define PHOTO_ADC_TIM_IRQn              TPM2_IRQn
+
+#define PHOTO_ADC_TIM_PERIOD_US         (2U)
+/* Calculate the clock division based on the PWM frequency to be obtained */
+#define PHOTO_ADC_TIM_PRESCALER         TPM_CalculateCounterClkDiv(PHOTO_ADC_TIM_BASE, 1000000U / PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ);
 
 #endif /* _BSP_BOARD_H_ */

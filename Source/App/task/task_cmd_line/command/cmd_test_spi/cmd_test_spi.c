@@ -10,6 +10,10 @@
 /* USER include. */
 #include "cmd_test_spi.h"
 
+/* Freescale include. */
+#include "fsl_tpm.h"
+#include "fsl_lpspi.h"
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -23,7 +27,7 @@ static void double_to_string(double value, char *buffer, uint8_t precision);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: Test CAN Command :::::::: */
-int CMD_SPI_READ_SENSOR(int argc, char *argv[])
+int CMD_SPI_READ_ADC(int argc, char *argv[])
 {
     /* CMD Input Guard */
     if (argc < 1)
@@ -31,15 +35,17 @@ int CMD_SPI_READ_SENSOR(int argc, char *argv[])
 	else if (argc > 1)
 		return CMDLINE_TOO_MANY_ARGS;
 
-    bsp_i2c_sensor_read_value(SENSOR_READ_BMP390);
+    // bsp_i2c_sensor_read_value(SENSOR_READ_BMP390);
 
-    char pressure_string[16] = {0};
-	char temperature_string[16] = {0};
+    // char pressure_string[16] = {0};
+	// char temperature_string[16] = {0};
 
-	double_to_string((Sensor_Pressure / 100.0), pressure_string, 3);
-	double_to_string(Sensor_Temp, temperature_string, 3);
+	// double_to_string((Sensor_Pressure / 100.0), pressure_string, 3);
+	// double_to_string(Sensor_Temp, temperature_string, 3);
 	
-	bsp_debug_console_printf("> BMP P: %s hPa, T: %s C\n\r", pressure_string, temperature_string);
+	// bsp_debug_console_printf("> BMP P: %s hPa, T: %s C\n\r", pressure_string, temperature_string);
+
+    TPM_StartTimer(PHOTO_ADC_TIM_BASE, kTPM_SystemClock);
 
 	// Return success.
 	return CMDLINE_OK;

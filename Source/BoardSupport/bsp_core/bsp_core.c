@@ -9,6 +9,8 @@
 
 #include "fsl_lpi2c.h"
 
+#include "fsl_tpm.h"
+
 /* USER includes. */
 #include "bsp_core.h"
 #include "bsp_board.h"
@@ -25,6 +27,7 @@ static void bsp_core_init_can(void);
 static void bsp_core_init_spi(void);
 static void bsp_core_init_gpio(void);
 static void bsp_core_init_i2c(void);
+static void bsp_core_init_tim(void);
 
 /*******************************************************************************
  * Variables
@@ -44,6 +47,7 @@ void bsp_core_init(void)
     bsp_core_init_spi();
     bsp_core_init_gpio();
     bsp_core_init_i2c();
+    bsp_core_init_tim();
 }
 
 /*!
@@ -137,12 +141,12 @@ static void bsp_core_init_spi(void)
     const clock_root_config_t lpspiClkCfg =
     {
         .clockOff = false,
-	    .mux = 0,
-	    .div = 1
+	    .mux = 1,
+	    .div = 4
     };
 
-    CLOCK_SetRootClock(TEC_SPI_CLOCK_ROOT, &lpspiClkCfg);
-    CLOCK_EnableClock(TEC_SPI_CLOCK_GATE);
+    CLOCK_SetRootClock(PHOTO_ADC_SPI_CLOCK_ROOT, &lpspiClkCfg);
+    CLOCK_EnableClock(PHOTO_ADC_SPI_CLOCK_GATE);
 
     /* Get LPSPI module default Configuration. */
     /*
@@ -166,20 +170,29 @@ static void bsp_core_init_spi(void)
      * masterConfig->enableInputDelay               = false;
      */
     LPSPI_MasterGetDefaultConfig(&masterConfig);
-    masterConfig.baudRate = TEC_SPI_BAUDRATE;
+    masterConfig.pcsToSckDelayInNanoSec         = 0;
+    masterConfig.lastSckToPcsDelayInNanoSec     = 0;
+    masterConfig.betweenTransferDelayInNanoSec  = 0;
+    masterConfig.baudRate = PHOTO_ADC_SPI_BAUDRATE;
     masterConfig.whichPcs = kLPSPI_Pcs1;
     
-    srcClock_Hz = TEC_SPI_CLK_FREQ;
-    LPSPI_MasterInit(TEC_SPI_BASE, &masterConfig, srcClock_Hz);
+    srcClock_Hz = PHOTO_ADC_SPI_CLK_FREQ;
+    LPSPI_MasterInit(PHOTO_ADC_SPI_BASE, &masterConfig, srcClock_Hz);
 }
 
 static void bsp_core_init_gpio(void)
 {
     /* Define the init structure for the output LED pin*/
-    rgpio_pin_config_t TEC_CS_config =
+    rgpio_pin_config_t photo_ADC_CS_config =
     {
         kRGPIO_DigitalOutput,
         1,
+    };
+
+    rgpio_pin_config_t photo_ADC_CV_config =
+    {
+        kRGPIO_DigitalOutput,
+        0,
     };
 
     /* Board pin, clock, debug console init */
@@ -188,18 +201,19 @@ static void bsp_core_init_gpio(void)
     const clock_root_config_t rgpioClkCfg =
     {
         .clockOff = false,
-        .mux = 0, // 24Mhz Mcore root buswake clock
-        .div = 1
+        .mux = 1, // 24Mhz Mcore root buswake clock
+        .div = 2
     };
 
     CLOCK_SetRootClock(TEC_SPI_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
     CLOCK_EnableClock(TEC_SPI_GPIO_CS_CLOCK_GATE);
 
     /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
-    TEC_SPI_GPIO_CS_PORT->PCNS = 0x0;
+    PHOTO_ADC_GPIO_PORT->PCNS = 0x0;
 
     /* Init output LED GPIO. */
-    RGPIO_PinInit(TEC_SPI_GPIO_CS_PORT, TEC_SPI_GPIO_CS_PIN, &TEC_CS_config);
+    RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CS_PIN, &photo_ADC_CS_config);
+    RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CV_PIN, &photo_ADC_CV_config);
 }
 
 static void bsp_core_init_i2c(void)
@@ -235,4 +249,30 @@ static void bsp_core_init_i2c(void)
 
     /* Initialize the LPI2C master peripheral */
     LPI2C_MasterInit(IO_EXPAN_BASE, &i2c_masterConfig, IO_EXPAN_CLK_FREQ);
+}
+
+static void bsp_core_init_tim(void)
+{
+    tpm_config_t tpmInfo;
+
+    const clock_root_config_t lptpmClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0,
+	    .div = 1
+    };
+
+    CLOCK_SetRootClock(PHOTO_ADC_TIM_CLOCK_ROOT, &lptpmClkCfg);
+    CLOCK_EnableClock(PHOTO_ADC_TIM_CLOCK_GATE);
+
+    TPM_GetDefaultConfig(&tpmInfo);
+
+    /* TPM clock divide by TPM_PRESCALER */
+    tpmInfo.prescale = PHOTO_ADC_TIM_PRESCALER;
+
+    /* Initialize TPM module */
+    TPM_Init(PHOTO_ADC_TIM_BASE, &tpmInfo);
+
+    /* Set timer period */
+    TPM_SetTimerPeriod(PHOTO_ADC_TIM_BASE, USEC_TO_COUNT(PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ / (1U << tpmInfo.prescale)));
 }
