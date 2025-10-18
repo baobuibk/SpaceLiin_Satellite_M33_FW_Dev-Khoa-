@@ -68,6 +68,9 @@
     "osdelay.h": "c",
     "ossemphr.h": "c",
     "os.h": "c",
-    "config.h": "c"
+    "config.h": "c",
+    "i2c_io.h": "c",
+    "core_cm33.h": "c",
+    "bsp_i2c_sensor.h": "c"
   }
 }

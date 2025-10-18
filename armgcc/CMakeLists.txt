@@ -142,6 +142,10 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.c"
     "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.h"
 
+    "${UserSourceDirPath}/Component/i2c/i2c_io.c"
+    "${UserSourceDirPath}/Component/i2c/i2c_io.h"
+    "${UserSourceDirPath}/Component/i2c/nxp/nxp_i2c_io.c"
+
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.c"
     "${UserSourceDirPath}/Component/can_stdio/can_stdio.h"
 
@@ -214,6 +218,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/sp_i2c
     ${UserSourceDirPath}/Component/sp_i2c/port
     ${UserSourceDirPath}/Component/sp_i2c/port/NXP
+
+    ${UserSourceDirPath}/Component/i2c
+    ${UserSourceDirPath}/Component/i2c/nxp
 
     ${UserSourceDirPath}/Component/uart_stdio
     ${UserSourceDirPath}/Component/can_stdio

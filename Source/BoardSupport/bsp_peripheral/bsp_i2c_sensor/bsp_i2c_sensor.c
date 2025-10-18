@@ -15,7 +15,7 @@
 #include "bsp_i2c_sensor.h"
 
 /* Component includes. */
-#include "sp_i2c.h"
+#include "i2c_io.h"
 // #include "sp_gpio.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -44,7 +44,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 typedef struct _spi_sensor_t_
 {
-	sp_i2c_t  	*p_i2c;
+	i2c_io_t  	*p_i2c;
 } spi_sensor_t;
 
 typedef enum _Sensor_common_read_state_typedef_
@@ -104,7 +104,7 @@ typedef struct _BMP390_data_typedef_
 } BMP390_data_typedef;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-sp_i2c_t  i2c_sensor_handle;
+i2c_io_t  	 i2c_sensor_handle;
 spi_sensor_t bmp390_device;
 
 static uint8_t Sensor_temp_buffer[30] = {0};
@@ -163,12 +163,7 @@ double Sensor_Altitude = 0.0;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void bsp_i2c_sensor_init()
 {
-    sp_i2c_init_t i2c_sensor_init =
-    {
-        .p_base = IO_EXPAN_BASE,
-    };
-
-    SP_I2C_master_blocking_init(&i2c_sensor_handle, &i2c_sensor_init);
+	i2c_sensor_handle.ui32I2cPort = 6;
 
     bmp390_device.p_i2c = &i2c_sensor_handle;
 
@@ -389,36 +384,25 @@ static inline void cs_high()
 
 static uint8_t BMP390_Write(uint8_t reg, uint8_t TX_data)
 {
-    // sp_spi_frame_t spi_frame =
-    // {
-    //     .addr = reg,
-    //     .p_TX_buffer = &TX_data,
-    //     .p_RX_buffer = NULL,
-    //     .data_size   = 1,
-    // };
+	uint8_t frame[2] = {reg, TX_data};
 
-    // cs_low();
-    SP_I2C_master_write_blocking(bmp390_device.p_i2c, BMP390_ADDR, reg, TX_data);
-    // cs_high();
+	uint32_t n = i2c_io_send(bmp390_device.p_i2c, BMP390_ADDR, (const char*)frame, 2);
 
-	return 1;
+	return (n == 2) ? 1u : 0u;
 }
 
 static uint8_t BMP390_Read(uint8_t reg, uint8_t *p_RX_buffer, uint8_t byte_count)
 {
-    // sp_spi_frame_t spi_frame =
-    // {
-    //     .addr = reg,
-    //     .p_TX_buffer = NULL,
-    //     .p_RX_buffer = p_RX_buffer,
-    //     .data_size   = byte_count,
-    // };
+	// 1) Write the register pointer WITHOUT STOP
+    if (i2c_io_send(bmp390_device.p_i2c, BMP390_ADDR, (const char*)&reg, 1) != 1u)
+	{
+		return 0u;
+	}
 
-    // cs_low();
-    SP_I2C_master_read_multi_blocking(bmp390_device.p_i2c, BMP390_ADDR, reg, p_RX_buffer, byte_count);
-    // cs_high();
+    // 2) Next recv performs a REPEATED-START automatically, then STOP
+    uint32_t n = i2c_io_recv(bmp390_device.p_i2c, BMP390_ADDR, (char*)p_RX_buffer, (int)byte_count);
 
-	return 1;
+    return (n == (uint32_t)byte_count) ? 1u : 0u;
 }
 
 static bool BMP390_is_value_ready(Sensor_Read_typedef read_type, uint8_t *p_status_value)
