@@ -15,6 +15,9 @@
 #include "bsp_core.h"
 #include "bsp_board.h"
 
+#include "i2c_io.h"
+#include "spi_io.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -25,8 +28,10 @@
 static void bsp_core_init_uart(void);
 static void bsp_core_init_can(void);
 static void bsp_core_init_spi(void);
+static void bsp_core_init_onboard_adc_spi(void);
+static void bsp_core_init_onboard_adc_cs_gpio(void);
 static void bsp_core_init_gpio(void);
-static void bsp_core_init_i2c(void);
+static void bsp_core_init_io_expander_i2c(void);
 static void bsp_core_init_tim(void);
 
 /*******************************************************************************
@@ -44,10 +49,12 @@ void bsp_core_init(void)
 {
     bsp_core_init_uart();
     bsp_core_init_can();
-    bsp_core_init_spi();
-    bsp_core_init_gpio();
-    bsp_core_init_i2c();
-    bsp_core_init_tim();
+    bsp_core_init_io_expander_i2c();
+    // bsp_core_init_onboard_adc_spi();
+    // bsp_core_init_onboard_adc_cs_gpio();
+    // bsp_core_init_spi();
+    // bsp_core_init_gpio();
+    // bsp_core_init_tim();
 }
 
 /*!
@@ -133,6 +140,84 @@ static void bsp_core_init_can(void)
     FLEXCAN_Init(LIBCSP_CAN_BASE, &flexcanConfig, LIBCSP_CAN_CLK_FREQ);
 }
 
+SPI_Io_t onboard_adc_spi =
+{
+    .ui32SpiPort = 1,
+};
+static void bsp_core_init_onboard_adc_spi(void)
+{
+    uint32_t srcClock_Hz;
+    lpspi_master_config_t masterConfig;
+
+    const clock_root_config_t lpspiClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0,
+	    .div = 1
+    };
+
+    CLOCK_SetRootClock(ONBOARD_ADC_SPI_CLOCK_ROOT, &lpspiClkCfg);
+    CLOCK_EnableClock(ONBOARD_ADC_SPI_CLOCK_GATE);
+
+    /* Get LPSPI module default Configuration. */
+    /*
+     * 
+     * masterConfig->baudRate                       = 500000;
+     * masterConfig->bitsPerFrame                   = 8;
+     * masterConfig->cpol                           = kLPSPI_ClockPolarityActiveHigh;
+     * masterConfig->cpha                           = kLPSPI_ClockPhaseFirstEdge;
+     * masterConfig->direction                      = kLPSPI_MsbFirst;
+
+     * masterConfig->pcsToSckDelayInNanoSec         = (1000000000U / masterConfig->baudRate) / 2U;
+     * masterConfig->lastSckToPcsDelayInNanoSec     = (1000000000U / masterConfig->baudRate) / 2U;
+     * masterConfig->betweenTransferDelayInNanoSec  = (1000000000U / masterConfig->baudRate) / 2U;
+
+     * masterConfig->whichPcs                       = kLPSPI_Pcs0;
+     * masterConfig->pcsActiveHighOrLow             = kLPSPI_PcsActiveLow;
+
+     * masterConfig->pinCfg                         = kLPSPI_SdiInSdoOut;
+     * masterConfig->dataOutConfig                  = kLpspiDataOutRetained;
+
+     * masterConfig->enableInputDelay               = false;
+     */
+    LPSPI_MasterGetDefaultConfig(&masterConfig);
+    masterConfig.pcsToSckDelayInNanoSec         = 0;
+    masterConfig.lastSckToPcsDelayInNanoSec     = 0;
+    masterConfig.betweenTransferDelayInNanoSec  = 0;
+    masterConfig.baudRate = ONBOARD_ADC_SPI_BAUDRATE;
+    masterConfig.whichPcs = kLPSPI_Pcs1;
+    
+    srcClock_Hz = ONBOARD_ADC_SPI_CLK_FREQ;
+    LPSPI_MasterInit(ONBOARD_ADC_SPI_BASE, &masterConfig, srcClock_Hz);
+
+    // Disable before config
+    ONBOARD_ADC_SPI_BASE->CR &= ~LPSPI_CR_MEN_MASK;
+
+    // Allow stalls (safe)
+    ONBOARD_ADC_SPI_BASE->CFGR1 &= ~LPSPI_CFGR1_NOSTALL_MASK;
+
+    // Force 8-bit frames; choose PCS1; hold PCS internally (no real pin toggling)
+    ONBOARD_ADC_SPI_BASE->TCR = (ONBOARD_ADC_SPI_BASE->TCR & ~(LPSPI_TCR_FRAMESZ_MASK |
+                            LPSPI_TCR_RXMSK_MASK   |
+                            LPSPI_TCR_TXMSK_MASK   |
+                            LPSPI_TCR_PCS_MASK     |
+                            LPSPI_TCR_CONT_MASK    |
+                            LPSPI_TCR_CONTC_MASK))
+            |  LPSPI_TCR_FRAMESZ(7)         // 8-bit
+            |  LPSPI_TCR_PCS(1)             // "PCS1" (not pin-muxed)
+            |  LPSPI_TCR_RXMSK(0)
+            |  LPSPI_TCR_TXMSK(0)
+            |  LPSPI_TCR_CONT(1)            // keep PCS asserted internally
+            |  LPSPI_TCR_CONTC(1);
+
+    // Clean state
+    ONBOARD_ADC_SPI_BASE->CR |=  (LPSPI_CR_RTF_MASK | LPSPI_CR_RRF_MASK);       // flush TX/RX FIFOs
+    ONBOARD_ADC_SPI_BASE->SR  =   LPSPI_SR_WCF_MASK | LPSPI_SR_FCF_MASK | LPSPI_SR_TCF_MASK; // clear sticky
+
+    // Enable
+    ONBOARD_ADC_SPI_BASE->CR |= LPSPI_CR_MEN_MASK;
+}
+
 static void bsp_core_init_spi(void)
 {
     uint32_t srcClock_Hz;
@@ -180,6 +265,47 @@ static void bsp_core_init_spi(void)
     LPSPI_MasterInit(PHOTO_ADC_SPI_BASE, &masterConfig, srcClock_Hz);
 }
 
+do_t onboard_adc0_cs =
+{
+    .port = 4,
+    .pin  = 16,
+};
+
+do_t onboard_adc1_cs =
+{
+    .port = 4,
+    .pin  = 20,
+};
+static void bsp_core_init_onboard_adc_cs_gpio(void)
+{
+    /* Define the init structure for the output LED pin*/
+    rgpio_pin_config_t onboard_ADC_CS_config =
+    {
+        kRGPIO_DigitalOutput,
+        1,
+    };
+
+    /* Board pin, clock, debug console init */
+    /* clang-format off */
+
+    const clock_root_config_t rgpioClkCfg =
+    {
+        .clockOff = false,
+        .mux = 0, // 24Mhz Mcore root buswake clock
+        .div = 1
+    };
+
+    CLOCK_SetRootClock(ONBOARD_ADC_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
+    CLOCK_EnableClock(ONBOARD_ADC_GPIO_CS_CLOCK_GATE);
+
+    /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+    ONBOARD_ADC_GPIO_CS_PORT->PCNS = 0x0;
+
+    /* Init output LED GPIO. */
+    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS0_PIN, &onboard_ADC_CS_config);
+    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS1_PIN, &onboard_ADC_CS_config);
+}
+
 static void bsp_core_init_gpio(void)
 {
     /* Define the init structure for the output LED pin*/
@@ -216,7 +342,15 @@ static void bsp_core_init_gpio(void)
     RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CV_PIN, &photo_ADC_CV_config);
 }
 
-static void bsp_core_init_i2c(void)
+i2c_io_t io_expander_i2c =
+{
+		.ui32I2cPort = 7
+};
+// i2c_io_t heater_i2c =
+// {
+// 		.ui32I2cPort = 7
+// };
+static void bsp_core_init_io_expander_i2c(void)
 {
     lpi2c_master_config_t i2c_masterConfig;
 
@@ -249,6 +383,9 @@ static void bsp_core_init_i2c(void)
 
     /* Initialize the LPI2C master peripheral */
     LPI2C_MasterInit(IO_EXPAN_BASE, &i2c_masterConfig, IO_EXPAN_CLK_FREQ);
+
+    i2c_io_init(&io_expander_i2c);
+    // i2c_io_init(&heater_i2c);
 }
 
 static void bsp_core_init_tim(void)

@@ -23,6 +23,13 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
         return 0;
     }
 
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
+
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
+
     uint32_t ui32I2cNum = me->ui32I2cPort;
     if (ui32I2cNum == 0 || ui32I2cNum > I2C_MAX_NUM) {
         return 0;
@@ -55,6 +62,8 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     // Generate STOP
     i2c->CR2 |= I2C_CR2_STOP;
 
+    osSemaphoreGiven(&me->lock);
+
     return (uint32_t)count;
 }
 
@@ -62,6 +71,13 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
 {
     if (!me || count <= 0 || !buf) {
         return 0;
+    }
+
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
+
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
     }
 
     uint32_t ui32I2cNum = me->ui32I2cPort;
@@ -92,6 +108,8 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
         while (!(i2c->ISR & I2C_ISR_RXNE)) {}
         buf[i] = (char)i2c->RXDR;
     }
+
+    osSemaphoreGiven(&me->lock);
 
     return (uint32_t)count;
 }

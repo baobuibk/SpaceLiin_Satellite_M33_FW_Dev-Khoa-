@@ -54,103 +54,81 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     # MCUXpresso Autogen
     "${UserSourceDirPath}/BoardSupport/autogen/board.c"
-    "${UserSourceDirPath}/BoardSupport/autogen/board.h"
     "${UserSourceDirPath}/BoardSupport/autogen/pin_mux.c"
-    "${UserSourceDirPath}/BoardSupport/autogen/pin_mux.h"
     "${UserSourceDirPath}/BoardSupport/autogen/clock_config.c"
-    "${UserSourceDirPath}/BoardSupport/autogen/clock_config.h"
 
     # User define
     # App
     "${UserSourceDirPath}/App/app.c"
-    "${UserSourceDirPath}/App/app.h"
-
-    "${UserSourceDirPath}/App/task/task_common.h"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.c"
-    "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.h"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/command/command.c"
-    "${UserSourceDirPath}/App/task/task_cmd_line/command/command.h"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.c"
-    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.h"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.c"
-    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.h"
 
     "${UserSourceDirPath}/App/task/task_test_can/task_test_can.c"
-    "${UserSourceDirPath}/App/task/task_test_can/task_test_can.h"
+
+    "${UserSourceDirPath}/App/task/task_update_temp/task_update_temp.c"
 
     # BoardSupport
     "${UserSourceDirPath}/BoardSupport/bsp.c"
-    "${UserSourceDirPath}/BoardSupport/bsp.h"
     
-    "${UserSourceDirPath}/BoardSupport/bsp_board/bsp_board.h"
 
     "${UserSourceDirPath}/BoardSupport/bsp_core/bsp_core.c"
-    "${UserSourceDirPath}/BoardSupport/bsp_core/bsp_core.h"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console/bsp_debug_console.c"
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console/bsp_debug_console.h"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.h"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.h"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.h"
 
-    # Component
-    "${UserSourceDirPath}/Component/error_codes/error_codes.h"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander/bsp_expander.c"
 
-    "${UserSourceDirPath}/Component/ring_buffer/ring_buffer.c"
-    "${UserSourceDirPath}/Component/ring_buffer/ring_buffer.h"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater/bsp_heater.c"
 
-    "${UserSourceDirPath}/Component/ring_char_buffer/ring_char_buffer.c"
-    "${UserSourceDirPath}/Component/ring_char_buffer/ring_char_buffer.h"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_temp/bsp_temp.c"
 
-    "${UserSourceDirPath}/Component/sp_gpio/sp_gpio.h"
-    "${UserSourceDirPath}/Component/sp_gpio/port/sp_gpio_api.h"
-    "${UserSourceDirPath}/Component/sp_gpio/port/NXP/sp_gpio_port.c"
-    "${UserSourceDirPath}/Component/sp_gpio/port/NXP/sp_gpio_port.h"
+    # Components
 
-    "${UserSourceDirPath}/Component/dio/do.h"
-    "${UserSourceDirPath}/Component/dio/nxp/do.c"
+    "${UserSourceDirPath}/Drivers/Components/ring_buffer/ring_buffer.c"
 
-    "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.c"
-    "${UserSourceDirPath}/Component/uart_stdio/uart_stdio.h"
+    "${UserSourceDirPath}/Drivers/Components/ring_char_buffer/ring_char_buffer.c"
 
-    "${UserSourceDirPath}/Component/sp_uart/sp_uart.h"
-    "${UserSourceDirPath}/Component/sp_uart/port/sp_uart_api.h"
-    "${UserSourceDirPath}/Component/sp_uart/port/NXP/sp_uart_port.c"
-    "${UserSourceDirPath}/Component/sp_uart/port/NXP/sp_uart_port.h"
+    "${UserSourceDirPath}/Drivers/Components/sp_gpio/port/NXP/sp_gpio_port.c"
 
-    "${UserSourceDirPath}/Component/sp_spi/sp_spi.h"
-    "${UserSourceDirPath}/Component/sp_spi/port/sp_spi_api.h"
-    "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.c"
-    "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.h"
+    "${UserSourceDirPath}/Drivers/Components/dio/nxp/do.c"
 
-    "${UserSourceDirPath}/Component/spi/spi_io.c"
-    "${UserSourceDirPath}/Component/spi/spi_io.h"
-    "${UserSourceDirPath}/Component/spi/nxp/spi_io_nxp.c"
+    "${UserSourceDirPath}/Drivers/Components/uart_stdio/uart_stdio.c"
 
-    "${UserSourceDirPath}/Component/sp_i2c/sp_i2c.h"
-    "${UserSourceDirPath}/Component/sp_i2c/port/sp_i2c_api.h"
-    "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.c"
-    "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.h"
+    "${UserSourceDirPath}/Drivers/Components/sp_uart/port/NXP/sp_uart_port.c"
 
-    "${UserSourceDirPath}/Component/i2c/i2c_io.c"
-    "${UserSourceDirPath}/Component/i2c/i2c_io.h"
-    "${UserSourceDirPath}/Component/i2c/nxp/nxp_i2c_io.c"
+    "${UserSourceDirPath}/Drivers/Components/sp_spi/port/NXP/sp_spi_port.c"
 
-    "${UserSourceDirPath}/Component/can_stdio/can_stdio.c"
-    "${UserSourceDirPath}/Component/can_stdio/can_stdio.h"
+    "${UserSourceDirPath}/Drivers/Components/spi/spi_io.c"
+    "${UserSourceDirPath}/Drivers/Components/spi/nxp/spi_io_nxp.c"
 
-    "${UserSourceDirPath}/Component/cmd_line/cmd_line.c"
-    "${UserSourceDirPath}/Component/cmd_line/cmd_line.h"
+    "${UserSourceDirPath}/Drivers/Components/sp_i2c/port/NXP/sp_i2c_port.c"
+
+    "${UserSourceDirPath}/Drivers/Components/i2c/i2c_io.c"
+    "${UserSourceDirPath}/Drivers/Components/i2c/nxp/nxp_i2c_io.c"
+
+    "${UserSourceDirPath}/Drivers/Components/can_stdio/can_stdio.c"
+
+    "${UserSourceDirPath}/Drivers/Components/cmd_line/cmd_line.c"
+
+    "${UserSourceDirPath}/Drivers/Components/ntc/ntc.c"
+
+    # Devices
+    "${UserSourceDirPath}/Drivers/Devices/tca6416/tca6416.c"
+
+    "${UserSourceDirPath}/Drivers/Devices/pca9685/pca9685.c"
+
+    "${UserSourceDirPath}/Drivers/Devices/AD4114/ad4114.c"
 
     # MiddleWare
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
@@ -165,8 +143,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/init.c"
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/mem.c"
 
-    # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.c"
-    # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.h"
+    # "${UserSourceDirPath}/Drivers/Components/devices/lt8722/lt8722.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -182,6 +159,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi
 
     ${UserSourceDirPath}/App/task/task_test_can
+    ${UserSourceDirPath}/App/task/task_update_temp
 
     # BoardSupport
     ${UserSourceDirPath}/BoardSupport
@@ -195,42 +173,52 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_temp
 
     # Component
-    ${UserSourceDirPath}/Component/error_codes
-    ${UserSourceDirPath}/Component/ring_buffer
-    ${UserSourceDirPath}/Component/ring_char_buffer
+    ${UserSourceDirPath}/Drivers/Components/error_codes
+    ${UserSourceDirPath}/Drivers/Components/ring_buffer
+    ${UserSourceDirPath}/Drivers/Components/ring_char_buffer
 
-    ${UserSourceDirPath}/Component/sp_gpio
-    ${UserSourceDirPath}/Component/sp_gpio/port
-    ${UserSourceDirPath}/Component/sp_gpio/port/NXP
+    ${UserSourceDirPath}/Drivers/Components/sp_gpio
+    ${UserSourceDirPath}/Drivers/Components/sp_gpio/port
+    ${UserSourceDirPath}/Drivers/Components/sp_gpio/port/NXP
 
-    ${UserSourceDirPath}/Component/dio
-    ${UserSourceDirPath}/Component/dio/nxp
+    ${UserSourceDirPath}/Drivers/Components/dio
+    ${UserSourceDirPath}/Drivers/Components/dio/nxp
 
-    ${UserSourceDirPath}/Component/sp_spi
-    ${UserSourceDirPath}/Component/sp_spi/port
-    ${UserSourceDirPath}/Component/sp_spi/port/NXP
+    ${UserSourceDirPath}/Drivers/Components/sp_spi
+    ${UserSourceDirPath}/Drivers/Components/sp_spi/port
+    ${UserSourceDirPath}/Drivers/Components/sp_spi/port/NXP
 
-    ${UserSourceDirPath}/Component/spi
-    ${UserSourceDirPath}/Component/spi/nxp
+    ${UserSourceDirPath}/Drivers/Components/spi
+    ${UserSourceDirPath}/Drivers/Components/spi/nxp
 
-    ${UserSourceDirPath}/Component/sp_i2c
-    ${UserSourceDirPath}/Component/sp_i2c/port
-    ${UserSourceDirPath}/Component/sp_i2c/port/NXP
+    ${UserSourceDirPath}/Drivers/Components/sp_i2c
+    ${UserSourceDirPath}/Drivers/Components/sp_i2c/port
+    ${UserSourceDirPath}/Drivers/Components/sp_i2c/port/NXP
 
-    ${UserSourceDirPath}/Component/i2c
-    ${UserSourceDirPath}/Component/i2c/nxp
+    ${UserSourceDirPath}/Drivers/Components/i2c
+    ${UserSourceDirPath}/Drivers/Components/i2c/nxp
 
-    ${UserSourceDirPath}/Component/uart_stdio
-    ${UserSourceDirPath}/Component/can_stdio
-    ${UserSourceDirPath}/Component/cmd_line
+    ${UserSourceDirPath}/Drivers/Components/uart_stdio
+    ${UserSourceDirPath}/Drivers/Components/can_stdio
+    ${UserSourceDirPath}/Drivers/Components/cmd_line
 
-    ${UserSourceDirPath}/Component/sp_uart
-    ${UserSourceDirPath}/Component/sp_uart/port
-    ${UserSourceDirPath}/Component/sp_uart/port/NXP
+    ${UserSourceDirPath}/Drivers/Components/sp_uart
+    ${UserSourceDirPath}/Drivers/Components/sp_uart/port
+    ${UserSourceDirPath}/Drivers/Components/sp_uart/port/NXP
 
-    # ${UserSourceDirPath}/Component/devices/lt8722
+    ${UserSourceDirPath}/Drivers/Components/ntc
+
+    # ${UserSourceDirPath}/Drivers/Components/devices/lt8722
+
+    # Devices
+    ${UserSourceDirPath}/Drivers/Devices/tca6416
+    ${UserSourceDirPath}/Drivers/Devices/pca9685
+    ${UserSourceDirPath}/Drivers/Devices/AD4114
 
     # MiddleWare
     # ${UserSourceDirPath}/MiddleWare/FreeRTOS

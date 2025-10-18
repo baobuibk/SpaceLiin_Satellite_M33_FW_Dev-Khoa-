@@ -39,14 +39,32 @@
 #define TEC_SPI_GPIO_SPI_CS_PIN         0U
 
 /*********************I/O EXPANDER I2C**********************/
-#define IO_EXPAN_CLOCK_ROOT              kCLOCK_Root_Lpi2c6
-#define IO_EXPAN_CLOCK_GATE              kCLOCK_Lpi2c6
+#define IO_EXPAN_CLOCK_ROOT              kCLOCK_Root_Lpi2c7
+#define IO_EXPAN_CLOCK_GATE              kCLOCK_Lpi2c7
 #define IO_EXPAN_CLK_FREQ                CLOCK_GetIpFreq(IO_EXPAN_CLOCK_ROOT)
 
-#define IO_EXPAN_BASE                    LPI2C6
-#define IO_EXPAN_IRQn                    LPI2C6_IRQn
+#define IO_EXPAN_BASE                    LPI2C7
+#define IO_EXPAN_IRQn                    LPI2C7_IRQn
 
 #define IO_EXPAN_BAUDRATE_HZ             (100000U)
+
+/*********************ON BOARD ADC SPI**********************/
+#define ONBOARD_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi1
+#define ONBOARD_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi1
+#define ONBOARD_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(ONBOARD_ADC_SPI_CLOCK_ROOT)
+
+#define ONBOARD_ADC_SPI_BASE              LPSPI1
+#define ONBOARD_ADC_SPI_IRQn              LPSPI1_IRQn
+
+#define ONBOARD_ADC_SPI_BAUDRATE          (500000)
+
+#define ONBOARD_ADC_GPIO_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
+#define ONBOARD_ADC_GPIO_CS_CLOCK_GATE    kCLOCK_Gpio4
+#define ONBOARD_ADC_GPIO_CS_CLK_FREQ      CLOCK_GetIpFreq(ONBOARD_ADC_GPIO_CS_CLOCK_ROOT)
+
+#define ONBOARD_ADC_GPIO_CS_PORT          GPIO4
+#define ONBOARD_ADC_GPIO_CS0_PIN          16U
+#define ONBOARD_ADC_GPIO_CS1_PIN          20U
 
 /*********************PHOTO ADC SPI**********************/
 #define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi6

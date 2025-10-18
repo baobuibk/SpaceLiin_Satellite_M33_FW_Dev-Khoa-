@@ -76,48 +76,79 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_PD_MASK);
 
     /* SPI6 Init Pin. */
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO16__GPIO2_IO16, 0U);
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO16__GPIO2_IO16, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 0U);
 
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 0U);
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 0U);
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 0U);
 
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO16__GPIO2_IO16, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO16__GPIO2_IO16, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
 
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
 
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO01__LPSPI6_SIN, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO02__LPSPI6_SOUT, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO03__LPSPI6_SCK, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
 
     /* I2C6 Init Pin. */
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO05__LPI2C6_SCL, 1U);
-    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO04__LPI2C6_SDA, 1U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO09__LPI2C7_SCL, 1U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO08__LPI2C7_SDA, 1U);
 
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO05__LPI2C6_SCL, 
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO09__LPI2C7_SCL, 
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_OD_MASK);
-    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO04__LPI2C6_SDA, 
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO08__LPI2C7_SDA, 
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_OD_MASK);
+
+    /* ONBOARD ADC Init Pin. */
+    // IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TD3__GPIO4_IO16, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TX_CTL__GPIO4_IO20, 0U);
+
+    // IOMUXC_SetPinMux(IOMUXC_PAD_SAI1_TXC__LPSPI1_SIN, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_SAI1_RXD0__LPSPI1_SOUT, 0U);
+    // IOMUXC_SetPinMux(IOMUXC_PAD_SAI1_TXD0__LPSPI1_SCK, 0U);
+
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TD3__GPIO4_IO16, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TX_CTL__GPIO4_IO20, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_SAI1_TXC__LPSPI1_SIN, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_SAI1_RXD0__LPSPI1_SOUT, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
+    // IOMUXC_SetPinConfig(IOMUXC_PAD_SAI1_TXD0__LPSPI1_SCK, 
+    //                     IOMUXC_PAD_DSE(15U) |
+    //                     IOMUXC_PAD_FSEL1(2U) |
+    //                     IOMUXC_PAD_PD_MASK);
 }
 
 /***********************************************************************************************************************

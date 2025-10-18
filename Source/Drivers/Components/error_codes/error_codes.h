@@ -63,6 +63,14 @@ typedef enum
     ERROR_DMA_CONFIG        = 0x73   // Lỗi cấu hình DMA
 } error_code_t;
 
+enum {
+	POWER_OFF = 0,
+	POWER_ON
+};
+
+enum {
+	LOW = 0,
+	HIGH
+};
+
 #endif /* _ERROR_CODE_H_ */
-
-

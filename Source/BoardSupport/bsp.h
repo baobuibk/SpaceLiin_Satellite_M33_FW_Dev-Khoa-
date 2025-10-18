@@ -8,6 +8,9 @@
 #include "bsp_libcsp_can.h"
 #include "bsp_spi_sensor.h"
 #include "bsp_i2c_sensor.h"
+#include "bsp_expander.h"
+#include "bsp_heater.h"
+#include "bsp_temp.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

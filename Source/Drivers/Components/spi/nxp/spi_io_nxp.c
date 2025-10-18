@@ -44,9 +44,11 @@ static LPSPI_Type* const spi_periph[SPI_MAX_BUS_NUMBER + 1] =
 //     RCC_APB2ENR_SPI6EN
 // };
 
+bool dwt_init = false;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // static void spi_enable_clock(uint32_t ui32SpiNum);
-static inline void dwt_cycle_counter_init(void);
+static inline void dwt_cycle_counter_init_once(void);
 
 static inline uint32_t cycles_now(void);
 
@@ -76,6 +78,8 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
     {
         return ERROR_INVALID_PARAM;
     }
+
+    dwt_cycle_counter_init_once();
 
     // Ensure module not busy (equiv. to STM32 BSY=0)
     if (wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
@@ -130,6 +134,8 @@ uint32_t spi_io_write_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t ui32Lengt
         return ERROR_INVALID_PARAM;
     }
 
+    dwt_cycle_counter_init_once();
+
     // Ensure module not busy (equiv. to STM32 BSY=0)
     while (base->SR & LPSPI_SR_MBF_MASK)
     {
@@ -175,6 +181,8 @@ uint32_t spi_io_transfer_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint8_t *pui8Rx
     {
         return ERROR_INVALID_PARAM;
     }
+
+    dwt_cycle_counter_init_once();
 
     // Ensure module not busy (equiv. to STM32 BSY=0)
     while (base->SR & LPSPI_SR_MBF_MASK)
@@ -271,8 +279,13 @@ uint32_t spi_io_write_and_read_dma(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t u
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline void dwt_cycle_counter_init(void)
+static inline void dwt_cycle_counter_init_once(void)
 {
+    if (dwt_init == true)
+    {
+        return;
+    }
+
     // Enable trace (needed for DWT)
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     // Some MCUs lock DWT; unlock if LAR present
@@ -281,6 +294,8 @@ static inline void dwt_cycle_counter_init(void)
     #endif
     DWT->CYCCNT = 0;
     DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;
+
+    dwt_init = true;
 }
 
 static inline uint32_t cycles_now(void)

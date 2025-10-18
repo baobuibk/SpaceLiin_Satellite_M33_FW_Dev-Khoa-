@@ -21,8 +21,13 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 tCmdLineEntry g_psCmdTable[] =
 {
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test IO Expander Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "io_set", 				CMD_IO_CTRL,				" : Turn on specific io" },
+	{ "heat_set", 				CMD_HEATER_CTRL,			" : Turn on specific heater" },
+	{ "read_temp", 				CMD_READ_TEMP,				" : Read onboard temp" },
+
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test SPI Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	{ "spi_read_adc", 			CMD_SPI_READ_ADC,		" : Test SPI read and write" },
+	{ "spi_read_adc", 			CMD_SPI_READ_ADC,			" : Test SPI read and write" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
@@ -37,6 +42,70 @@ tCmdLineEntry g_psCmdTable[] =
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+int CMD_IO_CTRL(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm[2];
+
+	receive_argm[0] = atoi(argv[1]);
+	receive_argm[1] = atoi(argv[2]);
+
+	if ((receive_argm[0] < 0) || (receive_argm[1] < 0))
+		return CMDLINE_INVALID_ARG;
+	else if ((receive_argm[0] > 30) || (receive_argm[1] > 1))
+		return CMDLINE_INVALID_ARG;
+
+    bsp_expander_ctrl(receive_argm[0], receive_argm[1]);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_HEATER_CTRL(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm[2];
+
+	receive_argm[0] = atoi(argv[1]);
+	receive_argm[1] = atoi(argv[2]);
+
+	if ((receive_argm[0] < 0) || (receive_argm[1] < 0))
+		return CMDLINE_INVALID_ARG;
+	else if ((receive_argm[0] > 15) || (receive_argm[1] > 100))
+		return CMDLINE_INVALID_ARG;
+
+    bsp_heater_turnon(receive_argm[0], receive_argm[1]);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_READ_TEMP(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint32_t temp_raw = bsp_adc0_update();
+
+	bsp_debug_console_printf("> CURRENT RAW TEMP: %d", temp_raw);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
 /* :::::::::: Ultility Command :::::::: */
 int CMD_HELP(int argc, char *argv[])
 {
