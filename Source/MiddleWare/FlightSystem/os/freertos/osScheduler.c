@@ -1,0 +1,39 @@
+/*
+ * Copyright 2025 SUCHAI Flight Software v2 project and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "osScheduler.h"
+
+#include "printf.h"
+
+/**
+ * starts the scheduler of the system operating
+ */
+void osScheduler(os_thread* thread_id, int n_thread)
+{
+#ifdef ESP32
+    // ESP32 Framwork starts the scheduler
+    return;
+#endif
+
+
+    printf("[INFO] Starting FreeRTOS scheduler...\r\n");
+ //   for(volatile int i=0;i<10000000; i++);
+    vTaskStartScheduler();
+
+    while(1)
+    {
+    	  printf("[ERROR] FreeRTOS scheduler stopped!\n");
+    }
+}

@@ -50,7 +50,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/main.c"
 
     # FreeRTOS
-    "${UserSourceDirPath}/MiddleWare/FreeRTOS/FreeRTOSConfig.h"
+    # "${UserSourceDirPath}/MiddleWare/FreeRTOS/FreeRTOSConfig.h"
 
     # MCUXpresso Autogen
     "${UserSourceDirPath}/BoardSupport/autogen/board.c"
@@ -104,7 +104,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.h"
 
     # Component
-    "${UserSourceDirPath}/Component/error_code/error_code.h"
+    "${UserSourceDirPath}/Component/error_codes/error_codes.h"
 
     "${UserSourceDirPath}/Component/ring_buffer/ring_buffer.c"
     "${UserSourceDirPath}/Component/ring_buffer/ring_buffer.h"
@@ -133,6 +133,10 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.c"
     "${UserSourceDirPath}/Component/sp_spi/port/NXP/sp_spi_port.h"
 
+    "${UserSourceDirPath}/Component/spi/spi_io.c"
+    "${UserSourceDirPath}/Component/spi/spi_io.h"
+    "${UserSourceDirPath}/Component/spi/nxp/spi_io_nxp.c"
+
     "${UserSourceDirPath}/Component/sp_i2c/sp_i2c.h"
     "${UserSourceDirPath}/Component/sp_i2c/port/sp_i2c_api.h"
     "${UserSourceDirPath}/Component/sp_i2c/port/NXP/sp_i2c_port.c"
@@ -143,6 +147,19 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.c"
     "${UserSourceDirPath}/Component/cmd_line/cmd_line.h"
+
+    # MiddleWare
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osMalloc.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osQueue.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osScheduler.c"
+    "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osSemphr.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osThread.c"
+
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/cpu.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/i2c.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/init.c"
+    # "${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/mem.c"
 
     # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.c"
     # "${UserSourceDirPath}/Component/devices/lt8722/lt8722.h"
@@ -176,7 +193,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
 
     # Component
-    ${UserSourceDirPath}/Component/error_code
+    ${UserSourceDirPath}/Component/error_codes
     ${UserSourceDirPath}/Component/ring_buffer
     ${UserSourceDirPath}/Component/ring_char_buffer
 
@@ -190,6 +207,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Component/sp_spi
     ${UserSourceDirPath}/Component/sp_spi/port
     ${UserSourceDirPath}/Component/sp_spi/port/NXP
+
+    ${UserSourceDirPath}/Component/spi
+    ${UserSourceDirPath}/Component/spi/nxp
 
     ${UserSourceDirPath}/Component/sp_i2c
     ${UserSourceDirPath}/Component/sp_i2c/port
@@ -206,10 +226,22 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     # ${UserSourceDirPath}/Component/devices/lt8722
 
     # MiddleWare
-    ${UserSourceDirPath}/MiddleWare/FreeRTOS
+    # ${UserSourceDirPath}/MiddleWare/FreeRTOS
+
+    # ${UserSourceDirPath}/MiddleWare/FlightSystem/os/include
+    ${UserSourceDirPath}/MiddleWare/FlightSystem/os/include/os
+    ${UserSourceDirPath}/MiddleWare/FlightSystem/os/include/wrapper
+
+    # ${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/include
+    # ${UserSourceDirPath}/MiddleWare/FlightSystem/drivers/stm32/include
+
+    # Configs
+    ${UserSourceDirPath}/Configs
+    # ${UserSourceDirPath}/Configs/csp
+    ${UserSourceDirPath}/Configs/flight
 )
 
-set_source_files_properties("${UserSourceDirPath}/MiddleWare/FreeRTOS/FreeRTOSConfig.h" PROPERTIES COMPONENT_CONFIG_FILE "middleware_freertos-kernel_template")
+set_source_files_properties("${UserSourceDirPath}/Configs/FreeRTOSConfig.h" PROPERTIES COMPONENT_CONFIG_FILE "middleware_freertos-kernel_template")
 
 include(${SdkRootDirPath}/devices/MIMX9352/all_lib_device.cmake)
 

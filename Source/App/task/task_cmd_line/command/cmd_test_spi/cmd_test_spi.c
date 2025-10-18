@@ -22,7 +22,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void double_to_string(double value, char *buffer, uint8_t precision);
+// static void double_to_string(double value, char *buffer, uint8_t precision);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -88,60 +88,60 @@ int CMD_SPI_READ_ADC(int argc, char *argv[])
 //     *buffer = '\0';
 // }
 
-static void double_to_string(double value, char *buffer, uint8_t precision)
-{
-    /* Sign */
-    if (value < 0.0)
-    {
-        *buffer++ = '-';
-        value = -value;
-    }
+// static void double_to_string(double value, char *buffer, uint8_t precision)
+// {
+//     /* Sign */
+//     if (value < 0.0)
+//     {
+//         *buffer++ = '-';
+//         value = -value;
+//     }
 
-    /* Split into integer and fractional parts */
-    uint32_t integer_part  = (uint32_t)value;          /* NOTE: clips to 32-bit range */
-    double   fractional_part = value - (double)integer_part;
-    if (fractional_part < 0.0) fractional_part = 0.0;  /* guard tiny FP negatives */
+//     /* Split into integer and fractional parts */
+//     uint32_t integer_part  = (uint32_t)value;          /* NOTE: clips to 32-bit range */
+//     double   fractional_part = value - (double)integer_part;
+//     if (fractional_part < 0.0) fractional_part = 0.0;  /* guard tiny FP negatives */
 
-    /* Integer -> string (in place, no sprintf) */
-    if (integer_part == 0U)
-    {
-        *buffer++ = '0';
-    }
-    else
-    {
-        char rev[10];  /* max 10 digits for uint32_t */
-        uint8_t n = 0;
-        while (integer_part != 0U)
-        {
-            rev[n++] = (char)('0' + (integer_part % 10U));
-            integer_part /= 10U;
-        }
-        while (n--)
-        {
-            *buffer++ = rev[n];
-        }
-    }
+//     /* Integer -> string (in place, no sprintf) */
+//     if (integer_part == 0U)
+//     {
+//         *buffer++ = '0';
+//     }
+//     else
+//     {
+//         char rev[10];  /* max 10 digits for uint32_t */
+//         uint8_t n = 0;
+//         while (integer_part != 0U)
+//         {
+//             rev[n++] = (char)('0' + (integer_part % 10U));
+//             integer_part /= 10U;
+//         }
+//         while (n--)
+//         {
+//             *buffer++ = rev[n];
+//         }
+//     }
 
-    /* Fractional part (truncate, no rounding) */
-    if (precision > 0U)
-    {
-        *buffer++ = '.';
-        for (uint8_t i = 0; i < precision; i++)
-        {
-            fractional_part *= 10.0;
-            uint8_t digit = (uint8_t)fractional_part;
+//     /* Fractional part (truncate, no rounding) */
+//     if (precision > 0U)
+//     {
+//         *buffer++ = '.';
+//         for (uint8_t i = 0; i < precision; i++)
+//         {
+//             fractional_part *= 10.0;
+//             uint8_t digit = (uint8_t)fractional_part;
 
-            /* Clamp against rare FP edge (e.g., 9.999999 -> 10) */
-            if (digit > 9U) digit = 9U;
+//             /* Clamp against rare FP edge (e.g., 9.999999 -> 10) */
+//             if (digit > 9U) digit = 9U;
 
-            *buffer++ = (char)('0' + digit);
-            fractional_part -= (double)digit;
-            if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
-        }
-    }
+//             *buffer++ = (char)('0' + digit);
+//             fractional_part -= (double)digit;
+//             if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
+//         }
+//     }
 
-    *buffer = '\0';
-}
+//     *buffer = '\0';
+// }
 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
