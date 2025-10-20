@@ -13,10 +13,10 @@
 #include "bsp_expander.h"
 #include "bsp_heater.h"
 
-extern i2c_io_t io_expander_i2c;
+extern i2c_io_t heater_i2c;
 
 pca9685_t pwmDev = {
-		.bus = &io_expander_i2c,
+		.bus = &heater_i2c,
 		.addr7 = 0x40
 };
 
@@ -32,7 +32,7 @@ void bsp_heater_disable()
 void bsp_heater_init()
 {
 
-	pca9685_init_min(&pwmDev,&io_expander_i2c,0x40);
+	pca9685_init_min(&pwmDev,&heater_i2c,0x40);
 	pca9685_set_freq_hz(&pwmDev, 100);
 	for (uint32_t channel = 0;channel < 16; channel++)
 		pca9685_set_duty_permille(&pwmDev, channel, 0); //disable all output

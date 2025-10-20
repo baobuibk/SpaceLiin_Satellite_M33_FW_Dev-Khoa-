@@ -138,12 +138,12 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
         return 0;
     }
 
-    int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    if (sem_ret != pdPASS)
-    {
-        return (uint32_t)sem_ret;
-    }
+    // if (sem_ret != pdPASS)
+    // {
+    //     return (uint32_t)sem_ret;
+    // }
 
     const uint32_t port = me->ui32I2cPort;
 
@@ -220,7 +220,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     /* Wait for STOP detected (optional fence) */
     (void)wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
 
-    osSemaphoreGiven(&me->lock);
+    // osSemaphoreGiven(&me->lock);
 
     return (uint32_t)count;
 }
@@ -232,12 +232,12 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
         return 0;
     }
 
-    int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    if (sem_ret != pdPASS)
-    {
-        return (uint32_t)sem_ret;
-    }
+    // if (sem_ret != pdPASS)
+    // {
+    //     return (uint32_t)sem_ret;
+    // }
 
     const uint32_t port = me->ui32I2cPort;
     if (port == 0 || port > I2C_MAX_BUS_NUMBER)
@@ -325,7 +325,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     /* Optional: wait for STOP detect */
     (void)wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
 
-    osSemaphoreGiven(&me->lock);
+    // osSemaphoreGiven(&me->lock);
 
     return (uint32_t)count;
 }

@@ -346,10 +346,10 @@ i2c_io_t io_expander_i2c =
 {
 		.ui32I2cPort = 7
 };
-// i2c_io_t heater_i2c =
-// {
-// 		.ui32I2cPort = 7
-// };
+i2c_io_t heater_i2c =
+{
+		.ui32I2cPort = 7
+};
 static void bsp_core_init_io_expander_i2c(void)
 {
     lpi2c_master_config_t i2c_masterConfig;
@@ -384,7 +384,7 @@ static void bsp_core_init_io_expander_i2c(void)
     /* Initialize the LPI2C master peripheral */
     LPI2C_MasterInit(IO_EXPAN_BASE, &i2c_masterConfig, IO_EXPAN_CLK_FREQ);
 
-    i2c_io_init(&io_expander_i2c);
+    // i2c_io_init(&io_expander_i2c);
     // i2c_io_init(&heater_i2c);
 }
 
