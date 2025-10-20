@@ -91,7 +91,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater/bsp_heater.c"
 
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_temp/bsp_temp.c"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc/bsp_onboard_adc.c"
 
     # Components
 
@@ -177,7 +177,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
-    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_temp
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc
 
     # Component
     ${UserSourceDirPath}/Drivers/Components/error_codes
