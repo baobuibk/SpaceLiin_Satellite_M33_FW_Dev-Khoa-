@@ -6,16 +6,12 @@
 #include "fsl_lpi2c.h"
 #include "MIMX9352_cm33.h"
 
-#include "core_cm33.h"      // DWT cycle counter (timeout)
 #include "fsl_device_registers.h" // brings LPI2C_Type and register bitfields for i.MX93
+
+#include "delay.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define I2C_MAX_BUS_NUMBER 8
-
-#define CPU_HZ SystemCoreClock  // 200 MHz CM33 (adjust if you change clocks)
-
-
-#define CYCLES_FROM_US(us) ((uint32_t)(((uint64_t)(us) * (uint64_t)CPU_HZ) / 1000000u))
 
 /*===================== LPI2C command helpers =====================*/
 /* MTDR command field (CMD = bits [10:8], DATA = [7:0]) */
@@ -108,27 +104,7 @@ static LPI2C_Type* const i2c_periph[I2C_MAX_BUS_NUMBER + 1] =
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static bool dwt_init = false;
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-// static void spi_enable_clock(uint32_t ui32SpiNum);
-static inline void dwt_cycle_counter_init_once(void);
-
-static inline uint32_t cycles_now(void);
-
-// wrap-safe: returns true if 'now' is before 'deadline'
-static inline bool time_before(uint32_t now, uint32_t deadline);
-
-// Wait until (reg & mask) != 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_set_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us);
-
-// Wait until (reg & mask) == 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_clr_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us);
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf, int count)
@@ -158,7 +134,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
         return 0;
     }
 
-    dwt_cycle_counter_init_once();
+    delay_init();
 
     /* Ensure module enabled (BSP should do this; keep it lean) */
     if ((base->MCR & LPI2C_MCR_MEN_MASK) == 0u)
@@ -176,7 +152,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
        If not, the act of reading MSR/MRDR/MTDR progresses state anyway. */
 
     /* 1) START + address (write) */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
     {
         return 0;
     }
@@ -184,7 +160,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     base->MTDR = LPI2C_MTDR_CMD(CMD_START) | LPI2C_MTDR_DATA(((uint32_t)ui8SlaveAddr << 1) | 0u);
 
     /* Optionally bail early if NACK detected on address */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_NDF_MASK, 50u) == 0)
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_NDF_MASK, 50u) == 0)
     {
         /* got NACK early */
         return 0;
@@ -195,7 +171,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     /* 2) Send payload bytes */
     for (int i = 0; i < count; i++)
     {
-        if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+        if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
         {
             return 0;
         }
@@ -210,7 +186,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     }
 
     /* 3) STOP */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
     {
         return 0;
     }
@@ -218,7 +194,7 @@ uint32_t i2c_io_send(struct i2c_io_t *me, uint8_t ui8SlaveAddr, const char *buf,
     base->MTDR = LPI2C_MTDR_CMD(CMD_STOP);
 
     /* Wait for STOP detected (optional fence) */
-    (void)wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
+    (void)delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
 
     // osSemaphoreGiven(&me->lock);
 
@@ -251,7 +227,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
         return 0;
     }
 
-    dwt_cycle_counter_init_once();
+    delay_init();
 
     if ((base->MCR & LPI2C_MCR_MEN_MASK) == 0u)
     {
@@ -262,7 +238,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     base->MFCR |= (LPI2C_MFCR_RTF_MASK | LPI2C_MFCR_RRF_MASK);
 
     /* 1) START + address (read) */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
     {
         return 0;
     }
@@ -276,7 +252,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     }
 
     /* 2) Tell controller to receive <count> bytes */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
     {
         return 0;
     }
@@ -286,7 +262,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     int remaining = count;
     while (remaining > 0)
     {
-        if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+        if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
         {
             return 0;
         }
@@ -304,7 +280,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     }
 
     /* 3) Queue STOP now (controller will issue it after RX completes) */
-    if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
+    if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_TDF_MASK, 1000u))
     {
         return 0;
     }
@@ -314,7 +290,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     /* 4) Read out bytes as they arrive */
     for (int i = 0; i < count; i++)
     {
-        if (wait_flag_set_timeout(&base->MSR, LPI2C_MSR_RDF_MASK, 1000u))
+        if (delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_RDF_MASK, 1000u))
         {
             return 0;
         }
@@ -323,7 +299,7 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
     }
 
     /* Optional: wait for STOP detect */
-    (void)wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
+    (void)delay_wait_flag_set_timeout(&base->MSR, LPI2C_MSR_SDF_MASK, 1000u);
 
     // osSemaphoreGiven(&me->lock);
 
@@ -331,72 +307,4 @@ uint32_t i2c_io_recv(struct i2c_io_t *me, uint8_t ui8SlaveAddr, char *buf, int c
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline void dwt_cycle_counter_init_once(void)
-{
-    if (dwt_init == true)
-    {
-        return;
-    }
-    
-    // Enable trace (needed for DWT)
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    // Some MCUs lock DWT; unlock if LAR present
-    #ifdef DWT_LAR
-    DWT->LAR = 0xC5ACCE55;
-    #endif
-    DWT->CYCCNT = 0;
-    DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;
-
-    dwt_init = true;
-}
-
-static inline uint32_t cycles_now(void)
-{
-    return DWT->CYCCNT;
-}
-
-// wrap-safe: returns true if 'now' is before 'deadline'
-static inline bool time_before(uint32_t now, uint32_t deadline)
-{
-    return (int32_t)(now - deadline) < 0;
-}
-
-// Wait until (reg & mask) != 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_set_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us)
-{
-    const uint32_t deadline = cycles_now() + CYCLES_FROM_US(timeout_us);
-    while ( (*reg & mask) == 0u )
-    {
-        if (!time_before(cycles_now(), deadline))
-        {
-            return true; // timed out
-        }
-
-        __NOP();
-    }
-
-    return false;
-}
-
-// Wait until (reg & mask) == 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_clr_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us)
-{
-    const uint32_t deadline = cycles_now() + CYCLES_FROM_US(timeout_us);
-    while ( (*reg & mask) != 0u )
-    {
-        if (!time_before(cycles_now(), deadline))
-        {
-            return true; // timed out
-        }
-        
-        __NOP();
-    }
-
-    return false;
-}
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

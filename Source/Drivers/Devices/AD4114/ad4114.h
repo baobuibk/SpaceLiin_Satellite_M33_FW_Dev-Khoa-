@@ -7,6 +7,7 @@
 #include "spi_io.h"
 #include "do.h"
 #include "error_codes.h"
+#include "delay.h"
 
 /* ==== Register addresses (RA) ==== */
 #define AD4114_RA_STATUS        0x00

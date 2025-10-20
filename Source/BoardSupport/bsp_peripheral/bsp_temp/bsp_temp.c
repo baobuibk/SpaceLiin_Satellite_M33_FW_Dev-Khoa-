@@ -24,7 +24,7 @@ ad4114_t onboard_adc_dev1 = {
 		.spi = &onboard_adc_spi,
 		.cs  = &onboard_adc1_cs
 };
-#define NTC_CHANNEL_NUM	8
+#define NTC_CHANNEL_NUM	12
 
 static  uint32_t adc0Result[16] = {0};
 static  uint32_t adc1Result[16] = {0};

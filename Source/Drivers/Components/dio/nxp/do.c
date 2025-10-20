@@ -32,7 +32,7 @@ void do_set(do_t *me)
         return;
     }
 
-    if (me->port == 0 || me->port > GPIO_MAX_PORTS || me->pin >= 16)
+    if (me->port == 0 || me->port > GPIO_MAX_PORTS || me->pin >= 32)
     {
         return;
     }
@@ -55,7 +55,7 @@ void do_reset(do_t *me)
         return;
     }
 
-    if (me->port == 0 || me->port > GPIO_MAX_PORTS || me->pin >= 16)
+    if (me->port == 0 || me->port > GPIO_MAX_PORTS || me->pin >= 32)
     {
         return;
     }

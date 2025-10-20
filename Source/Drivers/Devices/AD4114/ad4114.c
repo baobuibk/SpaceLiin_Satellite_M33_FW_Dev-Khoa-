@@ -34,7 +34,7 @@ static uint32_t rd_frame(ad4114_t *d, uint8_t ra, uint8_t *data, size_t n)
     uint32_t st = spi_io_transfer_sync(d->spi, &cmd, &rx, 1);
     if (st != ERROR_OK) { cs_idle(d); return st; }
 
-    uint8_t dummy_tx[4] = {0,0,0,0};
+    uint8_t dummy_tx[4] = {15,15,15,15};
     st = spi_io_transfer_sync(d->spi, dummy_tx, data, (uint32_t)n);
 
     cs_idle(d);
@@ -42,7 +42,7 @@ static uint32_t rd_frame(ad4114_t *d, uint8_t ra, uint8_t *data, size_t n)
 }
 
 /* Busy-wait best-effort */
-static inline void short_delay(void) { __asm__ __volatile__("" ::: "memory"); }
+// static inline void short_delay(void) { __asm__ __volatile__("" ::: "memory"); }
 
 /* ===== Core API ===== */
 
@@ -59,7 +59,9 @@ uint32_t ad4114_init(ad4114_t *dev, SPI_Io_t *spi, do_t *cs)
     uint32_t rc = ad4114_sw_reset(dev);
     if (rc != (uint32_t)ERROR_OK) return rc;
 
-    for (volatile int i=0;i<2000;i++) short_delay();
+    // for (volatile int i=0;i<2000;i++) short_delay();
+
+    delay_us(10000);
 
     rc = ad4114_set_ifmode(dev, (uint16_t)(dev->ifmode | AD4114_IF_DATA_STAT));
     if (rc != (uint32_t)ERROR_OK) return rc;
@@ -88,6 +90,7 @@ uint32_t ad4114_read_id(ad4114_t *dev, uint16_t *id_out)
     uint32_t rc = rd_frame(dev, AD4114_RA_ID, b, 2);
     if (rc != (uint32_t)ERROR_OK) return rc;
     *id_out = (uint16_t)((b[0] << 8) | b[1]);
+    // *id_out = (uint16_t)((b[1] << 8) | b[0]);
     return (uint32_t)ERROR_OK;
 }
 

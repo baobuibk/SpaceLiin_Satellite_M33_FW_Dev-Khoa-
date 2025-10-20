@@ -4,14 +4,10 @@
 #include "fsl_lpspi.h"
 #include "MIMX9352_cm33.h"
 
-#include "core_cm33.h"
+#include "delay.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define SPI_MAX_BUS_NUMBER 8
-
-#define CPU_HZ SystemCoreClock  // 200 MHz (or use SystemCoreClock)
-
-#define CYCLES_FROM_US(us) ((uint32_t)(((uint64_t)(us) * (uint64_t)CPU_HZ) / 1000000u))
 
 #define LPSPI_BYTE_TIMEOUT_US 100u
 
@@ -44,27 +40,7 @@ static LPSPI_Type* const spi_periph[SPI_MAX_BUS_NUMBER + 1] =
 //     RCC_APB2ENR_SPI6EN
 // };
 
-bool dwt_init = false;
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-// static void spi_enable_clock(uint32_t ui32SpiNum);
-static inline void dwt_cycle_counter_init_once(void);
-
-static inline uint32_t cycles_now(void);
-
-// wrap-safe: returns true if 'now' is before 'deadline'
-static inline bool time_before(uint32_t now, uint32_t deadline);
-
-// Wait until (reg & mask) != 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_set_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us);
-
-// Wait until (reg & mask) == 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_clr_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us);
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /******************************************************************************/
@@ -79,10 +55,10 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
         return ERROR_INVALID_PARAM;
     }
 
-    dwt_cycle_counter_init_once();
+    delay_init();
 
     // Ensure module not busy (equiv. to STM32 BSY=0)
-    if (wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
+    if (delay_wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
     {
         return ERROR_TIMEOUT;
     }
@@ -90,7 +66,7 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
     for (uint32_t i = 0; i < ui32Length; i++)
     {
         // Wait for TX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -99,7 +75,7 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
         base->TDR = 0xAA;
 
         // Wait for RX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -134,18 +110,18 @@ uint32_t spi_io_write_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t ui32Lengt
         return ERROR_INVALID_PARAM;
     }
 
-    dwt_cycle_counter_init_once();
+    delay_init();
 
     // Ensure module not busy (equiv. to STM32 BSY=0)
-    while (base->SR & LPSPI_SR_MBF_MASK)
+    if (delay_wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
     {
-        __NOP();
+        return ERROR_TIMEOUT;
     }
 
     for (uint32_t i = 0; i < ui32Length; i++)
     {
         // Wait for TX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -154,7 +130,7 @@ uint32_t spi_io_write_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t ui32Lengt
         base->TDR = (uint32_t)pui8TxBuff[i];
 
         // Wait for RX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -182,18 +158,18 @@ uint32_t spi_io_transfer_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint8_t *pui8Rx
         return ERROR_INVALID_PARAM;
     }
 
-    dwt_cycle_counter_init_once();
+    delay_init();
 
     // Ensure module not busy (equiv. to STM32 BSY=0)
-    while (base->SR & LPSPI_SR_MBF_MASK)
+    if (delay_wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
     {
-        __NOP();
+        return ERROR_TIMEOUT;
     }
 
     for (uint32_t i = 0; i < ui32Length; i++)
     {
         // Wait for TX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_TDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -202,7 +178,7 @@ uint32_t spi_io_transfer_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint8_t *pui8Rx
         base->TDR = (uint32_t)pui8TxBuff[i];
 
         // Wait for RX to ready
-        if (wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
+        if (delay_wait_flag_set_timeout(&base->SR, LPSPI_SR_RDF_MASK, LPSPI_BYTE_TIMEOUT_US))
         {
             return ERROR_TIMEOUT;
         }
@@ -279,74 +255,6 @@ uint32_t spi_io_write_and_read_dma(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t u
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline void dwt_cycle_counter_init_once(void)
-{
-    if (dwt_init == true)
-    {
-        return;
-    }
-
-    // Enable trace (needed for DWT)
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    // Some MCUs lock DWT; unlock if LAR present
-    #ifdef DWT_LAR
-    DWT->LAR = 0xC5ACCE55;
-    #endif
-    DWT->CYCCNT = 0;
-    DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;
-
-    dwt_init = true;
-}
-
-static inline uint32_t cycles_now(void)
-{
-    return DWT->CYCCNT;
-}
-
-// wrap-safe: returns true if 'now' is before 'deadline'
-static inline bool time_before(uint32_t now, uint32_t deadline)
-{
-    return (int32_t)(now - deadline) < 0;
-}
-
-// Wait until (reg & mask) != 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_set_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us)
-{
-    const uint32_t deadline = cycles_now() + CYCLES_FROM_US(timeout_us);
-    while ( (*reg & mask) == 0u )
-    {
-        if (!time_before(cycles_now(), deadline))
-        {
-            return true; // timed out
-        }
-
-        __NOP();
-    }
-
-    return false;
-}
-
-// Wait until (reg & mask) == 0  OR timeout (us) expires. Returns true on timeout.
-static inline bool wait_flag_clr_timeout(volatile uint32_t *reg,
-                                         uint32_t mask,
-                                         uint32_t timeout_us)
-{
-    const uint32_t deadline = cycles_now() + CYCLES_FROM_US(timeout_us);
-    while ( (*reg & mask) != 0u )
-    {
-        if (!time_before(cycles_now(), deadline))
-        {
-            return true; // timed out
-        }
-        
-        __NOP();
-    }
-
-    return false;
-}
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /**

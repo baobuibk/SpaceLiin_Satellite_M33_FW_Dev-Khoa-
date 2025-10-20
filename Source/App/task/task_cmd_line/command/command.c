@@ -10,6 +10,8 @@
 #include "cmd_test_can.h"
 #include "cmd_test_spi.h"
 
+#include "ad4114.h"
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -90,6 +92,7 @@ int CMD_HEATER_CTRL(int argc, char *argv[])
 	return CMDLINE_OK;
 }
 
+extern ad4114_t onboard_adc_dev0;
 int CMD_READ_TEMP(int argc, char *argv[])
 {
     /* CMD Input Guard */
@@ -98,9 +101,12 @@ int CMD_READ_TEMP(int argc, char *argv[])
 	else if (argc > 1)
 		return CMDLINE_TOO_MANY_ARGS;
 
-	uint32_t temp_raw = bsp_adc0_update();
+	uint16_t id = 0;
+	uint32_t ret = 0;
+	ret = ad4114_read_id(&onboard_adc_dev0, &id);
 
-	bsp_debug_console_printf("> CURRENT RAW TEMP: %d", temp_raw);
+	bsp_debug_console_printf("> RETURN: %d\n", ret);
+	bsp_debug_console_printf("> CHIP ID: %x\n", id);
 
 	// Return success.
 	return CMDLINE_OK;

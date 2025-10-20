@@ -95,6 +95,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     # Components
 
+    "${UserSourceDirPath}/Drivers/Components/delay/nxp/nxp_delay.c"
+
     "${UserSourceDirPath}/Drivers/Components/ring_buffer/ring_buffer.c"
 
     "${UserSourceDirPath}/Drivers/Components/ring_char_buffer/ring_char_buffer.c"
@@ -181,6 +183,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Drivers/Components/error_codes
     ${UserSourceDirPath}/Drivers/Components/ring_buffer
     ${UserSourceDirPath}/Drivers/Components/ring_char_buffer
+    ${UserSourceDirPath}/Drivers/Components/delay
 
     ${UserSourceDirPath}/Drivers/Components/sp_gpio
     ${UserSourceDirPath}/Drivers/Components/sp_gpio/port

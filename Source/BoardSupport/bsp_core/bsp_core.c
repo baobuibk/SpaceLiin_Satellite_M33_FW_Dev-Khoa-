@@ -27,17 +27,17 @@
  ******************************************************************************/
 static void bsp_core_init_uart(void);
 static void bsp_core_init_can(void);
-static void bsp_core_init_spi(void);
 static void bsp_core_init_onboard_adc_spi(void);
 static void bsp_core_init_onboard_adc_cs_gpio(void);
-static void bsp_core_init_gpio(void);
+static void bsp_core_init_tec_cs_gpio(void);
+// static void bsp_core_init_gpio(void);
 static void bsp_core_init_io_expander_i2c(void);
-static void bsp_core_init_tim(void);
+// static void bsp_core_init_tim(void);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-
+// const volatile uint32_t temp[1*1024] = {0xAA};
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -50,8 +50,9 @@ void bsp_core_init(void)
     bsp_core_init_uart();
     bsp_core_init_can();
     bsp_core_init_io_expander_i2c();
-    // bsp_core_init_onboard_adc_spi();
-    // bsp_core_init_onboard_adc_cs_gpio();
+    bsp_core_init_onboard_adc_spi();
+    bsp_core_init_onboard_adc_cs_gpio();
+    bsp_core_init_tec_cs_gpio();
     // bsp_core_init_spi();
     // bsp_core_init_gpio();
     // bsp_core_init_tim();
@@ -184,6 +185,10 @@ static void bsp_core_init_onboard_adc_spi(void)
     masterConfig.pcsToSckDelayInNanoSec         = 0;
     masterConfig.lastSckToPcsDelayInNanoSec     = 0;
     masterConfig.betweenTransferDelayInNanoSec  = 0;
+    masterConfig.direction                      = kLPSPI_MsbFirst;
+    masterConfig.cpol                           = kLPSPI_ClockPolarityActiveLow;
+    masterConfig.cpha                           = kLPSPI_ClockPhaseSecondEdge;
+    masterConfig.pinCfg                         = kLPSPI_SdoInSdiOut;
     masterConfig.baudRate = ONBOARD_ADC_SPI_BAUDRATE;
     masterConfig.whichPcs = kLPSPI_Pcs1;
     
@@ -216,53 +221,6 @@ static void bsp_core_init_onboard_adc_spi(void)
 
     // Enable
     ONBOARD_ADC_SPI_BASE->CR |= LPSPI_CR_MEN_MASK;
-}
-
-static void bsp_core_init_spi(void)
-{
-    uint32_t srcClock_Hz;
-    lpspi_master_config_t masterConfig;
-
-    const clock_root_config_t lpspiClkCfg =
-    {
-        .clockOff = false,
-	    .mux = 1,
-	    .div = 4
-    };
-
-    CLOCK_SetRootClock(PHOTO_ADC_SPI_CLOCK_ROOT, &lpspiClkCfg);
-    CLOCK_EnableClock(PHOTO_ADC_SPI_CLOCK_GATE);
-
-    /* Get LPSPI module default Configuration. */
-    /*
-     * 
-     * masterConfig->baudRate                       = 500000;
-     * masterConfig->bitsPerFrame                   = 8;
-     * masterConfig->cpol                           = kLPSPI_ClockPolarityActiveHigh;
-     * masterConfig->cpha                           = kLPSPI_ClockPhaseFirstEdge;
-     * masterConfig->direction                      = kLPSPI_MsbFirst;
-
-     * masterConfig->pcsToSckDelayInNanoSec         = (1000000000U / masterConfig->baudRate) / 2U;
-     * masterConfig->lastSckToPcsDelayInNanoSec     = (1000000000U / masterConfig->baudRate) / 2U;
-     * masterConfig->betweenTransferDelayInNanoSec  = (1000000000U / masterConfig->baudRate) / 2U;
-
-     * masterConfig->whichPcs                       = kLPSPI_Pcs0;
-     * masterConfig->pcsActiveHighOrLow             = kLPSPI_PcsActiveLow;
-
-     * masterConfig->pinCfg                         = kLPSPI_SdiInSdoOut;
-     * masterConfig->dataOutConfig                  = kLpspiDataOutRetained;
-
-     * masterConfig->enableInputDelay               = false;
-     */
-    LPSPI_MasterGetDefaultConfig(&masterConfig);
-    masterConfig.pcsToSckDelayInNanoSec         = 0;
-    masterConfig.lastSckToPcsDelayInNanoSec     = 0;
-    masterConfig.betweenTransferDelayInNanoSec  = 0;
-    masterConfig.baudRate = PHOTO_ADC_SPI_BAUDRATE;
-    masterConfig.whichPcs = kLPSPI_Pcs1;
-    
-    srcClock_Hz = PHOTO_ADC_SPI_CLK_FREQ;
-    LPSPI_MasterInit(PHOTO_ADC_SPI_BASE, &masterConfig, srcClock_Hz);
 }
 
 do_t onboard_adc0_cs =
@@ -306,19 +264,13 @@ static void bsp_core_init_onboard_adc_cs_gpio(void)
     RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS1_PIN, &onboard_ADC_CS_config);
 }
 
-static void bsp_core_init_gpio(void)
+static void bsp_core_init_tec_cs_gpio(void)
 {
     /* Define the init structure for the output LED pin*/
-    rgpio_pin_config_t photo_ADC_CS_config =
+    rgpio_pin_config_t TEC_CS_config =
     {
         kRGPIO_DigitalOutput,
         1,
-    };
-
-    rgpio_pin_config_t photo_ADC_CV_config =
-    {
-        kRGPIO_DigitalOutput,
-        0,
     };
 
     /* Board pin, clock, debug console init */
@@ -327,20 +279,58 @@ static void bsp_core_init_gpio(void)
     const clock_root_config_t rgpioClkCfg =
     {
         .clockOff = false,
-        .mux = 1, // 24Mhz Mcore root buswake clock
-        .div = 2
+        .mux = 0, // 24Mhz Mcore root buswake clock
+        .div = 1
     };
 
-    CLOCK_SetRootClock(TEC_SPI_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
-    CLOCK_EnableClock(TEC_SPI_GPIO_CS_CLOCK_GATE);
+    CLOCK_SetRootClock(kCLOCK_Root_BusWakeup, &rgpioClkCfg);
+    CLOCK_EnableClock(kCLOCK_Gpio3);
 
     /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
-    PHOTO_ADC_GPIO_PORT->PCNS = 0x0;
+    GPIO3->PCNS = 0x0;
 
     /* Init output LED GPIO. */
-    RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CS_PIN, &photo_ADC_CS_config);
-    RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CV_PIN, &photo_ADC_CV_config);
+    RGPIO_PinInit(GPIO3, 29, &TEC_CS_config);
+    RGPIO_PinInit(GPIO3, 31, &TEC_CS_config);
+    RGPIO_PinInit(GPIO3, 28, &TEC_CS_config);
+    RGPIO_PinInit(GPIO3, 30, &TEC_CS_config);
 }
+
+// static void bsp_core_init_gpio(void)
+// {
+//     /* Define the init structure for the output LED pin*/
+//     rgpio_pin_config_t photo_ADC_CS_config =
+//     {
+//         kRGPIO_DigitalOutput,
+//         1,
+//     };
+
+//     rgpio_pin_config_t photo_ADC_CV_config =
+//     {
+//         kRGPIO_DigitalOutput,
+//         0,
+//     };
+
+//     /* Board pin, clock, debug console init */
+//     /* clang-format off */
+
+//     const clock_root_config_t rgpioClkCfg =
+//     {
+//         .clockOff = false,
+//         .mux = 1, // 24Mhz Mcore root buswake clock
+//         .div = 2
+//     };
+
+//     CLOCK_SetRootClock(TEC_SPI_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
+//     CLOCK_EnableClock(TEC_SPI_GPIO_CS_CLOCK_GATE);
+
+//     /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+//     PHOTO_ADC_GPIO_PORT->PCNS = 0x0;
+
+//     /* Init output LED GPIO. */
+//     RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CS_PIN, &photo_ADC_CS_config);
+//     RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CV_PIN, &photo_ADC_CV_config);
+// }
 
 i2c_io_t io_expander_i2c =
 {
@@ -388,28 +378,28 @@ static void bsp_core_init_io_expander_i2c(void)
     // i2c_io_init(&heater_i2c);
 }
 
-static void bsp_core_init_tim(void)
-{
-    tpm_config_t tpmInfo;
+// static void bsp_core_init_tim(void)
+// {
+//     tpm_config_t tpmInfo;
 
-    const clock_root_config_t lptpmClkCfg =
-    {
-        .clockOff = false,
-	    .mux = 0,
-	    .div = 1
-    };
+//     const clock_root_config_t lptpmClkCfg =
+//     {
+//         .clockOff = false,
+// 	    .mux = 0,
+// 	    .div = 1
+//     };
 
-    CLOCK_SetRootClock(PHOTO_ADC_TIM_CLOCK_ROOT, &lptpmClkCfg);
-    CLOCK_EnableClock(PHOTO_ADC_TIM_CLOCK_GATE);
+//     CLOCK_SetRootClock(PHOTO_ADC_TIM_CLOCK_ROOT, &lptpmClkCfg);
+//     CLOCK_EnableClock(PHOTO_ADC_TIM_CLOCK_GATE);
 
-    TPM_GetDefaultConfig(&tpmInfo);
+//     TPM_GetDefaultConfig(&tpmInfo);
 
-    /* TPM clock divide by TPM_PRESCALER */
-    tpmInfo.prescale = PHOTO_ADC_TIM_PRESCALER;
+//     /* TPM clock divide by TPM_PRESCALER */
+//     tpmInfo.prescale = PHOTO_ADC_TIM_PRESCALER;
 
-    /* Initialize TPM module */
-    TPM_Init(PHOTO_ADC_TIM_BASE, &tpmInfo);
+//     /* Initialize TPM module */
+//     TPM_Init(PHOTO_ADC_TIM_BASE, &tpmInfo);
 
-    /* Set timer period */
-    TPM_SetTimerPeriod(PHOTO_ADC_TIM_BASE, USEC_TO_COUNT(PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ / (1U << tpmInfo.prescale)));
-}
+//     /* Set timer period */
+//     TPM_SetTimerPeriod(PHOTO_ADC_TIM_BASE, USEC_TO_COUNT(PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ / (1U << tpmInfo.prescale)));
+// }

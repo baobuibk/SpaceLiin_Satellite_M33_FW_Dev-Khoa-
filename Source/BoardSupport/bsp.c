@@ -30,9 +30,7 @@ void BSP_Init(void)
     /* Init board peripheral. */
     bsp_debug_console_init();
     bsp_libcsp_can_init();
-    // bsp_spi_sensor_init();
-    // bsp_i2c_sensor_init();
     bsp_expander_init();
-    bsp_heater_init();
-    // bsp_adc_init();
+    // bsp_heater_init();
+    bsp_adc_init();
 }
