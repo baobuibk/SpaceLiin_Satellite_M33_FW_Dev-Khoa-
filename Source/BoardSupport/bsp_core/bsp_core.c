@@ -262,6 +262,7 @@ static void bsp_core_init_onboard_adc_cs_gpio(void)
     /* Init output LED GPIO. */
     RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS0_PIN, &onboard_ADC_CS_config);
     RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS1_PIN, &onboard_ADC_CS_config);
+    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, 21, &onboard_ADC_CS_config);
 }
 
 static void bsp_core_init_tec_cs_gpio(void)

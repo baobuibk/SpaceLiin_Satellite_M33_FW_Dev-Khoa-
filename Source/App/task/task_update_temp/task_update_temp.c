@@ -37,7 +37,7 @@ for(;;)
 {
     last_delay = xTaskGetTickCount();
 
-    bsp_adc0_update();
+    bsp_onboard_adc_update_all();
 
     // wake up exactly every 100 ms
     vTaskDelayUntil(&last_delay, delay_period);

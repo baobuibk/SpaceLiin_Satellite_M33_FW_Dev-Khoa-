@@ -144,6 +144,13 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
                         
 }
 

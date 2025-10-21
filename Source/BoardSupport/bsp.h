@@ -10,7 +10,7 @@
 #include "bsp_i2c_sensor.h"
 #include "bsp_expander.h"
 #include "bsp_heater.h"
-#include "bsp_temp.h"
+#include "bsp_onboard_adc.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

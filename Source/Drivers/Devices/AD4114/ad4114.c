@@ -1,412 +1,764 @@
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Include~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include "ad4114.h"
+#include "bsp_debug_console.h"
 
-/* ===== Local helpers ===== */
-
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define AD4114_COMMS_RW_READ   0x40u  /* Bit6 = 1 (read), 0 = write */
 #define AD4114_COMMS_WEN0      0x00u  /* Bit7 = WEN (keep 0) */
 
-static inline void cs_active(ad4114_t *d)  { do_reset(d->cs); }
-static inline void cs_idle  (ad4114_t *d)  { do_set(d->cs);   }
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static inline void cs_active(ad4114_t* p_dev);
+static inline void cs_idle  (ad4114_t* p_dev);
+static uint32_t wr_frame(ad4114_t* p_dev, uint8_t reg_addr, const uint8_t *p_TX, uint32_t length);
+static uint32_t rd_frame(ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX, uint32_t length);
 
-static uint32_t wr_frame(ad4114_t *d, uint8_t ra, const uint8_t *data, size_t n)
-{
-    uint8_t tx[1 + 4];
-    uint8_t rx[1 + 4];
-    if (!d || !d->spi || !d->cs || n > 4) return (uint32_t)ERROR_INVALID_PARAM;
+/* Raw R/W */
+static uint32_t ad4114_write8 (ad4114_t* p_dev, uint8_t reg_addr, uint8_t TX_data);
+static uint32_t ad4114_write16(ad4114_t* p_dev, uint8_t reg_addr, uint16_t TX_data);
+static uint32_t ad4114_write24(ad4114_t* p_dev, uint8_t reg_addr, uint32_t TX_data);
+static uint32_t ad4114_read8 (ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX);
+static uint32_t ad4114_read16(ad4114_t* p_dev, uint8_t reg_addr, uint16_t* p_RX);
+static uint32_t ad4114_read24(ad4114_t* p_dev, uint8_t reg_addr, uint32_t* p_RX);
 
-    tx[0] = (uint8_t)(AD4114_COMMS_WEN0 | (ra & 0x3Fu)); /* write */
-    for (size_t i = 0; i < n; ++i) tx[1 + i] = data[i];
-
-    cs_active(d);
-    uint32_t st = spi_io_transfer_sync(d->spi, tx, rx, (uint32_t)(1 + n));
-    cs_idle(d);
-    return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
-}
-
-static uint32_t rd_frame(ad4114_t *d, uint8_t ra, uint8_t *data, size_t n)
-{
-    if (!d || !d->spi || !d->cs || !data || n == 0 || n > 4) return (uint32_t)ERROR_INVALID_PARAM;
-
-    uint8_t cmd = (uint8_t)(AD4114_COMMS_WEN0 | AD4114_COMMS_RW_READ | (ra & 0x3Fu));
-    uint8_t rx;
-    cs_active(d);
-
-    uint32_t st = spi_io_transfer_sync(d->spi, &cmd, &rx, 1);
-    if (st != ERROR_OK) { cs_idle(d); return st; }
-
-    uint8_t dummy_tx[4] = {15,15,15,15};
-    st = spi_io_transfer_sync(d->spi, dummy_tx, data, (uint32_t)n);
-
-    cs_idle(d);
-    return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
-}
-
-/* Busy-wait best-effort */
-// static inline void short_delay(void) { __asm__ __volatile__("" ::: "memory"); }
-
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ===== Core API ===== */
 
-uint32_t ad4114_init(ad4114_t *dev, SPI_Io_t *spi, do_t *cs)
+uint32_t ad4114_init(ad4114_t *p_dev, SPI_Io_t *spi, do_t *cs)
 {
-    if (!dev || !spi || !cs) return (uint32_t)ERROR_INVALID_PARAM;
-    dev->spi = spi;
-    dev->cs  = cs;
-    dev->ifmode = 0;
-    dev->adcmode = 0;
+    if (!p_dev || !spi || !cs)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    p_dev->spi      = spi;
+    p_dev->cs       = cs;
+    p_dev->ifmode   = 0;
+    p_dev->adcmode  = 0;
 
-    cs_idle(dev);
+    cs_idle(p_dev);
 
-    uint32_t rc = ad4114_sw_reset(dev);
-    if (rc != (uint32_t)ERROR_OK) return rc;
+    uint32_t rc = ad4114_sw_reset(p_dev);
 
-    // for (volatile int i=0;i<2000;i++) short_delay();
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
 
+    delay_init();
     delay_us(10000);
 
-    rc = ad4114_set_ifmode(dev, (uint16_t)(dev->ifmode | AD4114_IF_DATA_STAT));
-    if (rc != (uint32_t)ERROR_OK) return rc;
+    rc = ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode | AD4114_IF_DATA_STAT));
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
 
-    rc = ad4114_set_adcmode(dev, (uint16_t)((dev->adcmode & ~AD4114_ADCMODE_MODE_MASK) | AD4114_MODE_CONTINUOUS));
+    rc = ad4114_set_adcmode(p_dev, (uint16_t)((p_dev->adcmode & ~AD4114_ADCMODE_MODE_MASK) | AD4114_MODE_CONTINUOUS));
     return rc;
 }
 
-uint32_t ad4114_sw_reset(ad4114_t *dev)
+uint32_t ad4114_sw_reset(ad4114_t *p_dev)
 {
-    if (!dev || !dev->spi || !dev->cs) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || !p_dev->spi || !p_dev->cs)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
 
-    uint8_t tx[8]; for (int i=0;i<8;i++) tx[i]=0xFF;
-    uint8_t rx[8];
+    uint8_t TX_frame[8];
+    
+    for (uint8_t i=0; i<8; i++) 
+    {
+        TX_frame[i] = 0xFF;
+    }
 
-    cs_active(dev);
-    uint32_t st = spi_io_transfer_sync(dev->spi, tx, rx, 8);
-    cs_idle(dev);
+    cs_active(p_dev);
+    uint32_t st = spi_io_write_sync(p_dev->spi, TX_frame, 8);
+    cs_idle(p_dev);
+
     return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
 }
 
-uint32_t ad4114_read_id(ad4114_t *dev, uint16_t *id_out)
+uint32_t ad4114_read_id(ad4114_t *p_dev, uint16_t *id_out)
 {
-    if (!dev || !id_out) return (uint32_t)ERROR_INVALID_PARAM;
-    uint8_t b[2];
-    uint32_t rc = rd_frame(dev, AD4114_RA_ID, b, 2);
-    if (rc != (uint32_t)ERROR_OK) return rc;
-    *id_out = (uint16_t)((b[0] << 8) | b[1]);
-    // *id_out = (uint16_t)((b[1] << 8) | b[0]);
-    return (uint32_t)ERROR_OK;
-}
+    if (!p_dev || !id_out)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
 
-/* ===== Raw R/W ===== */
+    uint32_t rc = ad4114_read16(p_dev, AD4114_RA_ID, id_out);
 
-uint32_t ad4114_write8 (ad4114_t *dev, uint8_t ra, uint8_t v) {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    return wr_frame(dev, ra, &v, 1);
-}
-uint32_t ad4114_write16(ad4114_t *dev, uint8_t ra, uint16_t v) {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint8_t b[2] = { (uint8_t)(v >> 8), (uint8_t)v };
-    return wr_frame(dev, ra, b, 2);
-}
-uint32_t ad4114_write24(ad4114_t *dev, uint8_t ra, uint32_t v) {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint8_t b[3] = { (uint8_t)(v >> 16), (uint8_t)(v >> 8), (uint8_t)v };
-    return wr_frame(dev, ra, b, 3);
-}
-uint32_t ad4114_read8 (ad4114_t *dev, uint8_t ra, uint8_t *v) {
-    if (!dev || !v) return (uint32_t)ERROR_INVALID_PARAM;
-    return rd_frame(dev, ra, v, 1);
-}
-uint32_t ad4114_read16(ad4114_t *dev, uint8_t ra, uint16_t *v) {
-    if (!dev || !v) return (uint32_t)ERROR_INVALID_PARAM;
-    uint8_t b[2]; uint32_t rc = rd_frame(dev, ra, b, 2);
-    if (rc != (uint32_t)ERROR_OK) return rc;
-    *v = (uint16_t)((b[0] << 8) | b[1]);
-    return (uint32_t)ERROR_OK;
-}
-uint32_t ad4114_read24(ad4114_t *dev, uint8_t ra, uint32_t *v) {
-    if (!dev || !v) return (uint32_t)ERROR_INVALID_PARAM;
-    uint8_t b[3]; uint32_t rc = rd_frame(dev, ra, b, 3);
-    if (rc != (uint32_t)ERROR_OK) return rc;
-    *v = ((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2];
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
+
     return (uint32_t)ERROR_OK;
 }
 
 /* ===== Mode shortcuts ===== */
 
-uint32_t ad4114_set_ifmode(ad4114_t *dev, uint16_t ifmode)
+uint32_t ad4114_set_ifmode(ad4114_t *p_dev, uint16_t ifmode)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint32_t rc = ad4114_write16(dev, AD4114_RA_IFMODE, ifmode);
-    if (rc == (uint32_t)ERROR_OK) dev->ifmode = ifmode;
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    uint32_t rc = ad4114_write16(p_dev, AD4114_RA_IFMODE, ifmode);
+
+    if (rc == (uint32_t)ERROR_OK)
+    {
+        p_dev->ifmode = ifmode;
+    }
     return rc;
 }
 
-uint32_t ad4114_set_adcmode(ad4114_t *dev, uint16_t adcmode)
+uint32_t ad4114_set_adcmode(ad4114_t *p_dev, uint16_t adcmode)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint32_t rc = ad4114_write16(dev, AD4114_RA_ADCMODE, adcmode);
-    if (rc == (uint32_t)ERROR_OK) dev->adcmode = adcmode;
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    uint32_t rc = ad4114_write16(p_dev, AD4114_RA_ADCMODE, adcmode);
+
+    if (rc == (uint32_t)ERROR_OK)
+    {
+        p_dev->adcmode = adcmode;
+    }
+    
     return rc;
 }
 
 /* ===== Channel config ===== */
 
-uint32_t ad4114_config_channel(ad4114_t *dev, uint8_t ch, bool enable,
+uint32_t ad4114_config_channel(ad4114_t *p_dev, uint8_t channel, bool enable,
                                uint16_t input_map, uint8_t setup)
 {
-    if (!dev || ch >= AD4114_NUM_CHANNELS || setup >= AD4114_NUM_SETUPS)
+    if (!p_dev || channel >= AD4114_NUM_CHANNELS || setup >= AD4114_NUM_SETUPS)
+    {
         return (uint32_t)ERROR_INVALID_PARAM;
+    }
 
     uint16_t v = 0;
-    if (enable) v |= AD4114_CH_EN;
+
+    if (enable)
+    {
+        v |= AD4114_CH_EN;
+    }
+
     v |= ((uint16_t)setup & 0x7u) << AD4114_CH_SETUP_SHIFT;
     v |= (input_map & AD4114_CH_INPUT_MASK) << AD4114_CH_INPUT_SHIFT;
-    return ad4114_write16(dev, AD4114_RA_CH(ch), v);
+    return ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
 }
 
 /* ===== Wait for RDY then read DATA ===== */
 
-static uint32_t wait_rdy_low(ad4114_t *dev, uint32_t timeout_us)
+static uint32_t wait_rdy_low(ad4114_t *p_dev, uint32_t timeout_us)
 {
-    uint8_t st = 0x80;
-    uint32_t spins = (timeout_us == 0) ? 20000u : timeout_us;
-    while (spins--) {
-        uint32_t rc = ad4114_read8(dev, AD4114_RA_STATUS, &st);
-        if (rc != (uint32_t)ERROR_OK) return rc;
-        if ((st & AD4114_STATUS_RDY) == 0) return (uint32_t)ERROR_OK;
+    uint8_t st = 0xFF;
+    uint32_t wait_count = (timeout_us == 0) ? 20000u : timeout_us;
+
+    while (wait_count--)
+    {
+        uint32_t rc = ad4114_read8(p_dev, AD4114_RA_STATUS, &st);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
+        
+        if ((st & AD4114_STATUS_RDY) == 0)
+        {
+            return (uint32_t)ERROR_OK;
+        }
     }
+
+    bsp_debug_console_printf("> wait_rdy_low status 0X%x\n", st);
     return (uint32_t)ERROR_TIMEOUT;
 }
 
-uint32_t ad4114_read_data_wait(ad4114_t *dev, uint32_t timeout_us, uint32_t *raw24, uint8_t *status_opt)
+uint32_t ad4114_read_data_wait(ad4114_t *p_dev, uint32_t timeout_us, uint32_t *p_raw24, uint8_t *p_status)
 {
-    if (!dev || !raw24) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || !p_raw24 || !p_status)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
 
-    uint32_t rc = wait_rdy_low(dev, timeout_us);
-    if (rc != (uint32_t)ERROR_OK) return rc;
+    uint32_t rc = wait_rdy_low(p_dev, timeout_us);
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
 
-    if (dev->ifmode & AD4114_IF_DATA_STAT) {
+    if (p_dev->ifmode & AD4114_IF_DATA_STAT)
+    {
         uint8_t b[4];
-        cs_active(dev);
-        uint8_t cmd = (uint8_t)(AD4114_COMMS_WEN0 | AD4114_COMMS_RW_READ | (AD4114_RA_DATA & 0x3F));
-        uint8_t rx;
-        uint32_t st = spi_io_transfer_sync(dev->spi, &cmd, &rx, 1);
-        if (st == ERROR_OK) st = spi_io_transfer_sync(dev->spi, (uint8_t[4]){0,0,0,0}, b, 4);
-        cs_idle(dev);
-        if (st != ERROR_OK) return st;
 
-        *raw24 = ((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2];
-        if (status_opt) *status_opt = b[3];
+        uint32_t st = rd_frame(p_dev, AD4114_RA_DATA, b, 4);
+
+        if (st != ERROR_OK)
+        {
+            return st;
+        }
+
+        *p_raw24 = ((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2];
+
+        *p_status = b[3];
+
         return (uint32_t)ERROR_OK;
-    } else {
-        return ad4114_read24(dev, AD4114_RA_DATA, raw24);
+
+        // return ad4114_read24(p_dev, AD4114_RA_DATA, p_raw24);
+    }
+    else
+    {
+        return ad4114_read24(p_dev, AD4114_RA_DATA, p_raw24);
     }
 }
 
-uint32_t ad4114_read_channel_once(ad4114_t *dev, uint8_t ch, uint32_t timeout_us, uint32_t *raw24)
+uint32_t ad4114_read_channel_once(ad4114_t *p_dev, uint8_t channel, uint32_t timeout_us, uint32_t *raw24)
 {
-    if (!dev || !raw24 || ch >= AD4114_NUM_CHANNELS) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || !raw24 || channel >= AD4114_NUM_CHANNELS) return (uint32_t)ERROR_INVALID_PARAM;
 
     for (uint8_t i = 0; i < AD4114_NUM_CHANNELS; ++i) {
-        (void)ad4114_write16(dev, AD4114_RA_CH(i), 0x0000);
+        (void)ad4114_write16(p_dev, AD4114_RA_CH(i), 0x0000);
     }
 
     uint16_t v = 0;
-    uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
+    uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &v);
     if (rc != (uint32_t)ERROR_OK) return rc;
     v |= AD4114_CH_EN;
-    rc = ad4114_write16(dev, AD4114_RA_CH(ch), v);
+    rc = ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
     if (rc != (uint32_t)ERROR_OK) return rc;
 
-    uint16_t m = dev->adcmode;
+    uint16_t m = p_dev->adcmode;
     m &= (uint16_t)~AD4114_ADCMODE_MODE_MASK;
     m |= AD4114_MODE_SINGLE;
-    rc = ad4114_set_adcmode(dev, m);
+    rc = ad4114_set_adcmode(p_dev, m);
     if (rc != (uint32_t)ERROR_OK) return rc;
 
-    rc = ad4114_read_data_wait(dev, timeout_us ? timeout_us : 50000u, raw24, NULL);
+    rc = ad4114_read_data_wait(p_dev, timeout_us ? timeout_us : 50000u, raw24, NULL);
     return rc;
 }
 
 /* ===== Helper APIs ===== */
 
-uint32_t ad4114_channel_select_inputs(ad4114_t *dev, uint8_t ch, uint8_t ainp, uint8_t ainm)
+uint32_t ad4114_channel_select_inputs(ad4114_t *p_dev, uint8_t channel, uint8_t ainp, uint8_t ainm)
 {
-    if (!dev || ch >= AD4114_NUM_CHANNELS) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || channel >= AD4114_NUM_CHANNELS)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
     uint16_t v;
-    uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
-    if (rc != (uint32_t)ERROR_OK) return rc;
+    uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &v);
+
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
 
     v &= (uint16_t)~(AD4114_CH_INPUT_MASK << AD4114_CH_INPUT_SHIFT);
     v |= (uint16_t)(AD4114_INPUT_MAP(ainp, ainm) & AD4114_CH_INPUT_MASK);
-    return ad4114_write16(dev, AD4114_RA_CH(ch), v);
+
+    return ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
 }
 
-uint32_t ad4114_channel_select_setup(ad4114_t *dev, uint8_t ch, uint8_t setup)
+uint32_t ad4114_channel_select_setup(ad4114_t *p_dev, uint8_t channel, uint8_t setup)
 {
-    if (!dev || ch >= AD4114_NUM_CHANNELS || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || channel >= AD4114_NUM_CHANNELS || setup >= AD4114_NUM_SETUPS)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
     uint16_t v;
-    uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
-    if (rc != (uint32_t)ERROR_OK) return rc;
+    uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &v);
+
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
 
     v = (uint16_t)((v & (uint16_t)~AD4114_CH_SETUP_MASK) | (((uint16_t)setup << AD4114_CH_SETUP_SHIFT) & AD4114_CH_SETUP_MASK));
-    return ad4114_write16(dev, AD4114_RA_CH(ch), v);
+    return ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
 }
 
-uint32_t ad4114_channels_enable_mask(ad4114_t *dev, uint16_t mask)
+uint32_t ad4114_channels_enable_mask(ad4114_t *p_dev, uint16_t mask)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    for (uint8_t ch = 0; ch < AD4114_NUM_CHANNELS; ++ch) {
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    for (uint8_t channel = 0; channel < AD4114_NUM_CHANNELS; ++channel)
+    {
         uint16_t v;
-        uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
-        if (rc != (uint32_t)ERROR_OK) return rc;
-        if (mask & (1u << ch)) v |= AD4114_CH_EN;
-        rc = ad4114_write16(dev, AD4114_RA_CH(ch), v);
-        if (rc != (uint32_t)ERROR_OK) return rc;
+        uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &v);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
+
+        if (mask & (1u << channel))
+        {
+            v |= AD4114_CH_EN;
+        }
+
+        rc = ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
     }
     return (uint32_t)ERROR_OK;
 }
 
-uint32_t ad4114_channels_disable_mask(ad4114_t *dev, uint16_t mask)
+uint32_t ad4114_channels_disable_mask(ad4114_t *p_dev, uint16_t mask)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    for (uint8_t ch = 0; ch < AD4114_NUM_CHANNELS; ++ch) {
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    } 
+    for (uint8_t channel = 0; channel < AD4114_NUM_CHANNELS; ++channel)
+    {
         uint16_t v;
-        uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
-        if (rc != (uint32_t)ERROR_OK) return rc;
-        if (mask & (1u << ch)) v &= (uint16_t)~AD4114_CH_EN;
-        rc = ad4114_write16(dev, AD4114_RA_CH(ch), v);
-        if (rc != (uint32_t)ERROR_OK) return rc;
+        uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &v);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
+
+        if (mask & (1u << channel))
+        {
+            v &= (uint16_t)~AD4114_CH_EN;
+        }
+
+        rc = ad4114_write16(p_dev, AD4114_RA_CH(channel), v);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
     }
     return (uint32_t)ERROR_OK;
 }
 
-uint32_t ad4114_setup_write(ad4114_t *dev, uint8_t setup, uint16_t setupcon)
+uint32_t ad4114_setup_write(ad4114_t *p_dev, uint8_t setup, uint16_t setupcon)
 {
-    if (!dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_write16(dev, AD4114_RA_SETUPCON(setup), setupcon);
+    if (!p_dev || setup >= AD4114_NUM_SETUPS)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    return ad4114_write16(p_dev, AD4114_RA_SETUPCON(setup), setupcon);
 }
-uint32_t ad4114_setup_read(ad4114_t *dev, uint8_t setup, uint16_t *setupcon)
+
+uint32_t ad4114_setup_read(ad4114_t *p_dev, uint8_t setup, uint16_t *setupcon)
 {
-    if (!dev || !setupcon || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_read16(dev, AD4114_RA_SETUPCON(setup), setupcon);
+    if (!p_dev || !setupcon || setup >= AD4114_NUM_SETUPS)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    return ad4114_read16(p_dev, AD4114_RA_SETUPCON(setup), setupcon);
 }
-uint32_t ad4114_filt_write(ad4114_t *dev, uint8_t setup, uint16_t filtcon)
+
+uint32_t ad4114_filt_write(ad4114_t *p_dev, uint8_t setup, uint16_t filtcon)
 {
-    if (!dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_write16(dev, AD4114_RA_FILTCON(setup), filtcon);
+    if (!p_dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    return ad4114_write16(p_dev, AD4114_RA_FILTCON(setup), filtcon);
 }
-uint32_t ad4114_filt_read(ad4114_t *dev, uint8_t setup, uint16_t *filtcon)
+
+uint32_t ad4114_filt_read(ad4114_t *p_dev, uint8_t setup, uint16_t *filtcon)
 {
-    if (!dev || !filtcon || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_read16(dev, AD4114_RA_FILTCON(setup), filtcon);
+    if (!p_dev || !filtcon || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    return ad4114_read16(p_dev, AD4114_RA_FILTCON(setup), filtcon);
 }
-uint32_t ad4114_offset_write(ad4114_t *dev, uint8_t setup, uint32_t offset24)
+
+uint32_t ad4114_offset_write(ad4114_t *p_dev, uint8_t setup, uint32_t offset24)
 {
-    if (!dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_write24(dev, AD4114_RA_OFFSET(setup), offset24 & 0xFFFFFFu);
+    if (!p_dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    return ad4114_write24(p_dev, AD4114_RA_OFFSET(setup), offset24 & 0xFFFFFFu);
 }
-uint32_t ad4114_offset_read(ad4114_t *dev, uint8_t setup, uint32_t *offset24)
+
+uint32_t ad4114_offset_read(ad4114_t *p_dev, uint8_t setup, uint32_t *offset24)
 {
-    if (!dev || !offset24 || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_read24(dev, AD4114_RA_OFFSET(setup), offset24);
+    if (!p_dev || !offset24 || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    return ad4114_read24(p_dev, AD4114_RA_OFFSET(setup), offset24);
 }
-uint32_t ad4114_gain_write(ad4114_t *dev, uint8_t setup, uint32_t gain24)
+
+uint32_t ad4114_gain_write(ad4114_t *p_dev, uint8_t setup, uint32_t gain24)
 {
-    if (!dev || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_write24(dev, AD4114_RA_GAIN(setup), gain24 & 0xFFFFFFu);
+    if (!p_dev || setup >= AD4114_NUM_SETUPS)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    return ad4114_write24(p_dev, AD4114_RA_GAIN(setup), gain24 & 0xFFFFFFu);
 }
-uint32_t ad4114_gain_read(ad4114_t *dev, uint8_t setup, uint32_t *gain24)
+
+uint32_t ad4114_gain_read(ad4114_t *p_dev, uint8_t setup, uint32_t *gain24)
 {
-    if (!dev || !gain24 || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
-    return ad4114_read24(dev, AD4114_RA_GAIN(setup), gain24);
+    if (!p_dev || !gain24 || setup >= AD4114_NUM_SETUPS) return (uint32_t)ERROR_INVALID_PARAM;
+    return ad4114_read24(p_dev, AD4114_RA_GAIN(setup), gain24);
 }
 
 /* 5) Shortcuts chế độ chuyển đổi */
-uint32_t ad4114_set_mode_continuous(ad4114_t *dev, bool ref_en)
+uint32_t ad4114_set_mode_continuous(ad4114_t *p_dev, bool ref_en)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint16_t m = dev->adcmode;
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    uint16_t m = p_dev->adcmode;
+
     m &= (uint16_t)~AD4114_ADCMODE_MODE_MASK;
     m |= AD4114_MODE_CONTINUOUS;
-    if (ref_en) m |= AD4114_ADCMODE_REF_EN; else m &= (uint16_t)~AD4114_ADCMODE_REF_EN;
-    return ad4114_set_adcmode(dev, m);
+
+    if (ref_en)
+    {
+        m |= AD4114_ADCMODE_REF_EN;
+    }
+    else
+    {
+        m &= (uint16_t)~AD4114_ADCMODE_REF_EN;
+    }
+
+    return ad4114_set_adcmode(p_dev, m);
 }
 
-uint32_t ad4114_set_mode_single(ad4114_t *dev, bool single_cycle, bool ref_en)
+uint32_t ad4114_set_mode_single(ad4114_t *p_dev, bool single_cycle, bool ref_en)
 {
-    if (!dev) return (uint32_t)ERROR_INVALID_PARAM;
-    uint16_t m = dev->adcmode;
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    uint16_t m = p_dev->adcmode;
+
     m &= (uint16_t)~AD4114_ADCMODE_MODE_MASK;
     m |= AD4114_MODE_SINGLE;
-    if (single_cycle) m |= AD4114_ADCMODE_SING_CYC; else m &= (uint16_t)~AD4114_ADCMODE_SING_CYC;
-    if (ref_en) m |= AD4114_ADCMODE_REF_EN; else m &= (uint16_t)~AD4114_ADCMODE_REF_EN;
-    return ad4114_set_adcmode(dev, m);
+
+    if (single_cycle)
+    {
+        m |= AD4114_ADCMODE_SING_CYC;
+    }
+    else
+    {
+        m &= (uint16_t)~AD4114_ADCMODE_SING_CYC;
+    }
+    
+    if (ref_en)
+    {
+        m |= AD4114_ADCMODE_REF_EN;
+    }
+    else
+    {
+        m &= (uint16_t)~AD4114_ADCMODE_REF_EN;
+    }
+        return ad4114_set_adcmode(p_dev, m);
 }
 
 /* 6) Đọc 1 mẫu cho tất cả kênh đang enable */
-uint32_t ad4114_read_all(ad4114_t *dev,
+uint32_t ad4114_read_all(ad4114_t* p_dev,
                          uint32_t timeout_us_per_sample,
-                         uint16_t *out_ch_mask,
+                         uint16_t* p_out_ch_mask,
                          uint32_t samples[AD4114_NUM_CHANNELS])
 {
-    if (!dev || !samples) return (uint32_t)ERROR_INVALID_PARAM;
+    if (!p_dev || !samples || !p_out_ch_mask)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
 
     /* 1) Xác định các kênh đang enable */
     uint16_t enabled_mask = 0;
-    for (uint8_t ch = 0; ch < AD4114_NUM_CHANNELS; ++ch) {
-        uint16_t v = 0;
-        uint32_t rc = ad4114_read16(dev, AD4114_RA_CH(ch), &v);
-        if (rc != (uint32_t)ERROR_OK) return rc;
-        if (v & AD4114_CH_EN) enabled_mask |= (uint16_t)(1u << ch);
+    for (uint8_t channel = 0; channel < AD4114_NUM_CHANNELS; ++channel)
+    {
+        uint16_t RX_data = 0;
+        uint32_t rc = ad4114_read16(p_dev, AD4114_RA_CH(channel), &RX_data);
+
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        } 
+
+        if (RX_data & AD4114_CH_EN)
+        {
+            enabled_mask |= (uint16_t)(1u << channel);
+        }
     }
-    if (enabled_mask == 0) return (uint32_t)ERROR_NOT_READY;
-    if (out_ch_mask) *out_ch_mask = 0;
+
+    bsp_debug_console_printf("> enabled_mask 0x%x\n", enabled_mask);
+
+    if (enabled_mask == 0)
+    {
+        return (uint32_t)ERROR_NOT_READY;
+    }
+
+    *p_out_ch_mask = 0;
 
     /* 2) Bật tạm DATA_STAT nếu chưa bật */
-    const bool had_data_stat = (dev->ifmode & AD4114_IF_DATA_STAT) != 0;
-    if (!had_data_stat) {
-        uint32_t rc = ad4114_set_ifmode(dev, (uint16_t)(dev->ifmode | AD4114_IF_DATA_STAT));
-        if (rc != (uint32_t)ERROR_OK) return rc;
-    }
+    const bool had_data_stat = (p_dev->ifmode & AD4114_IF_DATA_STAT) != 0;
+    uint32_t rc;
+
+    // if (!had_data_stat)
+    // {
+    //     uint32_t rc = ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode | AD4114_IF_DATA_STAT));
+
+    //     if (rc != (uint32_t)ERROR_OK)
+    //     {
+    //         return rc;
+    //     }
+    // }
 
     /* 3) Chuyển continuous mode (nếu chưa) */
-    uint16_t adcmode_before = dev->adcmode;
-    uint16_t m = (uint16_t)((adcmode_before & (uint16_t)~AD4114_ADCMODE_MODE_MASK) | AD4114_MODE_CONTINUOUS);
-    uint32_t rc = ad4114_set_adcmode(dev, m);
-    if (rc != (uint32_t)ERROR_OK) goto restore_modes;
+    uint16_t adcmode_before = p_dev->adcmode;
+    uint16_t adcmode_temp   = (uint16_t)((adcmode_before & (uint16_t)~AD4114_ADCMODE_MODE_MASK) | AD4114_MODE_CONTINUOUS);
+    // uint32_t rc = ad4114_set_adcmode(p_dev, adcmode_temp);
+    // if (rc != (uint32_t)ERROR_OK)
+    // {
+    //     if (!had_data_stat)
+    //     {
+    //         ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
+    //     }
+
+    //     if (p_dev->adcmode != adcmode_before)
+    //     {
+    //         ad4114_set_adcmode(p_dev, adcmode_before);
+    //     }
+
+    //     return rc;
+    // }
 
     /* 4) Đọc vòng: cần N mẫu với N = số kênh enable */
     uint8_t  seen[AD4114_NUM_CHANNELS] = {0};
     uint16_t remaining = 0;
-    for (uint8_t ch = 0; ch < AD4114_NUM_CHANNELS; ++ch)
-        if (enabled_mask & (uint16_t)(1u << ch)) remaining++;
 
-    for (uint8_t ch = 0; ch < AD4114_NUM_CHANNELS; ++ch)
-        if (enabled_mask & (uint16_t)(1u << ch)) samples[ch] = 0;
+    for (uint8_t channel = 0; channel < AD4114_NUM_CHANNELS; ++channel)
+    {
+        if (enabled_mask & (uint16_t)(1u << channel))
+        {
+            remaining++;
+            samples[channel] = 0;
+        } 
+    }
 
-    while (remaining) {
+    while (remaining)
+    {
         uint8_t status = 0;
         uint32_t raw   = 0;
-        rc = ad4114_read_data_wait(dev, timeout_us_per_sample, &raw, &status);
-        if (rc != (uint32_t)ERROR_OK) { rc = (uint32_t)ERROR_TIMEOUT; goto restore_modes; }
 
-        uint8_t ch = (uint8_t)(status & AD4114_STATUS_CH_MASK);
-        if (ch >= AD4114_NUM_CHANNELS) continue;
+        rc = ad4114_read_data_wait(p_dev, timeout_us_per_sample, &raw, &status);
 
-        if ((enabled_mask & (uint16_t)(1u << ch)) && !seen[ch]) {
-            samples[ch] = raw;
-            seen[ch]    = 1;
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            rc = (uint32_t)ERROR_TIMEOUT;
+
+            if (!had_data_stat)
+            {
+                ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
+            }
+
+            if (p_dev->adcmode != adcmode_before)
+            {
+                ad4114_set_adcmode(p_dev, adcmode_before);
+            }
+
+            return rc;
+        }
+
+        uint8_t channel = (uint8_t)(status & AD4114_STATUS_CH_MASK);
+
+        if (channel >= AD4114_NUM_CHANNELS)
+        {
+            continue;
+        }
+
+        if ((enabled_mask & (uint16_t)(1u << channel)) && !seen[channel])
+        {
+            samples[channel] = raw;
+            seen[channel]    = 1;
             remaining--;
-            if (out_ch_mask) *out_ch_mask |= (uint16_t)(1u << ch);
+
+            *p_out_ch_mask |= (uint16_t)(1u << channel);
         }
     }
-    rc = (uint32_t)ERROR_OK;
 
-restore_modes:
-    if (!had_data_stat) {
-        (void)ad4114_set_ifmode(dev, (uint16_t)(dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
+    if (!had_data_stat)
+    {
+        ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
     }
-    if (dev->adcmode != adcmode_before) {
-        (void)ad4114_set_adcmode(dev, adcmode_before);
+
+    if (p_dev->adcmode != adcmode_before)
+    {
+        ad4114_set_adcmode(p_dev, adcmode_before);
     }
-    return rc;
+
+    return (uint32_t)ERROR_OK;
 }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static inline void cs_active(ad4114_t* p_dev)
+{
+    do_reset(p_dev->cs);
+}
+
+static inline void cs_idle  (ad4114_t* p_dev)
+{
+    do_set(p_dev->cs);
+}
+
+static uint32_t wr_frame(ad4114_t* p_dev, uint8_t reg_addr, const uint8_t *p_TX, uint32_t length_byte)
+{
+    uint8_t TX_frame[1 + 4];
+
+    if (!p_dev || !p_dev->spi || !p_dev->cs || length_byte > 4)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    TX_frame[0] = (uint8_t)(AD4114_COMMS_WEN0 | (reg_addr & 0x3Fu)); /* write */
+
+    for (size_t i = 0; i < length_byte; ++i)
+    {
+        TX_frame[1 + i] = p_TX[i];
+    }
+
+    cs_active(p_dev);
+
+    uint32_t st = spi_io_write_sync(p_dev->spi, TX_frame, (uint32_t)(1 + length_byte));
+
+    cs_idle(p_dev);
+
+    return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
+}
+
+static uint32_t rd_frame(ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX, uint32_t length_byte)
+{
+    if (!p_dev || !p_dev->spi || !p_dev->cs || !p_RX || length_byte == 0 || length_byte > 4)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    } 
+
+    uint8_t CMD = (uint8_t)(AD4114_COMMS_WEN0 | AD4114_COMMS_RW_READ | (reg_addr & 0x3Fu));
+
+    cs_active(p_dev);
+
+    uint32_t st = spi_io_write_sync(p_dev->spi, &CMD, 1);
+    if (st != ERROR_OK)
+    {
+        cs_idle(p_dev);
+        return st;
+    }
+
+    st = spi_io_read_sync(p_dev->spi, p_RX, (uint32_t)length_byte);
+
+    cs_idle(p_dev);
+
+    return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
+}
+
+static uint32_t ad4114_write8 (ad4114_t *p_dev, uint8_t reg_addr, uint8_t TX_data)
+{
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    return wr_frame(p_dev, reg_addr, &TX_data, 1);
+}
+
+static uint32_t ad4114_write16(ad4114_t *p_dev, uint8_t reg_addr, uint16_t TX_data)
+{
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    } 
+
+    uint8_t b[2] = 
+    {
+        (uint8_t)(TX_data >> 8),
+        (uint8_t)TX_data
+    };
+    return wr_frame(p_dev, reg_addr, b, 2);
+}
+
+static uint32_t ad4114_write24(ad4114_t *p_dev, uint8_t reg_addr, uint32_t TX_data)
+{
+    if (!p_dev)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    uint8_t b[3] =
+    {
+        (uint8_t)(TX_data >> 16),
+        (uint8_t)(TX_data >> 8),
+        (uint8_t)TX_data
+    };
+    return wr_frame(p_dev, reg_addr, b, 3);
+}
+
+static uint32_t ad4114_read8 (ad4114_t *p_dev, uint8_t reg_addr, uint8_t* p_RX)
+{
+    if (!p_dev || !p_RX)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+    
+    return rd_frame(p_dev, reg_addr, p_RX, 1);
+}
+
+static uint32_t ad4114_read16(ad4114_t *p_dev, uint8_t reg_addr, uint16_t* p_RX)
+{
+    if (!p_dev || !p_RX)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    uint8_t b[2];
+    
+    uint32_t rc = rd_frame(p_dev, reg_addr, b, 2);
+
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
+    
+    *p_RX = (uint16_t)((b[0] << 8) | b[1]);
+
+    return (uint32_t)ERROR_OK;
+}
+
+static uint32_t ad4114_read24(ad4114_t *p_dev, uint8_t reg_addr, uint32_t* p_RX)
+{
+    if (!p_dev || !p_RX)
+    {
+        return (uint32_t)ERROR_INVALID_PARAM;
+    }
+
+    uint8_t b[3];
+    
+    uint32_t rc = rd_frame(p_dev, reg_addr, b, 3);
+
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        return rc;
+    }
+    
+    *p_RX = ((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2];
+    return (uint32_t)ERROR_OK;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

@@ -80,6 +80,9 @@
     "task_update_temp.h": "c",
     "ad4114.h": "c",
     "spi_io.h": "c",
-    "bsp_heater.h": "c"
+    "bsp_heater.h": "c",
+    "compare": "c",
+    "system_error": "c",
+    "bsp_onboard_adc.h": "c"
   }
 }

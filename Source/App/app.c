@@ -33,10 +33,12 @@ int app_main(void)
     BSP_Init();
 
     xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
-    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
+    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38 + 128, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
 
     /* Init task */
     Task_CMD_Line_Init();
+
+    bsp_expander_ctrl(RAM_SPI_nCS, 1);
 
     vTaskStartScheduler();
     for (;;)
