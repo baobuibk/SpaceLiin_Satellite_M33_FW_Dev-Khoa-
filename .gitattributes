@@ -7,3 +7,7 @@ CMakeLists.txt text eol=lf
 *.bat text eol=crlf
 *.ld text eol=lf
 *.json text eol=lf
+
+# Track but never diff/merge these artifacts (keep OURS on merge)
+armgcc/debug/*.bin          binary merge=ours
+armgcc/debug/*.elf          binary merge=ours
