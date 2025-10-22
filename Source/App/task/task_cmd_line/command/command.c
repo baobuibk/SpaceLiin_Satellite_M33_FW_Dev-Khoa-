@@ -150,7 +150,7 @@ int CMD_SOL_CTL(int argc, char *argv[])
 
 	if ((receive_argm[0] < 1) || (receive_argm[0] > 12))
 		return CMDLINE_INVALID_ARG;
-	if ((receive_argm[1] < 0) || (receive_argm[1] > 11))
+	if ((receive_argm[1] < 0) || (receive_argm[1] > 1))
 		return CMDLINE_INVALID_ARG;
 
 	uint8_t sol_map[12] =
