@@ -26,6 +26,10 @@ typedef enum
     NTC_CHANNEL_6,
     NTC_CHANNEL_11,
     NTC_CHANNEL_9,
+} Onboard_ADC0_Channel;
+
+typedef enum
+{
     ONBOARD_ADC1_0,
     ONBOARD_ADC1_1,
     EFUSE_12V_PHOTO,
@@ -38,7 +42,7 @@ typedef enum
     EFUSE_5V_TEC,
     EFUSE_5V_IO,
     EFUSE_12V_SOLENOID,
-} Onboard_ADC_Channel;
+} Onboard_ADC1_Channel;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -49,11 +53,11 @@ uint32_t bsp_onboard_adc_init();
 
 uint32_t bsp_onboard_adc_update_all();
 
-void bsp_get_TEC(Onboard_ADC_Channel TEC_Index);
+void bsp_get_TEC(Onboard_ADC0_Channel TEC_Index);
 
-int16_t bsp_get_NTC(Onboard_ADC_Channel NTC_Index);
+int16_t bsp_get_NTC(Onboard_ADC0_Channel NTC_Index);
 
-void bsp_get_eFUSE_ILIM(Onboard_ADC_Channel eFUSE_Index);
+uint16_t bsp_get_eFUSE_Current(Onboard_ADC1_Channel eFUSE_Index);
 
 int32_t bsp_get_temp();
 

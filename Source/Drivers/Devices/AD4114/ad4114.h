@@ -100,6 +100,8 @@ uint32_t ad4114_config_channel(ad4114_t* p_dev, uint8_t channel, bool enable,
 /* Data read helpers */
 uint32_t ad4114_read_channel_once(ad4114_t* p_dev, uint8_t channel, uint32_t timeout_us, uint32_t *raw24);
 uint32_t ad4114_read_data_wait(ad4114_t* p_dev, uint32_t timeout_us, uint32_t *raw24, uint8_t *status_opt);
+uint32_t ad4114_data_to_vin(uint32_t raw24, uint32_t gain24, uint32_t offset24,
+                            bool bipolar, float vref, float* vin_out);
 
 /* ====== Helper APIs ====== */
 uint32_t ad4114_channel_select_inputs(ad4114_t* p_dev, uint8_t channel, uint8_t ainp, uint8_t ainm);

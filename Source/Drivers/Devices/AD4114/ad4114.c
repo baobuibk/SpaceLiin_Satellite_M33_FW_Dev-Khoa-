@@ -223,6 +223,53 @@ uint32_t ad4114_read_data_wait(ad4114_t *p_dev, uint32_t timeout_us, uint32_t *p
     }
 }
 
+/* Tính VIN từ code 24-bit, GAINx, OFFSETx theo datasheet.
+ * - raw24  : giá trị 24-bit từ thanh ghi DATA (0..0xFFFFFF)
+ * - gain24 : giá trị 24-bit từ GAINx (0x000000..0xFFFFFF), chuẩn hóa theo 0x400000
+ * - offset24: giá trị 24-bit từ OFFSETx (thường mặc định 0x800000)
+ * - bipolar: true = bipolar (offset-binary), false = unipolar (straight-binary)
+ * - vref   : điện áp tham chiếu (Volt)
+ * - vin_out: kết quả (Volt)
+ */
+uint32_t ad4114_data_to_vin(uint32_t raw24,
+                            uint32_t gain24,
+                            uint32_t offset24,
+                            bool     bipolar,
+                            float    vref,
+                            float   *vin_out)
+{
+    if (!vin_out || vref <= 0.0f) return (uint32_t)ERROR_INVALID_PARAM;
+
+    /* chặn 24-bit, tránh tràn */
+    raw24    &= 0xFFFFFFu;
+    gain24   &= 0xFFFFFFu;
+    offset24 &= 0xFFFFFFu;
+
+    /* Hằng số theo datasheet */
+    const float K_ATT   = 0.075f;           /* hệ số suy giảm nội trước hiệu chuẩn */
+    const float TWO23   = 8388608.0f;       /* 2^23 */
+    const float G_NORM  = 4194304.0f;       /* 0x400000 = 2^22 */
+
+    /* Chuẩn hoá gain */
+    float G = (gain24 > 0u) ? ((float)gain24 / G_NORM) : 1.0f;
+
+    float term_off = ((float)((int32_t)(offset24) - (int32_t)0x800000)) / TWO23;
+    float vin;
+
+    if (!bipolar) {
+        /* Unipolar: VIN = VREF/0.075 * [ Data/(G*2*2^23) + (OFFSET-0x800000)/2^23 ] */
+        float term_data = ((float)raw24) / (G * 2.0f * TWO23);
+        vin = (vref / K_ATT) * (term_data + term_off);
+    } else {
+        /* Bipolar: VIN = VREF/0.075 * [ (Data-0x800000)/(G*2^23) + (OFFSET-0x800000)/2^23 ] */
+        float term_data = ((float)((int32_t)raw24 - (int32_t)0x800000)) / (G * TWO23);
+        vin = (vref / K_ATT) * (term_data + term_off);
+    }
+
+    *vin_out = vin;
+    return (uint32_t)ERROR_OK;
+}
+
 uint32_t ad4114_read_channel_once(ad4114_t *p_dev, uint8_t channel, uint32_t timeout_us, uint32_t *raw24)
 {
     if (!p_dev || !raw24 || channel >= AD4114_NUM_CHANNELS) return (uint32_t)ERROR_INVALID_PARAM;
@@ -499,8 +546,6 @@ uint32_t ad4114_read_all(ad4114_t* p_dev,
         }
     }
 
-    bsp_debug_console_printf("> enabled_mask 0x%x\n", enabled_mask);
-
     if (enabled_mask == 0)
     {
         return (uint32_t)ERROR_NOT_READY;
@@ -510,36 +555,34 @@ uint32_t ad4114_read_all(ad4114_t* p_dev,
 
     /* 2) Bật tạm DATA_STAT nếu chưa bật */
     const bool had_data_stat = (p_dev->ifmode & AD4114_IF_DATA_STAT) != 0;
-    uint32_t rc;
+    if (!had_data_stat)
+    {
+        uint32_t rc = ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode | AD4114_IF_DATA_STAT));
 
-    // if (!had_data_stat)
-    // {
-    //     uint32_t rc = ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode | AD4114_IF_DATA_STAT));
-
-    //     if (rc != (uint32_t)ERROR_OK)
-    //     {
-    //         return rc;
-    //     }
-    // }
+        if (rc != (uint32_t)ERROR_OK)
+        {
+            return rc;
+        }
+    }
 
     /* 3) Chuyển continuous mode (nếu chưa) */
     uint16_t adcmode_before = p_dev->adcmode;
     uint16_t adcmode_temp   = (uint16_t)((adcmode_before & (uint16_t)~AD4114_ADCMODE_MODE_MASK) | AD4114_MODE_CONTINUOUS);
-    // uint32_t rc = ad4114_set_adcmode(p_dev, adcmode_temp);
-    // if (rc != (uint32_t)ERROR_OK)
-    // {
-    //     if (!had_data_stat)
-    //     {
-    //         ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
-    //     }
+    uint32_t rc = ad4114_set_adcmode(p_dev, adcmode_temp);
+    if (rc != (uint32_t)ERROR_OK)
+    {
+        if (!had_data_stat)
+        {
+            ad4114_set_ifmode(p_dev, (uint16_t)(p_dev->ifmode & (uint16_t)~AD4114_IF_DATA_STAT));
+        }
 
-    //     if (p_dev->adcmode != adcmode_before)
-    //     {
-    //         ad4114_set_adcmode(p_dev, adcmode_before);
-    //     }
+        if (p_dev->adcmode != adcmode_before)
+        {
+            ad4114_set_adcmode(p_dev, adcmode_before);
+        }
 
-    //     return rc;
-    // }
+        return rc;
+    }
 
     /* 4) Đọc vòng: cần N mẫu với N = số kênh enable */
     uint8_t  seen[AD4114_NUM_CHANNELS] = {0};
@@ -563,6 +606,7 @@ uint32_t ad4114_read_all(ad4114_t* p_dev,
 
         if (rc != (uint32_t)ERROR_OK)
         {
+            bsp_debug_console_printf("remaining: %d\n", remaining);
             rc = (uint32_t)ERROR_TIMEOUT;
 
             if (!had_data_stat)

@@ -83,6 +83,8 @@
     "bsp_heater.h": "c",
     "compare": "c",
     "system_error": "c",
-    "bsp_onboard_adc.h": "c"
+    "bsp_onboard_adc.h": "c",
+    "fsl_flexcan.h": "c",
+    "ntc.h": "c"
   }
 }

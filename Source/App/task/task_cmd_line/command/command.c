@@ -101,18 +101,15 @@ int CMD_READ_TEMP(int argc, char *argv[])
 	else if (argc > 1)
 		return CMDLINE_TOO_MANY_ARGS;
 
-	uint32_t ret = 0;
-	int32_t temp = 0;
-	uint16_t id = 0;
+	// int32_t temp_ic = 0;
+	int16_t temp_ntc = 0;
+	// uint16_t current_ma = 0;
 
-	// do_reset(onboard_adc_dev1.cs);
+	bsp_onboard_adc_update_all();
+	temp_ntc = bsp_get_NTC(NTC_CHANNEL_1);
 
-	ret  = bsp_onboard_adc_update_all();
-	temp = bsp_get_temp();
-	// ret = ad4114_read_id(&onboard_adc_dev1, &id);
-	bsp_debug_console_printf("> UPDATE RETURN: %d\n", ret);
-	// bsp_debug_console_printf("> CHIP ID: %x\n", id);
-	bsp_debug_console_printf("> TEMP: %d\n", temp);
+	// bsp_debug_console_printf("> CURRENT: %d mA\n", current_ma);
+	bsp_debug_console_printf("> NTC TEMP: %d C\n", temp_ntc);
 
 	// Return success.
 	return CMDLINE_OK;

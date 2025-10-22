@@ -119,6 +119,20 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
 
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TD2__GPIO4_IO17, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TD2__GPIO4_IO17, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
     /* TEC Init Pin. */
     IOMUXC_SetPinMux(IOMUXC_PAD_DAP_TMS_SWDIO__GPIO3_IO29, 0U);
     IOMUXC_SetPinMux(IOMUXC_PAD_DAP_TDO_TRACESWO__GPIO3_IO31, 0U);
@@ -141,13 +155,6 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_PD_MASK);
 
     IOMUXC_SetPinConfig(IOMUXC_PAD_DAP_TCLK_SWCLK__GPIO3_IO30, 
-                        IOMUXC_PAD_DSE(15U) |
-                        IOMUXC_PAD_FSEL1(2U) |
-                        IOMUXC_PAD_PD_MASK);
-
-    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 0U);
-
-    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TXC__GPIO4_IO21, 
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
