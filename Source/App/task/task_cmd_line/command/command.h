@@ -14,9 +14,15 @@ enum command_error_code
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-int CMD_IO_CTRL(int argc, char *argv[]);
-int CMD_HEATER_CTRL(int argc, char *argv[]);
-int CMD_READ_TEMP(int argc, char *argv[]);
+/* :::::::::: Power Control Command :::::::: */
+int CMD_PWR_SOL_EN(int argc, char *argv[]);
+int CMD_PWR_HTR_EN(int argc, char *argv[]);
+
+/* :::::::::: Heater Command :::::::: */
+int CMD_HTR_SET(int argc, char *argv[]);
+
+/* :::::::::: Solenoid Command :::::::: */
+int CMD_SOL_CTL(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);
@@ -24,6 +30,10 @@ int CMD_GET_TEMP_NTC(int argc, char *argv[]);
 /* :::::::::: Ultility Command :::::::: */
 int CMD_HELP(int argc, char *argv[]);
 int CMD_CLEAR_SCREEN(int argc, char *argv[]);
+
+int CMD_IO_CTRL(int argc, char *argv[]);
+int CMD_HEATER_CTRL(int argc, char *argv[]);
+int CMD_READ_TEMP(int argc, char *argv[]);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
