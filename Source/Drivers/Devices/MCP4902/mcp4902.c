@@ -2,7 +2,7 @@
 
 /* -------- Helpers -------- */
 
-static inline void mcp4902_latch_pulse(MCP4902_Device_t *dev) {
+static inline void mcp4902_latch_pulse(mcp4902_dev_t *dev) {
     /* xung latch ngắn: LOW -> HIGH */
     do_reset(&dev->latch);
     /* tuỳ platform, có thể cần delay vài chu kỳ */
@@ -10,7 +10,7 @@ static inline void mcp4902_latch_pulse(MCP4902_Device_t *dev) {
 }
 
 /* Gửi 1 frame 16-bit (MSB trước) tới một kênh */
-static int mcp4902_write_frame(MCP4902_Device_t *dev, uint16_t frame)
+static int mcp4902_write_frame(mcp4902_dev_t *dev, uint16_t frame)
 {
     uint8_t tx[2] = { (uint8_t)(frame >> 8), (uint8_t)frame };
     uint8_t rx[2];
@@ -42,7 +42,7 @@ static uint16_t mcp4902_build_frame(uint8_t channel, uint8_t code, uint8_t gain1
 
 /* -------- Public API -------- */
 
-uint8_t MCP4902_VoltageToCode(uint16_t mv)
+uint8_t mcp4902_vol_2_code(uint16_t mv)
 {
     /* round( mv * 255 / Vref ) */
     uint32_t num = (uint32_t)mv * 255u + (MCP4902_VREF_MV/2u);
@@ -51,17 +51,14 @@ uint8_t MCP4902_VoltageToCode(uint16_t mv)
     return (uint8_t)code;
 }
 
-uint16_t MCP4902_CodeToVoltage(uint8_t code)
+uint16_t mcp4902_code_2_vol(uint8_t code)
 {
     /* round( code * Vref / 255 ) */
     uint32_t num = (uint32_t)code * MCP4902_VREF_MV + 127u;
     return (uint16_t)(num / 255u);
 }
 
-int MCP4902_Device_Init(MCP4902_Device_t *dev,
-                        SPI_Io_t *spi,
-                        const do_t *cs,
-                        const do_t *latch)
+int mcp4902_dev_init(mcp4902_dev_t *dev, SPI_Io_t *spi, const do_t *cs, const do_t *latch)
 {
     if (!dev || !spi || !cs || !latch) return (int)ERROR_INVALID_PARAM;
 
@@ -77,17 +74,17 @@ int MCP4902_Device_Init(MCP4902_Device_t *dev,
     dev->dac_channel[MCP4902_CHB] = 0u;
 
     /* Ghi mặc định 0 cho cả hai kênh, sau đó shutdown cả A và B như mã gốc */
-    int rc = MCP4902_Flush(dev);
+    int rc = mcp4902_flush(dev);
     if (rc != (int)ERROR_OK) return rc;
 
-    rc = MCP4902_Shutdown(dev, MCP4902_CHA);
+    rc = mcp4902_shutdown(dev, MCP4902_CHA);
     if (rc != (int)ERROR_OK) return rc;
 
-    rc = MCP4902_Shutdown(dev, MCP4902_CHB);
+    rc = mcp4902_shutdown(dev, MCP4902_CHB);
     return rc;
 }
 
-int MCP4902_Shutdown(MCP4902_Device_t *dev, uint8_t channel)
+int mcp4902_shutdown(mcp4902_dev_t *dev, uint8_t channel)
 {
     if (!dev || channel >= MCP4902_NUM_CHANNEL) return (int)ERROR_INVALID_PARAM;
 
@@ -96,21 +93,21 @@ int MCP4902_Shutdown(MCP4902_Device_t *dev, uint8_t channel)
     return mcp4902_write_frame(dev, frame);
 }
 
-int MCP4902_Set_DAC(MCP4902_Device_t *dev, uint8_t channel, uint8_t code)
+int mcp4902_set_dac(mcp4902_dev_t *dev, uint8_t channel, uint8_t code)
 {
     if (!dev || channel >= MCP4902_NUM_CHANNEL) return (int)ERROR_INVALID_PARAM;
     dev->dac_channel[channel] = code;
-    return MCP4902_Flush(dev);
+    return mcp4902_flush(dev);
 }
 
-int MCP4902_Set_Voltage(MCP4902_Device_t *dev, uint8_t channel, uint16_t mv)
+int mcp4902_set_vol(mcp4902_dev_t *dev, uint8_t channel, uint16_t mv)
 {
     if (!dev || channel >= MCP4902_NUM_CHANNEL) return (int)ERROR_INVALID_PARAM;
-    dev->dac_channel[channel] = MCP4902_VoltageToCode(mv);
-    return MCP4902_Flush(dev);
+    dev->dac_channel[channel] = mcp4902_vol_2_code(mv);
+    return mcp4902_flush(dev);
 }
 
-int MCP4902_Flush(MCP4902_Device_t *dev)
+int mcp4902_flush(mcp4902_dev_t *dev)
 {
     if (!dev) return (int)ERROR_INVALID_PARAM;
 

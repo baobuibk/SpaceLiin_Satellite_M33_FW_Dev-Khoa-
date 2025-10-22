@@ -25,22 +25,22 @@ typedef struct {
     do_t        cs;                          /* CS (digital output) */
     do_t        latch;                       /* LATCH (digital output) */
     uint8_t     dac_channel[MCP4902_NUM_CHANNEL]; /* cache giá trị DAC 8-bit cho A/B */
-} MCP4902_Device_t;
+} mcp4902_dev_t;
 
 /* --- API --- */
-uint8_t  MCP4902_VoltageToCode(uint16_t mv);     /* mV -> 8-bit DAC */
-uint16_t MCP4902_CodeToVoltage(uint8_t code);    /* 8-bit DAC -> mV   */
+uint8_t mcp4902_vol_2_code(uint16_t mv);     /* mV -> 8-bit DAC */
+uint16_t mcp4902_code_2_vol(uint8_t code);   /* 8-bit DAC -> mV */
 
-int MCP4902_Device_Init(MCP4902_Device_t *dev,
+int mcp4902_dev_init(mcp4902_dev_t *dev,
                         SPI_Io_t *spi,
                         const do_t *cs,
                         const do_t *latch);
 
-int MCP4902_Shutdown(MCP4902_Device_t *dev, uint8_t channel);         /* tắt riêng kênh */
-int MCP4902_Set_DAC  (MCP4902_Device_t *dev, uint8_t channel, uint8_t code);
-int MCP4902_Set_Voltage(MCP4902_Device_t *dev, uint8_t channel, uint16_t mv);
+int mcp4902_shutdown(mcp4902_dev_t *dev, uint8_t channel);
+int mcp4902_set_dac(mcp4902_dev_t *dev, uint8_t channel, uint8_t code);
+int mcp4902_set_vol(mcp4902_dev_t *dev, uint8_t channel, uint16_t mv);
 
 /* Ghi cả hai kênh từ cache (nếu bạn muốn chủ động flush) */
-int MCP4902_Flush(MCP4902_Device_t *dev);
+int mcp4902_flush(mcp4902_dev_t *dev);
 
 #endif /* MCP4902_H_ */

@@ -90,6 +90,7 @@
     "task_update_onboard_adc.h": "c",
     "semphr.h": "c",
     "mutex": "c",
-    "variant": "c"
+    "variant": "c",
+    "bsp_laser.h": "c"
   }
 }
