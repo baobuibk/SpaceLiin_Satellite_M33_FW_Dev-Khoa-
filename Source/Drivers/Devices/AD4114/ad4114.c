@@ -20,7 +20,7 @@ static uint32_t wr_frame(ad4114_t* p_dev, uint8_t reg_addr, const uint8_t *p_TX,
 static uint32_t rd_frame(ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX, uint32_t length);
 
 /* Raw R/W */
-static uint32_t ad4114_write8 (ad4114_t* p_dev, uint8_t reg_addr, uint8_t TX_data);
+// static uint32_t ad4114_write8 (ad4114_t* p_dev, uint8_t reg_addr, uint8_t TX_data);
 static uint32_t ad4114_write16(ad4114_t* p_dev, uint8_t reg_addr, uint16_t TX_data);
 static uint32_t ad4114_write24(ad4114_t* p_dev, uint8_t reg_addr, uint32_t TX_data);
 static uint32_t ad4114_read8 (ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX);
@@ -713,15 +713,15 @@ static uint32_t rd_frame(ad4114_t* p_dev, uint8_t reg_addr, uint8_t* p_RX, uint3
     return (st == ERROR_OK) ? (uint32_t)ERROR_OK : st;
 }
 
-static uint32_t ad4114_write8 (ad4114_t *p_dev, uint8_t reg_addr, uint8_t TX_data)
-{
-    if (!p_dev)
-    {
-        return (uint32_t)ERROR_INVALID_PARAM;
-    }
+// static uint32_t ad4114_write8 (ad4114_t *p_dev, uint8_t reg_addr, uint8_t TX_data)
+// {
+//     if (!p_dev)
+//     {
+//         return (uint32_t)ERROR_INVALID_PARAM;
+//     }
 
-    return wr_frame(p_dev, reg_addr, &TX_data, 1);
-}
+//     return wr_frame(p_dev, reg_addr, &TX_data, 1);
+// }
 
 static uint32_t ad4114_write16(ad4114_t *p_dev, uint8_t reg_addr, uint16_t TX_data)
 {

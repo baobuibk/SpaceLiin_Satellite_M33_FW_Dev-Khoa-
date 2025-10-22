@@ -18,6 +18,9 @@ int CMD_IO_CTRL(int argc, char *argv[]);
 int CMD_HEATER_CTRL(int argc, char *argv[]);
 int CMD_READ_TEMP(int argc, char *argv[]);
 
+/* :::::::::: NTC Command :::::::: */
+int CMD_GET_TEMP_NTC(int argc, char *argv[]);
+
 /* :::::::::: Ultility Command :::::::: */
 int CMD_HELP(int argc, char *argv[]);
 int CMD_CLEAR_SCREEN(int argc, char *argv[]);

@@ -8,42 +8,6 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef enum
-{
-    TEC_CHANNEL_1,
-    TEC_CHANNEL_3,
-    TEC_CHANNEL_4,
-    TEC_CHANNEL_2,
-    NTC_CHANNEL_12,
-    NTC_CHANNEL_10,
-    NTC_CHANNEL_5,
-    NTC_CHANNEL_4,
-    NTC_CHANNEL_1,
-    NTC_CHANNEL_8,
-    NTC_CHANNEL_2,
-    NTC_CHANNEL_3,
-    NTC_CHANNEL_7,
-    NTC_CHANNEL_6,
-    NTC_CHANNEL_11,
-    NTC_CHANNEL_9,
-} Onboard_ADC0_Channel;
-
-typedef enum
-{
-    ONBOARD_ADC1_0,
-    ONBOARD_ADC1_1,
-    EFUSE_12V_PHOTO,
-    EFUSE_5V_CAM,
-    TEMP_SENSOR,
-    EFUSE_12V_LASER,
-    EFUSE_5V_HD4,
-    EFUSE_12V_HEADER,
-    EFUSE_12V, //EFUSE_12V_IN
-    EFUSE_5V_TEC,
-    EFUSE_5V_IO,
-    EFUSE_12V_SOLENOID,
-} Onboard_ADC1_Channel;
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -51,15 +15,13 @@ typedef enum
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 uint32_t bsp_onboard_adc_init();
 
-uint32_t bsp_onboard_adc_update_all();
+uint32_t bsp_onboard_adc_update_raw();
+void bsp_onboard_adc_update_volt();
 
-void bsp_get_TEC(Onboard_ADC0_Channel TEC_Index);
-
-int16_t bsp_get_NTC(Onboard_ADC0_Channel NTC_Index);
-
-uint16_t bsp_get_eFUSE_Current(Onboard_ADC1_Channel eFUSE_Index);
-
-int32_t bsp_get_temp();
+void bsp_convert_TEC();
+void bsp_convert_NTC();
+void bsp_convert_eFUSE_Current();
+void bsp_convert_onboard_temp();
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #endif /* _BSP_ONBOARD_ADC_H_ */

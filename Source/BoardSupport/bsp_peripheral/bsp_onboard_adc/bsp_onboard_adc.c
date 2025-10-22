@@ -8,6 +8,7 @@
 #include "do.h"
 #include "ntc.h"
 
+#include "system_data.h"
 #include "ad4114.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -17,6 +18,42 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+typedef enum
+{
+    PIN_TEC_CHANNEL_1,
+    PIN_TEC_CHANNEL_3,
+    PIN_TEC_CHANNEL_4,
+    PIN_TEC_CHANNEL_2,
+    PIN_NTC_CHANNEL_12,
+    PIN_NTC_CHANNEL_10,
+    PIN_NTC_CHANNEL_5,
+    PIN_NTC_CHANNEL_4,
+    PIN_NTC_CHANNEL_1,
+    PIN_NTC_CHANNEL_8,
+    PIN_NTC_CHANNEL_2,
+    PIN_NTC_CHANNEL_3,
+    PIN_NTC_CHANNEL_7,
+    PIN_NTC_CHANNEL_6,
+    PIN_NTC_CHANNEL_11,
+    PIN_NTC_CHANNEL_9,
+} Onboard_ADC0_Channel;
+
+typedef enum
+{
+    ONBOARD_ADC1_0,
+    ONBOARD_ADC1_1,
+    PIN_EFUSE_12V_PHOTO,
+    PIN_EFUSE_5V_CAM,
+    PIN_TEMP_SENSOR,
+    PIN_EFUSE_12V_LASER,
+    PIN_EFUSE_5V_HD4,
+    PIN_EFUSE_12V_HEADER,
+    PIN_EFUSE_12V, //EFUSE_12V_IN
+    PIN_EFUSE_5V_TEC,
+    PIN_EFUSE_5V_IO,
+    PIN_EFUSE_12V_SOLENOID,
+} Onboard_ADC1_Channel;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -24,7 +61,13 @@
 static  uint32_t adc0_raw[16] = {0};
 static  uint32_t adc1_raw[16] = {0};
 
+static 	float    adc0_volt_mv[16] = {0.0};
+static  float	 adc1_volt_mv[16] = {0.0};
+
 static  int16_t  NTC_temperature[NTC_CHANNEL_NUM] = {0};
+
+static  uint8_t  TEC_channel_map[TEC_CHANNEL_NUM] = {0, 2, 3, 1};
+static  uint8_t  NTC_channel_map[NTC_CHANNEL_NUM] = {11, 9, 4, 3, 0, 7, 1, 2, 6, 5, 10, 8};
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static uint32_t bsp_onboard_adc_config(ad4114_t* p_dev, uint16_t enable_mask);
@@ -85,7 +128,7 @@ uint32_t bsp_onboard_adc_init()
     return ERROR_OK;
 }
 
-uint32_t bsp_onboard_adc_update_all()
+uint32_t bsp_onboard_adc_update_raw()
 {
 	uint16_t out_mask_adc0, out_mask_adc1 = 0;
 	uint32_t ret;
@@ -107,53 +150,48 @@ uint32_t bsp_onboard_adc_update_all()
     return ERROR_OK;
 }
 
-void bsp_get_TEC(Onboard_ADC0_Channel TEC_Index)
+void bsp_onboard_adc_update_volt()
 {
-	if ((TEC_Index < TEC_CHANNEL_1) || (TEC_Index > TEC_CHANNEL_2))
+	for (uint8_t index = 0; index < 16; index++)
 	{
-		return;
+		bsp_onboard_adc_get_vin_mv(adc0_raw[index], 5000.0, &adc0_volt_mv[index]);
+		bsp_onboard_adc_get_vin_mv(adc1_raw[index], 1800.0, &adc1_volt_mv[index]);
 	}
 }
 
-int16_t bsp_get_NTC(Onboard_ADC0_Channel NTC_Index)
+void bsp_convert_TEC()
 {
-	if ((NTC_Index < NTC_CHANNEL_12) || (NTC_Index > NTC_CHANNEL_9))
-	{
-		return ERROR_INVALID_PARAM;
-	}
+	;
+}
 
-	float NTC_V = 0.0;
-	bsp_onboard_adc_get_vin_mv(adc0_raw[NTC_Index], 5000.0, &NTC_V);
+void bsp_convert_NTC()
+{
+	int16_t NTC_temp_C[NTC_CHANNEL_NUM] = {0};
 	
-	// return NTC_temperature[NTC_Index] = ntc_convert_from_adc(adc0_raw[NTC_Index]);
-	return NTC_temperature[NTC_Index] = ntc_convert_from_volt(NTC_V, 5000.0);
-}
-
-uint16_t bsp_get_eFUSE_Current(Onboard_ADC1_Channel eFUSE_Index)
-{
-	if ((eFUSE_Index < EFUSE_12V_PHOTO) || (eFUSE_Index == TEMP_SENSOR) || (eFUSE_Index > EFUSE_12V_SOLENOID))
+	for (uint8_t index = 0; index < NTC_CHANNEL_NUM; index++)
 	{
-		return ERROR_INVALID_PARAM;
+		NTC_temp_C[NTC_channel_map[index]] = ntc_convert_from_volt(adc0_volt_mv[PIN_NTC_CHANNEL_12 + index], 5000.0);
 	}
 
-	float efuse_volt_mv = 0.0;
-
-	bsp_onboard_adc_get_vin_mv(adc1_raw[eFUSE_Index], 1800.0, &efuse_volt_mv);
-
-	float efuse_current_ma = efuse_volt_mv * 3.343;
-
-	return (uint16_t)efuse_current_ma;
+	system_data_update_NTC(NTC_temp_C);
 }
 
-int32_t bsp_get_temp()
+void bsp_convert_eFUSE_Current()
 {
-	float vin = 0.0;
+	uint16_t eFUSE_current_ma[EFUSE_CHANNEL_NUM] = {0};
 
-	bsp_onboard_adc_get_vin_mv(adc1_raw[TEMP_SENSOR], 1800.0, &vin);
+	eFUSE_current_ma[0] = (uint16_t)(adc1_volt_mv[PIN_EFUSE_12V_PHOTO] * 3.343);
+	eFUSE_current_ma[1] = (uint16_t)(adc1_volt_mv[PIN_EFUSE_12V_PHOTO + 1] * 3.343);
 
-	int32_t t_dC = (uint16_t)vin - 500;
+	for (uint8_t index = 2; index < EFUSE_CHANNEL_NUM; index++)
+	{
+		eFUSE_current_ma[index] = (uint16_t)(adc1_volt_mv[PIN_EFUSE_5V_CAM + index] * 3.343);
+	}
+}
 
-    return t_dC;
+void bsp_convert_onboard_temp()
+{
+	int32_t t_dC = (uint16_t)adc1_volt_mv[PIN_TEMP_SENSOR] - 500;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

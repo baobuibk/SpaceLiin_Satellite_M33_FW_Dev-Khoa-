@@ -14,6 +14,8 @@
 #include "queue.h"
 #include "timers.h"
 
+#include "osSemphr.h"
+
 /* BoardSupport includes. */
 #include "bsp.h"
 

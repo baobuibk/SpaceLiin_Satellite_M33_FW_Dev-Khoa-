@@ -85,6 +85,11 @@
     "system_error": "c",
     "bsp_onboard_adc.h": "c",
     "fsl_flexcan.h": "c",
-    "ntc.h": "c"
+    "ntc.h": "c",
+    "algorithm": "c",
+    "task_update_onboard_adc.h": "c",
+    "semphr.h": "c",
+    "mutex": "c",
+    "variant": "c"
   }
 }

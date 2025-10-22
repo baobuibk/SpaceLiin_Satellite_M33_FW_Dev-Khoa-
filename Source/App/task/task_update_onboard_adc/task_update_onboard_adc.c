@@ -5,7 +5,7 @@
 /* Component includes. */
 
 /* USER include. */
-#include "task_update_temp.h"
+#include "task_update_onboard_adc.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // #define TASK_TEST_CAN_PRINTF                bsp_debug_console_printf
@@ -25,23 +25,29 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: Test CAN Task ::::::::::::: */
-void Task_Update_Temp(void *pvParameters)
+void Task_Update_Onboard_ADC(void *pvParameters)
 {
     // uint8_t time_out;
-    const TickType_t delay_period = pdMS_TO_TICKS(1000);   // 50 ms
+    const TickType_t delay_period = pdMS_TO_TICKS(1000);   // 1000 ms
           TickType_t last_delay;
 
     // flexcan_frame_t RX_frame;
 
-for(;;)
-{
-    last_delay = xTaskGetTickCount();
+    for(;;)
+    {
+        last_delay = xTaskGetTickCount();
 
-    bsp_onboard_adc_update_all();
+        bsp_onboard_adc_update_raw();
+        bsp_onboard_adc_update_volt();
 
-    // wake up exactly every 100 ms
-    vTaskDelayUntil(&last_delay, delay_period);
-}
+        bsp_convert_TEC();
+        bsp_convert_NTC();
+        bsp_convert_eFUSE_Current();
+        bsp_convert_onboard_temp();
+
+        // wake up exactly every 100 ms
+        vTaskDelayUntil(&last_delay, delay_period);
+    }
 }
 
 //static void CMD_send_splash()

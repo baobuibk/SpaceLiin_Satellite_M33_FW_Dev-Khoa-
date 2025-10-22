@@ -10,7 +10,7 @@
 #include "cmd_test_can.h"
 #include "cmd_test_spi.h"
 
-#include "ad4114.h"
+#include "system_data.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -28,8 +28,13 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "heat_set", 				CMD_HEATER_CTRL,			" : Turn on specific heater" },
 	{ "read_temp", 				CMD_READ_TEMP,				" : Read onboard temp" },
 
-	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test SPI Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	{ "spi_read_adc", 			CMD_SPI_READ_ADC,			" : Test SPI read and write" },
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test IO Expander Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "io_set", 				CMD_IO_CTRL,				" : Turn on specific io" },
+	{ "heat_set", 				CMD_HEATER_CTRL,			" : Turn on specific heater" },
+	{ "read_temp", 				CMD_READ_TEMP,				" : Read onboard temp" },
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
@@ -92,7 +97,6 @@ int CMD_HEATER_CTRL(int argc, char *argv[])
 	return CMDLINE_OK;
 }
 
-extern ad4114_t onboard_adc_dev1;
 int CMD_READ_TEMP(int argc, char *argv[])
 {
     /* CMD Input Guard */
@@ -101,12 +105,49 @@ int CMD_READ_TEMP(int argc, char *argv[])
 	else if (argc > 1)
 		return CMDLINE_TOO_MANY_ARGS;
 
-	// int32_t temp_ic = 0;
-	int16_t temp_ntc = 0;
-	// uint16_t current_ma = 0;
+	int16_t temp_ic = 0;
+	system_data_get_NTC(NTC_CHANNEL_1, &temp_ic);
 
-	bsp_onboard_adc_update_all();
-	temp_ntc = bsp_get_NTC(NTC_CHANNEL_1);
+	// bsp_debug_console_printf("> CURRENT: %d mA\n", current_ma);
+	bsp_debug_console_printf("> NTC TEMP: %d C\n", temp_ic);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+/* :::::::::: NTC Command :::::::: */
+int CMD_GET_TEMP_NTC(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	if (!strcmp(argv[1], "all"))
+	{
+		int16_t temp_ntc[12] = {0};
+		system_data_get_NTC(NTC_CHANNEL_ALL, temp_ntc);
+
+		for (uint8_t i = 0; i < 12; i+=3)
+		{
+			bsp_debug_console_printf("> NTC TEMP %d: %d, NTC TEMP %d: %d, NTC TEMP %d: %d\n", i, temp_ntc[i], i + 1, temp_ntc[i + 1], i + 2, temp_ntc[i + 2]);
+		}
+		
+		// Return success.
+		return CMDLINE_OK;
+	}
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 12))
+		return CMDLINE_INVALID_ARG;
+
+	int16_t temp_ntc = 0;
+
+	system_data_get_NTC(receive_argm, &temp_ntc);
 
 	// bsp_debug_console_printf("> CURRENT: %d mA\n", current_ma);
 	bsp_debug_console_printf("> NTC TEMP: %d C\n", temp_ntc);

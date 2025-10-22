@@ -1,5 +1,5 @@
-#ifndef _TASK_UPDATE_TEMP_H_
-#define _TASK_UPDATE_TEMP_H_
+#ifndef _TASK_UPDATE_ONBOARD_ADC_H_
+#define _TASK_UPDATE_ONBOARD_ADC_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -10,8 +10,8 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: CMD Line Task ::::::::::::: */
-void Task_Update_Temp(void *pvParameters);
+void Task_Update_Onboard_ADC(void *pvParameters);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* _TASK_UPDATE_TEMP_H_ */
+#endif /* _TASK_UPDATE_ONBOARD_ADC_H_ */

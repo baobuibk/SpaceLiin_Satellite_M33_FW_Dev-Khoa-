@@ -10,6 +10,10 @@
 /* Task includes. */
 #include "task_cmd_line.h"
 #include "task_test_can.h"
+#include "task_update_onboard_adc.h"
+
+/* System data includes. */
+#include "system_data.h"
 
 /*******************************************************************************
  * Definitions
@@ -20,6 +24,9 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+static void Task_Init(void *pvParameters);
+
+static TaskHandle_t Task_Init_Handle = NULL;
 
 /*******************************************************************************
  * Code
@@ -32,15 +39,30 @@ int app_main(void)
     /* Init board hardware. */
     BSP_Init();
 
-    xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
-    xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38 + 128, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
-
-    /* Init task */
-    Task_CMD_Line_Init();
+    xTaskCreate(Task_Init, "Task_Init", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, &Task_Init_Handle);
 
     bsp_expander_ctrl(RAM_SPI_nCS, 1);
 
     vTaskStartScheduler();
     for (;;)
         ;
+}
+
+static void Task_Init(void *pvParameters)
+{
+    for(;;)
+    {
+        /* Init system data */
+        system_data_init();
+
+        /* Init task */
+        Task_CMD_Line_Init();
+
+        /* Task Create */
+        xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
+        xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
+        xTaskCreate(Task_Update_Onboard_ADC, "Task_Update_Onboard_ADC", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 2, NULL);
+
+        vTaskDelete(Task_Init_Handle);
+    }
 }
