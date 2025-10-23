@@ -26,6 +26,7 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Power Control Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "pwr_sol_en", 			CMD_PWR_SOL_EN,				" : Solenoid power control" },
 	{ "pwr_htr_en", 			CMD_PWR_HTR_EN,				" : Heater power control" },
+	{ "pwr_las_en", 			CMD_PWR_LAS_EN,				" : Heater power control" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Heater Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "htr_set", 				CMD_HTR_SET,				" : Set heater n duty cycle" },
@@ -36,13 +37,17 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
 
-	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
-	{ "can_send_2byte", 		CMD_CAN_SEND_2BYTE,			" : Send 2 byte of user input" },
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test LASER Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "laser_set", 				CMD_LASER_SET,				" : Switch on/off a channel" },
+	{ "laser_dac", 				CMD_LASER_DAC,				" : Set DAC output volt" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Ultility Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "help", 					CMD_HELP,					" : Display list of commands" },
 	{ "clear",           		CMD_CLEAR_SCREEN,           " : Clear console screen" },
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test CAN Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "can_send_demo", 			CMD_CAN_SEND_DEMO,			" : Send demo can frame" },
+	{ "can_send_2byte", 		CMD_CAN_SEND_2BYTE,			" : Send 2 byte of user input" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test IO Expander Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "io_set", 				CMD_IO_CTRL,				" : Turn on specific io" },
@@ -98,6 +103,27 @@ int CMD_PWR_HTR_EN(int argc, char *argv[])
 		return CMDLINE_INVALID_ARG;
 
 	bsp_expander_ctrl(POW_ONOFF_HEATER, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PWR_LAS_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_LASER, receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;
@@ -202,6 +228,83 @@ int CMD_GET_TEMP_NTC(int argc, char *argv[])
 
 	// bsp_debug_console_printf("> CURRENT: %d mA\n", current_ma);
 	bsp_debug_console_printf("> NTC TEMP: %d C\n", temp_ntc);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_LASER_SET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm[2];
+
+	receive_argm[0] = atoi(argv[1]);
+	receive_argm[1] = atoi(argv[2]);
+
+	if ((receive_argm[1] < 0) || (receive_argm[1] > 1))
+		return CMDLINE_INVALID_ARG;
+
+	if (!strcmp(argv[0], "all"))
+	{
+		if (receive_argm[1] == 1)
+		{
+			for (uint8_t i = 1; i < 25; i++)
+			{
+				bsp_laser_int_sw_on(i);
+			}
+			
+		}
+		else
+		{
+			bsp_laser_int_all_sw_off();
+		}
+		
+		// Return success.
+		return CMDLINE_OK;
+	}
+	else if ((receive_argm[0] < 1) || (receive_argm[0] > 24))
+	{
+		return CMDLINE_INVALID_ARG;
+	}
+		
+	bsp_laser_int_all_sw_off();
+	
+	if (receive_argm[1] == 1)
+	{
+		bsp_laser_int_sw_on(receive_argm[0]);
+	}
+	else
+	{
+		bsp_laser_int_sw_off(receive_argm[0]);
+	}
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_LASER_DAC(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > UINT8_MAX))
+	{
+		return CMDLINE_INVALID_ARG;
+	}
+		
+	bsp_laser_int_set_dac(receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;

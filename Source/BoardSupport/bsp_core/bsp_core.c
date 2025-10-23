@@ -15,9 +15,6 @@
 #include "bsp_core.h"
 #include "bsp_board.h"
 
-#include "i2c_io.h"
-#include "spi_io.h"
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -27,11 +24,18 @@
  ******************************************************************************/
 static void bsp_core_init_uart(void);
 static void bsp_core_init_can(void);
+
+static void bsp_core_init_io_expander_i2c(void);
+
 static void bsp_core_init_onboard_adc_spi(void);
 static void bsp_core_init_onboard_adc_cs_gpio(void);
+
+static void bsp_core_init_laser_dac_gpio(void);
+static void bsp_core_init_switch_gpio(void);
+
 static void bsp_core_init_tec_cs_gpio(void);
+
 // static void bsp_core_init_gpio(void);
-static void bsp_core_init_io_expander_i2c(void);
 // static void bsp_core_init_tim(void);
 
 /*******************************************************************************
@@ -49,9 +53,15 @@ void bsp_core_init(void)
 {
     bsp_core_init_uart();
     bsp_core_init_can();
+
     bsp_core_init_io_expander_i2c();
+
     bsp_core_init_onboard_adc_spi();
     bsp_core_init_onboard_adc_cs_gpio();
+
+    bsp_core_init_laser_dac_gpio();
+    bsp_core_init_switch_gpio();
+
     bsp_core_init_tec_cs_gpio();
     // bsp_core_init_spi();
     // bsp_core_init_gpio();
@@ -226,18 +236,24 @@ static void bsp_core_init_onboard_adc_spi(void)
 do_t onboard_adc0_cs =
 {
     .port = 4,
-    .pin  = 16,
+    .pin  = ONBOARD_ADC_GPIO_CS0_PIN,
 };
 
 do_t onboard_adc1_cs =
 {
     .port = 4,
-    .pin  = 20,
+    .pin  = ONBOARD_ADC_GPIO_CS1_PIN,
 };
 static void bsp_core_init_onboard_adc_cs_gpio(void)
 {
     /* Define the init structure for the output LED pin*/
     rgpio_pin_config_t onboard_ADC_CS_config =
+    {
+        kRGPIO_DigitalOutput,
+        1,
+    };
+
+    rgpio_pin_config_t onboard_ADC_CV_config =
     {
         kRGPIO_DigitalOutput,
         1,
@@ -262,8 +278,96 @@ static void bsp_core_init_onboard_adc_cs_gpio(void)
     /* Init output LED GPIO. */
     RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS0_PIN, &onboard_ADC_CS_config);
     RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_CS1_PIN, &onboard_ADC_CS_config);
-    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, 17, &onboard_ADC_CS_config);
-    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, 21, &onboard_ADC_CS_config);
+    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_SYNC0_PIN, &onboard_ADC_CV_config);
+    RGPIO_PinInit(ONBOARD_ADC_GPIO_CS_PORT, ONBOARD_ADC_GPIO_SYNC1_PIN, &onboard_ADC_CV_config);
+}
+
+do_t laser_dac_cs =
+{
+    .port = 4,
+    .pin  = LASER_DAC_GPIO_CS_PIN,
+};
+
+do_t laser_dac_latch =
+{
+    .port = 4,
+    .pin  = LASER_DAC_GPIO_LATCH_PIN,
+};
+static void bsp_core_init_laser_dac_gpio(void)
+{
+    /* Define the init structure for the output LED pin*/
+    rgpio_pin_config_t laser_DAC_CS_config =
+    {
+        kRGPIO_DigitalOutput,
+        1,
+    };
+
+    rgpio_pin_config_t laser_DAC_latch_config =
+    {
+        kRGPIO_DigitalOutput,
+        1,
+    };
+
+    /* Board pin, clock, debug console init */
+    /* clang-format off */
+
+    const clock_root_config_t rgpioClkCfg =
+    {
+        .clockOff = false,
+        .mux = 0, // 24Mhz Mcore root buswake clock
+        .div = 1
+    };
+
+    CLOCK_SetRootClock(LASER_DAC_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
+    CLOCK_EnableClock(LASER_DAC_GPIO_CS_CLOCK_GATE);
+
+    /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+    LASER_DAC_GPIO_CS_PORT->PCNS = 0x0;
+
+    /* Init output LED GPIO. */
+    RGPIO_PinInit(LASER_DAC_GPIO_CS_PORT, LASER_DAC_GPIO_CS_PIN, &laser_DAC_CS_config);
+    RGPIO_PinInit(LASER_DAC_GPIO_CS_PORT, LASER_DAC_GPIO_LATCH_PIN, &laser_DAC_latch_config);
+}
+
+do_t laser_sw_int_cs =
+{
+    .port = 4,
+    .pin  = LASER_SW_GPIO_INT_CS_PIN,
+};
+
+do_t laser_sw_ext_cs =
+{
+    .port = 4,
+    .pin  = LASER_SW_GPIO_EXT_CS_PIN,
+};
+static void bsp_core_init_switch_gpio(void)
+{
+    /* Define the init structure for the output LED pin*/
+    rgpio_pin_config_t laser_SW_CS_config =
+    {
+        kRGPIO_DigitalOutput,
+        1,
+    };
+
+    /* Board pin, clock, debug console init */
+    /* clang-format off */
+
+    const clock_root_config_t rgpioClkCfg =
+    {
+        .clockOff = false,
+        .mux = 0, // 24Mhz Mcore root buswake clock
+        .div = 1
+    };
+
+    CLOCK_SetRootClock(LASER_SW_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
+    CLOCK_EnableClock(LASER_SW_GPIO_CS_CLOCK_GATE);
+
+    /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+    LASER_SW_GPIO_CS_PORT->PCNS = 0x0;
+
+    /* Init output LED GPIO. */
+    RGPIO_PinInit(LASER_SW_GPIO_CS_PORT, LASER_SW_GPIO_INT_CS_PIN, &laser_SW_CS_config);
+    RGPIO_PinInit(LASER_SW_GPIO_CS_PORT, LASER_SW_GPIO_EXT_CS_PIN, &laser_SW_CS_config);
 }
 
 static void bsp_core_init_tec_cs_gpio(void)
@@ -335,10 +439,6 @@ static void bsp_core_init_tec_cs_gpio(void)
 // }
 
 i2c_io_t io_expander_i2c =
-{
-		.ui32I2cPort = 7
-};
-i2c_io_t heater_i2c =
 {
 		.ui32I2cPort = 7
 };

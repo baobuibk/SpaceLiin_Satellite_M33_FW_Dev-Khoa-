@@ -41,8 +41,6 @@ int app_main(void)
 
     xTaskCreate(Task_Init, "Task_Init", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, &Task_Init_Handle);
 
-    bsp_expander_ctrl(RAM_SPI_nCS, 1);
-
     vTaskStartScheduler();
     for (;;)
         ;
@@ -52,8 +50,16 @@ static void Task_Init(void *pvParameters)
 {
     for(;;)
     {
+        /* IO core driver init */
+        // spi_io_init(&onboard_adc_spi);
+        // i2c_io_init(&io_expander_i2c);
+
         /* Init system data */
         system_data_init();
+
+        // Pull up RAM SPI nCS
+        bsp_expander_ctrl(RAM_SPI_nCS, 1);
+        bsp_laser_init();
 
         /* Init task */
         Task_CMD_Line_Init();

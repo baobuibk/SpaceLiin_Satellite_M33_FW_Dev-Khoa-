@@ -11,6 +11,11 @@
 #include "system_data.h"
 #include "ad4114.h"
 
+#include "fsl_lpspi.h"
+#include "MIMX9352_cm33.h"
+
+#include "delay.h"
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define TEC_CHANNEL_NUM 4U
 #define NTC_CHANNEL_NUM	12U
@@ -72,6 +77,7 @@ static  uint8_t  NTC_channel_map[NTC_CHANNEL_NUM] = {11, 9, 4, 3, 0, 7, 1, 2, 6,
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static uint32_t bsp_onboard_adc_config(ad4114_t* p_dev, uint16_t enable_mask);
 static uint32_t bsp_onboard_adc_get_vin_mv(uint32_t raw24, float vref_mv, float* vin_out_mv);
+static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern SPI_Io_t onboard_adc_spi;
@@ -95,10 +101,12 @@ ad4114_t onboard_adc_dev1 =
 uint32_t bsp_onboard_adc_init()
 {
 	uint32_t ret;
+	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 1);
 	ret = ad4114_init(&onboard_adc_dev0, &onboard_adc_spi, &onboard_adc0_cs);
 
 	if (ret != ERROR_OK)
 	{
+		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 		return ret;
 	}
 
@@ -107,6 +115,7 @@ uint32_t bsp_onboard_adc_init()
 
 	if (ret != ERROR_OK)
 	{
+		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 		return ret;
 	}
 
@@ -114,11 +123,14 @@ uint32_t bsp_onboard_adc_init()
 
 	if (ret != ERROR_OK)
 	{
+		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 		return ret;
 	}
 
 	// ((1 << 10) - 1) << 2: Enable 10 pin, start at pin 2
 	ret = bsp_onboard_adc_config(&onboard_adc_dev1, (((1 << 10) - 1) << 2));
+
+	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 
 	if (ret != ERROR_OK)
 	{
@@ -133,14 +145,19 @@ uint32_t bsp_onboard_adc_update_raw()
 	uint16_t out_mask_adc0, out_mask_adc1 = 0;
 	uint32_t ret;
 
+	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 1);
+
     ret = ad4114_read_all(&onboard_adc_dev0, 5000u, &out_mask_adc0, adc0_raw);
 
 	if (ret != ERROR_OK)
 	{
+		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 		return ret;
 	}
 	
 	ret = ad4114_read_all(&onboard_adc_dev1, 5000u, &out_mask_adc1, adc1_raw);
+
+	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
 
 	if (ret != ERROR_OK)
 	{
@@ -276,6 +293,92 @@ static uint32_t bsp_onboard_adc_get_vin_mv(uint32_t raw24, float vref_mv, float*
 
     *vin_out_mv = vin;
     return (uint32_t)ERROR_OK;
+}
+
+static LPSPI_Type* const spi_periph[8 + 1] =
+{
+    NULL,
+    LPSPI1,
+    LPSPI2,
+    LPSPI3,
+    LPSPI4,
+    LPSPI5,
+    LPSPI6,
+    LPSPI7,
+    LPSPI8,
+};
+
+/**
+ * FUNCTION BELOW HERE IS NON STANDARD API
+ * THESE API ONLY APPLY FOR THIS BOARD VERSION 1.1.0, FOR BOARD SATELITE_EXP
+ * FOR OTHER APPLICATION AND OTHER BOARD PLEASE DISCARD (DELETE) THOSE FUNCTION
+ */
+static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip)
+{
+    if (me == NULL || me->ui32SpiPort == 0 || me->ui32SpiPort > 8)
+    {
+        return ERROR_INVALID_PARAM;
+    }
+
+    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+
+    // if (sem_ret != pdPASS)
+    // {
+    //     return (uint32_t)sem_ret;
+    // }
+
+    LPSPI_Type *base = spi_periph[me->ui32SpiPort];
+
+    if (!base)
+    {
+        return ERROR_INVALID_PARAM;
+    }
+
+    delay_init();
+
+    // Ensure module not busy (equiv. to STM32 BSY=0)
+    if (delay_wait_flag_clr_timeout(&base->SR, LPSPI_SR_MBF_MASK, 1000u))
+    {
+        return ERROR_TIMEOUT;
+    }
+
+    /* Disable SPI before modifying configuration */
+    base->CR &= ~LPSPI_CR_MEN_MASK;
+
+    // Update TCR: CPOL/CPHA bits (preserve the rest)
+    uint32_t temp_cfgr1 = base->CFGR1;
+
+    /* Clear CPOL and CPHA bits first */
+    temp_cfgr1 &= ~(LPSPI_CFGR1_PINCFG_MASK);
+
+    // Implement cpol, cpha accordingly
+    if (is_flip == 0)
+    {
+        temp_cfgr1 |= (LPSPI_CFGR1_PINCFG(kLPSPI_SdiInSdoOut));
+    }
+    else
+    {
+        temp_cfgr1 |= (LPSPI_CFGR1_PINCFG(kLPSPI_SdiInSdoOut));
+    }
+    
+    base->CFGR1 = temp_cfgr1;
+
+    // Update TCR: CPOL/CPHA bits (preserve the rest)
+    uint32_t temp_tcr = base->TCR;
+
+    /* Clear CPOL and CPHA bits first */
+    temp_tcr &= ~(LPSPI_TCR_CPOL_MASK | LPSPI_TCR_CPHA_MASK);
+
+    // Implement cpol, cpha accordingly
+    temp_tcr |=  (LPSPI_TCR_CPOL(1) | LPSPI_TCR_CPHA(1));
+    base->TCR = temp_tcr;
+
+    /* Enable SPI again */
+    base->CR |= LPSPI_CR_MEN_MASK;
+
+    // osSemaphoreGiven(&me->lock);
+
+    return ERROR_OK;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

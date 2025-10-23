@@ -6,8 +6,20 @@
  */
 
 #include "bsp_laser.h"
-#include "board.h"
+#include "bsp_core.h"
 #include "do.h"
+
+adg1414_dev_t laser_int_dev = {
+		.spi = &onboard_adc_spi,
+		.cs  = { .port = 4, .pin = 25, .bStatus = true },
+		.num_of_sw = 3
+};
+
+mcp4902_dev_t laser_dac_dev = {
+		.spi = &onboard_adc_spi,
+		.cs = { .port = 4, .pin = 27, .bStatus = true },
+		.latch = { .port = 4, .pin = 24, .bStatus = true },
+};
 
 static int8_t map_LD_position(int x) {
     static const uint8_t map[] = {
@@ -24,8 +36,8 @@ static int8_t map_LD_position(int x) {
 
 void bsp_laser_init(void)
 {
-	adg1414_chain_init(&laser_int_dev, &laser_spi, &laser_int_dev.cs, laser_int_dev.num_of_sw);
-	mcp4902_dev_init(&laser_dac_dev, &laser_spi, &laser_dac_dev.cs, &laser_dac_dev.latch);
+	adg1414_chain_init(&laser_int_dev, &onboard_adc_spi, &laser_int_dev.cs, laser_int_dev.num_of_sw);
+	mcp4902_dev_init(&laser_dac_dev, &onboard_adc_spi, &laser_dac_dev.cs, &laser_dac_dev.latch);
 }
 
 void bsp_laser_int_sw_on(uint8_t channel)
