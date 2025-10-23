@@ -161,6 +161,45 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
 
+    /* PHOTO SPI Init Pin */
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO19__LPSPI5_SIN, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO20__LPSPI5_SOUT, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO21__LPSPI5_SCK, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO19__LPSPI5_SIN, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO20__LPSPI5_SOUT, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO21__LPSPI5_SCK, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TD0__GPIO4_IO19, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_TD1__GPIO4_IO18, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO07__GPIO2_IO07, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TD0__GPIO4_IO19, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_TD1__GPIO4_IO18, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
     /* TEC Init Pin. */
     IOMUXC_SetPinMux(IOMUXC_PAD_DAP_TMS_SWDIO__GPIO3_IO29, 0U);
     IOMUXC_SetPinMux(IOMUXC_PAD_DAP_TDO_TRACESWO__GPIO3_IO31, 0U);

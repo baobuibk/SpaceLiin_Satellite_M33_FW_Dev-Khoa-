@@ -85,7 +85,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
 
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
+    # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
 
@@ -96,6 +96,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater/bsp_heater.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc/bsp_onboard_adc.c"
+
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo/bsp_photo.c"
 
     # Components
 
@@ -182,12 +184,13 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
-    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
+    # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo
 
     # Component
     ${UserSourceDirPath}/Drivers/Components/error_codes

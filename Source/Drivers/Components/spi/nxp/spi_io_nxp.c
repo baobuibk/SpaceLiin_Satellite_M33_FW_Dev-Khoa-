@@ -50,12 +50,12 @@ uint32_t spi_io_set_mode(SPI_Io_t *me, uint8_t spi_mode)
         return ERROR_INVALID_PARAM;
     }
 
-    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    // if (sem_ret != pdPASS)
-    // {
-    //     return (uint32_t)sem_ret;
-    // }
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
 
     LPSPI_Type *base = spi_periph[me->ui32SpiPort];
 
@@ -92,7 +92,7 @@ uint32_t spi_io_set_mode(SPI_Io_t *me, uint8_t spi_mode)
     /* Enable SPI again */
     base->CR |= LPSPI_CR_MEN_MASK;
 
-    // osSemaphoreGiven(&me->lock);
+    osSemaphoreGiven(&me->lock);
 
     return ERROR_OK;
 }
@@ -109,12 +109,12 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
         return ERROR_INVALID_PARAM;
     }
 
-    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    // if (sem_ret != pdPASS)
-    // {
-    //     return (uint32_t)sem_ret;
-    // }
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
 
     delay_init();
 
@@ -159,7 +159,7 @@ uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t *pui8RxBuff, uint32_t ui32Length
     // Optional: clear TCF once for neatness
     base->SR = LPSPI_SR_TCF_MASK;
 
-    // osSemaphoreGiven(&me->lock);
+    osSemaphoreGiven(&me->lock);
 
     return ERROR_OK;
 }
@@ -173,12 +173,12 @@ uint32_t spi_io_write_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t ui32Lengt
         return ERROR_INVALID_PARAM;
     }
 
-    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    // if (sem_ret != pdPASS)
-    // {
-    //     return (uint32_t)sem_ret;
-    // }
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
 
     delay_init();
 
@@ -216,7 +216,7 @@ uint32_t spi_io_write_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint32_t ui32Lengt
     // Optional: clear sticky TCF
     base->SR = LPSPI_SR_TCF_MASK;
 
-    // osSemaphoreGiven(&me->lock);
+    osSemaphoreGiven(&me->lock);
 
     return ERROR_OK;
 }
@@ -230,12 +230,12 @@ uint32_t spi_io_transfer_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint8_t *pui8Rx
         return ERROR_INVALID_PARAM;
     }
 
-    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    // if (sem_ret != pdPASS)
-    // {
-    //     return (uint32_t)sem_ret;
-    // }
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
 
     delay_init();
 
@@ -273,7 +273,7 @@ uint32_t spi_io_transfer_sync(SPI_Io_t *me, uint8_t *pui8TxBuff, uint8_t *pui8Rx
     // Optional: clear sticky TCF
     base->SR = LPSPI_SR_TCF_MASK;
 
-    // osSemaphoreGiven(&me->lock);
+    osSemaphoreGiven(&me->lock);
 
     return ERROR_OK;
 }

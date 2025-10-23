@@ -26,7 +26,8 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Power Control Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "pwr_sol_en", 			CMD_PWR_SOL_EN,				" : Solenoid power control" },
 	{ "pwr_htr_en", 			CMD_PWR_HTR_EN,				" : Heater power control" },
-	{ "pwr_las_en", 			CMD_PWR_LAS_EN,				" : Heater power control" },
+	{ "pwr_las_en", 			CMD_PWR_LAS_EN,				" : Laser power control" },
+	{ "pwr_phot_en", 			CMD_PWR_PHOT_EN,			" : Photo power control" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Heater Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "htr_set", 				CMD_HTR_SET,				" : Set heater n duty cycle" },
@@ -40,6 +41,9 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test LASER Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "laser_set", 				CMD_LASER_SET,				" : Switch on/off a channel" },
 	{ "laser_dac", 				CMD_LASER_DAC,				" : Set DAC output volt" },
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test PHOTO Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "photo_set", 				CMD_PHOTO_SET,				" : Switch on/off a channel" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Ultility Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "help", 					CMD_HELP,					" : Display list of commands" },
@@ -124,6 +128,27 @@ int CMD_PWR_LAS_EN(int argc, char *argv[])
 		return CMDLINE_INVALID_ARG;
 
 	bsp_expander_ctrl(POW_ONOFF_LASER, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PWR_PHOT_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_PHOTO, receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;
@@ -249,7 +274,7 @@ int CMD_LASER_SET(int argc, char *argv[])
 	if ((receive_argm[1] < 0) || (receive_argm[1] > 1))
 		return CMDLINE_INVALID_ARG;
 
-	if (!strcmp(argv[0], "all"))
+	if (!strcmp(argv[1], "all"))
 	{
 		if (receive_argm[1] == 1)
 		{
@@ -305,6 +330,60 @@ int CMD_LASER_DAC(int argc, char *argv[])
 	}
 		
 	bsp_laser_int_set_dac(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PHOTO_SET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm[2];
+
+	receive_argm[0] = atoi(argv[1]);
+	receive_argm[1] = atoi(argv[2]);
+
+	if ((receive_argm[1] < 0) || (receive_argm[1] > 1))
+		return CMDLINE_INVALID_ARG;
+
+	if (!strcmp(argv[1], "all"))
+	{
+		if (receive_argm[1] == 1)
+		{
+			for (uint8_t i = 1; i < 25; i++)
+			{
+				bsp_photo_int_sw_on(i);
+			}
+			
+		}
+		else
+		{
+			bsp_photo_int_all_sw_off();
+		}
+		
+		// Return success.
+		return CMDLINE_OK;
+	}
+	else if ((receive_argm[0] < 1) || (receive_argm[0] > 24))
+	{
+		return CMDLINE_INVALID_ARG;
+	}
+		
+	bsp_photo_int_all_sw_off();
+	
+	if (receive_argm[1] == 1)
+	{
+		bsp_photo_int_sw_on(receive_argm[0]);
+	}
+	else
+	{
+		bsp_photo_int_sw_off(receive_argm[0]);
+	}
 
 	// Return success.
 	return CMDLINE_OK;

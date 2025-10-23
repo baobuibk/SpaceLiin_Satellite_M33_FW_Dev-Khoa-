@@ -50,16 +50,26 @@ static void Task_Init(void *pvParameters)
 {
     for(;;)
     {
-        /* IO core driver init */
-        // spi_io_init(&onboard_adc_spi);
-        // i2c_io_init(&io_expander_i2c);
-
         /* Init system data */
         system_data_init();
 
+        /* IO core driver init */
+        spi_io_init(&onboard_adc_spi);
+        spi_io_init(&photo_adc_spi);
+
+        i2c_io_init(&io_expander_i2c);
+
+        /* Init board peripheral. */
+        bsp_debug_console_init();
+        bsp_libcsp_can_init();
+        bsp_expander_init();
+        bsp_heater_init();
+        bsp_onboard_adc_init();
+        bsp_laser_init();
+        bsp_photo_init();
+
         // Pull up RAM SPI nCS
         bsp_expander_ctrl(RAM_SPI_nCS, 1);
-        bsp_laser_init();
 
         /* Init task */
         Task_CMD_Line_Init();

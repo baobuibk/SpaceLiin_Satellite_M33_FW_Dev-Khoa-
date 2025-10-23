@@ -7,7 +7,14 @@
 
 
 #include "bsp_photo.h"
+#include "bsp_core.h"
 #include "board.h"
+
+adg1414_dev_t photo_sw_dev = {
+		.spi = &photo_adc_spi,
+		.cs  = { .port = 2, .pin = 7, .bStatus = true },
+		.num_of_sw = 3
+};
 
 static int8_t map_PD_position(int x) {
     static const uint8_t map[] = {
@@ -24,20 +31,20 @@ static int8_t map_PD_position(int x) {
 
 void bsp_photo_init(void)
 {
-	adg1414_chain_init(&photo_sw_dev, &photo_spi, &photo_sw_dev.cs, photo_sw_dev.num_of_sw);
+	adg1414_chain_init(&photo_sw_dev, &photo_adc_spi, &photo_sw_dev.cs, photo_sw_dev.num_of_sw);
 }
 
 void bsp_photo_int_sw_on(uint8_t channel)
 {
 	uint8_t real_channel = map_PD_position(channel);
-	spi_io_set_mode(laser_int_dev.spi, 1);
+	spi_io_set_mode(photo_sw_dev.spi, 1);
 	adg1414_chain_sw_on(&photo_sw_dev, real_channel);
 }
 
 void bsp_photo_int_sw_off(uint8_t channel)
 {
 	uint8_t real_channel = map_PD_position(channel);
-	spi_io_set_mode(laser_int_dev.spi, 1);
+	spi_io_set_mode(photo_sw_dev.spi, 1);
 	adg1414_chain_sw_off(&photo_sw_dev, real_channel);
 }
 

@@ -320,12 +320,12 @@ static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip)
         return ERROR_INVALID_PARAM;
     }
 
-    // int sem_ret = osSemaphoreTake(&me->lock, 1000);
+    int sem_ret = osSemaphoreTake(&me->lock, 1000);
 
-    // if (sem_ret != pdPASS)
-    // {
-    //     return (uint32_t)sem_ret;
-    // }
+    if (sem_ret != pdPASS)
+    {
+        return (uint32_t)sem_ret;
+    }
 
     LPSPI_Type *base = spi_periph[me->ui32SpiPort];
 
@@ -376,7 +376,7 @@ static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip)
     /* Enable SPI again */
     base->CR |= LPSPI_CR_MEN_MASK;
 
-    // osSemaphoreGiven(&me->lock);
+    osSemaphoreGiven(&me->lock);
 
     return ERROR_OK;
 }

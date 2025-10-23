@@ -105,22 +105,41 @@
 #define LASER_SW_GPIO_EXT_CS_PIN        26U
 
 /*********************PHOTO ADC SPI**********************/
-#define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi6
-#define PHOTO_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi6
+#define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi5
+#define PHOTO_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi5
 #define PHOTO_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(PHOTO_ADC_SPI_CLOCK_ROOT)
 
-#define PHOTO_ADC_SPI_BASE              LPSPI6
-#define PHOTO_ADC_SPI_IRQn              LPSPI6_IRQn
+#define PHOTO_ADC_SPI_BASE              LPSPI5
+#define PHOTO_ADC_SPI_IRQn              LPSPI5_IRQn
 
 #define PHOTO_ADC_SPI_BAUDRATE          (25000000)
 
-#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
-#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_GATE    kCLOCK_Gpio2
-#define PHOTO_ADC_GPIO_SPI_CS_CLK_FREQ      CLOCK_GetIpFreq(PHOTO_ADC_GPIO_CS_CLOCK_ROOT)
+#define PHOTO_ADC_GPIO_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
+#define PHOTO_ADC_GPIO_CS_CLOCK_GATE    kCLOCK_Gpio4
+#define PHOTO_ADC_GPIO_CS_CLK_FREQ      CLOCK_GetIpFreq(PHOTO_ADC_GPIO_CS_CLOCK_ROOT)
 
-#define PHOTO_ADC_GPIO_PORT                 GPIO2
-#define PHOTO_ADC_GPIO_SPI_CS_PIN           16U
-#define PHOTO_ADC_GPIO_SPI_CV_PIN           7U
+#define PHOTO_ADC_GPIO_CS_PORT          GPIO4
+#define PHOTO_ADC_GPIO_CS_PIN           19U
+#define PHOTO_ADC_GPIO_CV_PIN           18U
+
+
+
+/*********************PHOTO SW**********************/
+#define PHOTO_SW_SPI_CLOCK_ROOT         kCLOCK_Root_Lpspi5
+#define PHOTO_SW_SPI_CLOCK_GATE         kCLOCK_Lpspi5
+#define PHOTO_SW_SPI_CLK_FREQ           CLOCK_GetIpFreq(PHOTO_SW_SPI_CLOCK_ROOT)
+
+#define PHOTO_SW_SPI_BASE               LPSPI5
+#define PHOTO_SW_SPI_IRQn               LPSPI5_IRQn
+
+#define PHOTO_SW_SPI_BAUDRATE           (25000000)
+
+#define PHOTO_SW_GPIO_CS_CLOCK_ROOT     kCLOCK_Root_BusWakeup
+#define PHOTO_SW_GPIO_CS_CLOCK_GATE     kCLOCK_Gpio2
+#define PHOTO_SW_GPIO_CS_CLK_FREQ       CLOCK_GetIpFreq(PHOTO_SW_GPIO_CS_CLOCK_ROOT)
+
+#define PHOTO_SW_GPIO_CS_PORT           GPIO2
+#define PHOTO_SW_GPIO_CS_PIN            7U
 
 /*********************PHOTO ADC TIM**********************/
 #define PHOTO_ADC_TIM_CLOCK_ROOT        kCLOCK_Root_Tpm2

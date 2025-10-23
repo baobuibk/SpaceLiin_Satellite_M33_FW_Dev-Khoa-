@@ -26,11 +26,4 @@ void BSP_Init(void)
 
     /* Init core peripheral. */
     bsp_core_init();
-
-    /* Init board peripheral. */
-    bsp_debug_console_init();
-    bsp_libcsp_can_init();
-    bsp_expander_init();
-    bsp_heater_init();
-    bsp_onboard_adc_init();
 }
