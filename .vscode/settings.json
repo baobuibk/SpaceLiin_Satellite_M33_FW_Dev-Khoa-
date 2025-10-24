@@ -90,6 +90,13 @@
     "task_update_onboard_adc.h": "c",
     "semphr.h": "c",
     "mutex": "c",
-    "variant": "c"
+    "variant": "c",
+    "bsp_laser.h": "c",
+    "board.h": "c",
+    "string.h": "c",
+    "task_experiment.h": "c",
+    "fsl_tpm.h": "c",
+    "delay.h": "c",
+    "bsp_photo.h": "c"
   }
 }

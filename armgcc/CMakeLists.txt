@@ -63,6 +63,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/App/system_data/system_data.c"
 
+    "${UserSourceDirPath}/App/task/task_experiment/task_experiment.c"
+
     "${UserSourceDirPath}/App/task/task_cmd_line/task_cmd_line.c"
 
     "${UserSourceDirPath}/App/task/task_cmd_line/command/command.c"
@@ -75,6 +77,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/App/task/task_update_onboard_adc/task_update_onboard_adc.c"
 
+    "${UserSourceDirPath}/App/task/task_experiment/task_experiment.c"
+
     # BoardSupport
     "${UserSourceDirPath}/BoardSupport/bsp.c"
     
@@ -85,15 +89,19 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
 
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
+    # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
+
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser/bsp_laser.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander/bsp_expander.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater/bsp_heater.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc/bsp_onboard_adc.c"
+
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo/bsp_photo.c"
 
     # Components
 
@@ -134,6 +142,10 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/Drivers/Devices/AD4114/ad4114.c"
 
+    "${UserSourceDirPath}/Drivers/Devices/ADG1414BR/adg1414.c"
+
+    "${UserSourceDirPath}/Drivers/Devices/MCP4902/mcp4902.c"
+
     # MiddleWare
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osMalloc.c"
@@ -158,6 +170,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App
     ${UserSourceDirPath}/App/system_data
     ${UserSourceDirPath}/App/task
+    ${UserSourceDirPath}/App/task/task_experiment
     ${UserSourceDirPath}/App/task/task_cmd_line
     ${UserSourceDirPath}/App/task/task_cmd_line/command
     ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can
@@ -165,6 +178,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
     ${UserSourceDirPath}/App/task/task_test_can
     ${UserSourceDirPath}/App/task/task_update_onboard_adc
+    ${UserSourceDirPath}/App/task/task_experiment
 
     # BoardSupport
     ${UserSourceDirPath}/BoardSupport
@@ -176,11 +190,13 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
-    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
+    # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo
 
     # Component
     ${UserSourceDirPath}/Drivers/Components/error_codes
@@ -225,6 +241,8 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Drivers/Devices/tca6416
     ${UserSourceDirPath}/Drivers/Devices/pca9685
     ${UserSourceDirPath}/Drivers/Devices/AD4114
+    ${UserSourceDirPath}/Drivers/Devices/ADG1414BR
+    ${UserSourceDirPath}/Drivers/Devices/MCP4902
 
     # MiddleWare
     # ${UserSourceDirPath}/MiddleWare/FreeRTOS

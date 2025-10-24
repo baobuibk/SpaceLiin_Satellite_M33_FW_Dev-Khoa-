@@ -17,6 +17,8 @@ enum command_error_code
 /* :::::::::: Power Control Command :::::::: */
 int CMD_PWR_SOL_EN(int argc, char *argv[]);
 int CMD_PWR_HTR_EN(int argc, char *argv[]);
+int CMD_PWR_LAS_EN(int argc, char *argv[]);
+int CMD_PWR_PHOT_EN(int argc, char *argv[]);
 
 /* :::::::::: Heater Command :::::::: */
 int CMD_HTR_SET(int argc, char *argv[]);
@@ -26,6 +28,14 @@ int CMD_SOL_CTL(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);
+int CMD_EXP_START(int argc, char *argv[]);
+
+/* :::::::::: Test Laser Command :::::::: */
+int CMD_LASER_SET(int argc, char *argv[]);
+int CMD_LASER_DAC(int argc, char *argv[]);
+
+/* :::::::::: Test Photo Command :::::::: */
+int CMD_PHOTO_SET(int argc, char *argv[]);
 
 /* :::::::::: Ultility Command :::::::: */
 int CMD_HELP(int argc, char *argv[]);

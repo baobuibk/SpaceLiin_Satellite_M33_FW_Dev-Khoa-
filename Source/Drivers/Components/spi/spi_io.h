@@ -75,7 +75,7 @@ typedef struct
 
 }SPI_Io_t;
 
-
+uint32_t spi_io_set_mode(SPI_Io_t *me, uint8_t spi_mode);
 
 uint32_t spi_io_init(SPI_Io_t *me);
 uint32_t spi_io_read_sync(SPI_Io_t *me, uint8_t	*pui8RxBuff, uint32_t ui32Length);

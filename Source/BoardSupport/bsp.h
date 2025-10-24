@@ -3,14 +3,18 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* User includes. */
+#include "system_data.h"
+
+#include "bsp_core.h"
 #include "bsp_board.h"
 #include "bsp_debug_console.h"
 #include "bsp_libcsp_can.h"
-#include "bsp_spi_sensor.h"
 #include "bsp_i2c_sensor.h"
 #include "bsp_expander.h"
 #include "bsp_heater.h"
 #include "bsp_onboard_adc.h"
+#include "bsp_laser.h"
+#include "bsp_photo.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

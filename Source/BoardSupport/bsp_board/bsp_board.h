@@ -48,7 +48,7 @@
 
 #define IO_EXPAN_BAUDRATE_HZ             (100000U)
 
-/*********************ON BOARD ADC SPI**********************/
+/*********************ONBOARD ADC SPI**********************/
 #define ONBOARD_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi1
 #define ONBOARD_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi1
 #define ONBOARD_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(ONBOARD_ADC_SPI_CLOCK_ROOT)
@@ -65,41 +65,81 @@
 #define ONBOARD_ADC_GPIO_CS_PORT          GPIO4
 #define ONBOARD_ADC_GPIO_CS0_PIN          16U
 #define ONBOARD_ADC_GPIO_CS1_PIN          20U
+#define ONBOARD_ADC_GPIO_SYNC0_PIN        17U
+#define ONBOARD_ADC_GPIO_SYNC1_PIN        21U
 
-// #define ONBOARD_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi6
-// #define ONBOARD_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi6
-// #define ONBOARD_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(ONBOARD_ADC_SPI_CLOCK_ROOT)
+/*********************LASER DAC**********************/
+#define LASER_DAC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi1
+#define LASER_DAC_SPI_CLOCK_GATE        kCLOCK_Lpspi1
+#define LASER_DAC_SPI_CLK_FREQ          CLOCK_GetIpFreq(LASER_DAC_SPI_CLOCK_ROOT)
 
-// #define ONBOARD_ADC_SPI_BASE              LPSPI6
-// #define ONBOARD_ADC_SPI_IRQn              LPSPI6_IRQn
+#define LASER_DAC_SPI_BASE              LPSPI1
+#define LASER_DAC_SPI_IRQn              LPSPI1_IRQn
 
-// #define ONBOARD_ADC_SPI_BAUDRATE          (500000)
+#define LASER_DAC_SPI_BAUDRATE          (500000)
 
-// #define ONBOARD_ADC_GPIO_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
-// #define ONBOARD_ADC_GPIO_CS_CLOCK_GATE    kCLOCK_Gpio4
-// #define ONBOARD_ADC_GPIO_CS_CLK_FREQ      CLOCK_GetIpFreq(ONBOARD_ADC_GPIO_CS_CLOCK_ROOT)
+#define LASER_DAC_GPIO_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
+#define LASER_DAC_GPIO_CS_CLOCK_GATE    kCLOCK_Gpio4
+#define LASER_DAC_GPIO_CS_CLK_FREQ      CLOCK_GetIpFreq(LASER_DAC_GPIO_CS_CLOCK_ROOT)
 
-// #define ONBOARD_ADC_GPIO_CS_PORT          GPIO4
-// #define ONBOARD_ADC_GPIO_CS0_PIN          16U
-// #define ONBOARD_ADC_GPIO_CS1_PIN          20U
+#define LASER_DAC_GPIO_CS_PORT          GPIO4
+#define LASER_DAC_GPIO_CS_PIN           27U
+#define LASER_DAC_GPIO_LATCH_PIN        24U
+
+/*********************LASER SW**********************/
+#define LASER_SW_SPI_CLOCK_ROOT         kCLOCK_Root_Lpspi1
+#define LASER_SW_SPI_CLOCK_GATE         kCLOCK_Lpspi1
+#define LASER_SW_SPI_CLK_FREQ           CLOCK_GetIpFreq(LASER_SW_SPI_CLOCK_ROOT)
+
+#define LASER_SW_SPI_BASE               LPSPI1
+#define LASER_SW_SPI_IRQn               LPSPI1_IRQn
+
+#define LASER_SW_SPI_BAUDRATE           (500000)
+
+#define LASER_SW_GPIO_CS_CLOCK_ROOT     kCLOCK_Root_BusWakeup
+#define LASER_SW_GPIO_CS_CLOCK_GATE     kCLOCK_Gpio4
+#define LASER_SW_GPIO_CS_CLK_FREQ       CLOCK_GetIpFreq(LASER_SW_GPIO_CS_CLOCK_ROOT)
+
+#define LASER_SW_GPIO_CS_PORT           GPIO4
+#define LASER_SW_GPIO_INT_CS_PIN        25U
+#define LASER_SW_GPIO_EXT_CS_PIN        26U
 
 /*********************PHOTO ADC SPI**********************/
-#define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi6
-#define PHOTO_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi6
+#define PHOTO_ADC_SPI_CLOCK_ROOT        kCLOCK_Root_Lpspi5
+#define PHOTO_ADC_SPI_CLOCK_GATE        kCLOCK_Lpspi5
 #define PHOTO_ADC_SPI_CLK_FREQ          CLOCK_GetIpFreq(PHOTO_ADC_SPI_CLOCK_ROOT)
 
-#define PHOTO_ADC_SPI_BASE              LPSPI6
-#define PHOTO_ADC_SPI_IRQn              LPSPI6_IRQn
+#define PHOTO_ADC_SPI_BASE              LPSPI5
+#define PHOTO_ADC_SPI_IRQn              LPSPI5_IRQn
 
 #define PHOTO_ADC_SPI_BAUDRATE          (25000000)
 
-#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
-#define PHOTO_ADC_GPIO_SPI_CS_CLOCK_GATE    kCLOCK_Gpio2
-#define PHOTO_ADC_GPIO_SPI_CS_CLK_FREQ      CLOCK_GetIpFreq(PHOTO_ADC_GPIO_CS_CLOCK_ROOT)
+#define PHOTO_ADC_GPIO_CS_CLOCK_ROOT    kCLOCK_Root_BusWakeup
+#define PHOTO_ADC_GPIO_CS_CLOCK_GATE    kCLOCK_Gpio4
+#define PHOTO_ADC_GPIO_CS_CLK_FREQ      CLOCK_GetIpFreq(PHOTO_ADC_GPIO_CS_CLOCK_ROOT)
 
-#define PHOTO_ADC_GPIO_PORT                 GPIO2
-#define PHOTO_ADC_GPIO_SPI_CS_PIN           16U
-#define PHOTO_ADC_GPIO_SPI_CV_PIN           7U
+#define PHOTO_ADC_GPIO_CS_PORT          GPIO4
+#define PHOTO_ADC_GPIO_CS_PIN           19U
+
+#define PHOTO_ADC_GPIO_CV_PORT          GPIO4
+#define PHOTO_ADC_GPIO_CV_PIN           18U
+
+/*********************PHOTO SW**********************/
+#define PHOTO_SW_SPI_CLOCK_ROOT         kCLOCK_Root_Lpspi5
+#define PHOTO_SW_SPI_CLOCK_GATE         kCLOCK_Lpspi5
+#define PHOTO_SW_SPI_CLK_FREQ           CLOCK_GetIpFreq(PHOTO_SW_SPI_CLOCK_ROOT)
+
+#define PHOTO_SW_SPI_BASE               LPSPI5
+#define PHOTO_SW_SPI_IRQn               LPSPI5_IRQn
+
+#define PHOTO_SW_SPI_BAUDRATE           (25000000)
+
+#define PHOTO_SW_GPIO_CS_CLOCK_ROOT     kCLOCK_Root_BusWakeup
+#define PHOTO_SW_GPIO_CS_CLOCK_GATE     kCLOCK_Gpio2
+#define PHOTO_SW_GPIO_CS_CLK_FREQ       CLOCK_GetIpFreq(PHOTO_SW_GPIO_CS_CLOCK_ROOT)
+
+#define PHOTO_SW_GPIO_CS_PORT           GPIO2
+#define PHOTO_SW_GPIO_CS_PIN            7U
 
 /*********************PHOTO ADC TIM**********************/
 #define PHOTO_ADC_TIM_CLOCK_ROOT        kCLOCK_Root_Tpm2
