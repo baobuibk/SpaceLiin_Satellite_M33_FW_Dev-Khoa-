@@ -100,10 +100,10 @@ void Task_CMD_Line(void *pvParameters)
     const TickType_t delay_period = pdMS_TO_TICKS(50);   // 50 ms
           TickType_t last_delay;
 
-for(;;)
-{
     last_delay = xTaskGetTickCount();
 
+for(;;)
+{
     for(time_out = 50; (!TASK_CMD_LINE_RX_EMPTY()) && (time_out != 0); time_out--)
     {
         task_cmd_line.RX_char = (char)TASK_CMD_LINE_GET_CHAR();

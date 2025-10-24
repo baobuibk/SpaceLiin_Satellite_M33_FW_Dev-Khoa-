@@ -1,21 +1,7 @@
-#ifndef _BSUPPORT_H_
-#define _BSUPPORT_H_
+#ifndef _TASK_EXPERIMENT_H_
+#define _TASK_EXPERIMENT_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* User includes. */
-#include "system_data.h"
-
-#include "bsp_core.h"
-#include "bsp_board.h"
-#include "bsp_debug_console.h"
-#include "bsp_libcsp_can.h"
-#include "bsp_i2c_sensor.h"
-#include "bsp_expander.h"
-#include "bsp_heater.h"
-#include "bsp_onboard_adc.h"
-#include "bsp_laser.h"
-#include "bsp_photo.h"
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -23,8 +9,9 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void BSP_Init(void);
+/* :::::::::: CMD Line Task ::::::::::::: */
+void Task_Experiment(void *pvParameters);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* _BSUPPORT_H_ */
+#endif /* _TASK_EXPERIMENT_H_ */

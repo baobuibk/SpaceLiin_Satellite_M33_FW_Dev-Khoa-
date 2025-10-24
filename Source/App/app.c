@@ -11,6 +11,7 @@
 #include "task_cmd_line.h"
 #include "task_test_can.h"
 #include "task_update_onboard_adc.h"
+#include "task_experiment.h"
 
 /* System data includes. */
 #include "system_data.h"
@@ -75,9 +76,10 @@ static void Task_Init(void *pvParameters)
         Task_CMD_Line_Init();
 
         /* Task Create */
-        xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
+        xTaskCreate(Task_Experiment, "Task_Experiment", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
+        // xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
         xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
-        xTaskCreate(Task_Update_Onboard_ADC, "Task_Update_Onboard_ADC", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 2, NULL);
+        xTaskCreate(Task_Update_Onboard_ADC, "Task_Update_Onboard_ADC", configMINIMAL_STACK_SIZE + 38 + 128, NULL, Task_CMD_Line_PRIORITY - 2, NULL);
 
         vTaskDelete(Task_Init_Handle);
     }

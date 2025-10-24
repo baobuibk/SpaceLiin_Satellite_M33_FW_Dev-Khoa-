@@ -62,13 +62,31 @@ typedef enum
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+typedef struct _exp_profile_t_
+{
+    // Timing
+	uint32_t pre_time_ms; //time before switching
+	uint32_t sampling_time_ms; //time when switch the laser on
+	uint32_t post_time_ms;  //time after switching off the laser
+
+    uint8_t  laser_intensity; //in percent
+
+    uint32_t sampling_rate_khz; //in Khz
+
+} exp_profile_t;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 uint32_t system_data_init();
 
 uint32_t system_data_update_NTC(int16_t* p_data);
-
 uint32_t system_data_get_NTC(NTC_channel channel, int16_t* p_data);
+
+uint32_t system_data_update_exp_profile(exp_profile_t* p_data);
+uint32_t system_data_get_exp_profile(exp_profile_t* p_data);
+
+uint32_t system_data_update_is_start_exp(uint8_t _is_start_exp);
+uint32_t system_data_get_is_start_exp(uint8_t* p_buffer);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #endif /* _SYSTEM_DATA_H_ */

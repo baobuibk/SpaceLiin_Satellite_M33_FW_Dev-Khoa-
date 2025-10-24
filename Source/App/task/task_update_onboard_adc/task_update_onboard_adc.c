@@ -8,13 +8,7 @@
 #include "task_update_onboard_adc.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-// #define TASK_TEST_CAN_PRINTF                bsp_debug_console_printf
-// #define TASK_TEST_CAN_SEND_CHAR             bsp_debug_console_send_char
-// #define TASK_TEST_CAN_SEND_STRING           bsp_debug_console_send_string
-
-// #define TASK_TEST_CAN_GET_FRAME(p_frame)    bsp_libcsp_can_get_frame((p_frame))
-// #define TASK_TEST_CAN_RX_EMPTY              bsp_libcsp_RX_buffer_empty
-
+#define TASK_DELAY_MS   1000
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -28,15 +22,15 @@
 void Task_Update_Onboard_ADC(void *pvParameters)
 {
     // uint8_t time_out;
-    const TickType_t delay_period = pdMS_TO_TICKS(1000);   // 1000 ms
+    const TickType_t delay_period = pdMS_TO_TICKS(TASK_DELAY_MS);   // 1000 ms
           TickType_t last_delay;
+
+        last_delay = xTaskGetTickCount();
 
     // flexcan_frame_t RX_frame;
 
     for(;;)
     {
-        last_delay = xTaskGetTickCount();
-
         bsp_onboard_adc_update_raw();
         bsp_onboard_adc_update_volt();
 
@@ -45,7 +39,7 @@ void Task_Update_Onboard_ADC(void *pvParameters)
         bsp_convert_eFUSE_Current();
         bsp_convert_onboard_temp();
 
-        // wake up exactly every 100 ms
+        // wake up exactly every 1000 ms
         vTaskDelayUntil(&last_delay, delay_period);
     }
 }

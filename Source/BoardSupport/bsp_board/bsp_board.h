@@ -120,9 +120,9 @@
 
 #define PHOTO_ADC_GPIO_CS_PORT          GPIO4
 #define PHOTO_ADC_GPIO_CS_PIN           19U
+
+#define PHOTO_ADC_GPIO_CV_PORT          GPIO4
 #define PHOTO_ADC_GPIO_CV_PIN           18U
-
-
 
 /*********************PHOTO SW**********************/
 #define PHOTO_SW_SPI_CLOCK_ROOT         kCLOCK_Root_Lpspi5

@@ -38,6 +38,9 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
 
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test EXP Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "exp_start", 				CMD_EXP_START,				" : Start EXP sequence" },
+
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test LASER Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "laser_set", 				CMD_LASER_SET,				" : Switch on/off a channel" },
 	{ "laser_dac", 				CMD_LASER_DAC,				" : Set DAC output volt" },
@@ -253,6 +256,27 @@ int CMD_GET_TEMP_NTC(int argc, char *argv[])
 
 	// bsp_debug_console_printf("> CURRENT: %d mA\n", current_ma);
 	bsp_debug_console_printf("> NTC TEMP: %d C\n", temp_ntc);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_EXP_START(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	// int receive_argm;
+
+	// receive_argm = atoi(argv[1]);
+
+	// if ((receive_argm < 0) || (receive_argm > 1))
+	// 	return CMDLINE_INVALID_ARG;
+
+	system_data_update_is_start_exp(1);
 
 	// Return success.
 	return CMDLINE_OK;

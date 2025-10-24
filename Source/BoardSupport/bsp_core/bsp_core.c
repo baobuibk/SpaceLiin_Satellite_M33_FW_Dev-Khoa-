@@ -40,7 +40,7 @@ static void bsp_core_init_photo_adc_cs_gpio(void);
 static void bsp_core_init_photo_switch_gpio(void);
 
 // static void bsp_core_init_gpio(void);
-// static void bsp_core_init_tim(void);
+static void bsp_core_init_tim(void);
 
 /*******************************************************************************
  * Variables
@@ -74,7 +74,7 @@ void bsp_core_init(void)
 
     // bsp_core_init_spi();
     // bsp_core_init_gpio();
-    // bsp_core_init_tim();
+    bsp_core_init_tim();
 }
 
 /*!
@@ -281,7 +281,7 @@ static void bsp_core_init_onboard_adc_spi(void)
     masterConfig.direction                      = kLPSPI_MsbFirst;
     masterConfig.cpol                           = kLPSPI_ClockPolarityActiveLow;
     masterConfig.cpha                           = kLPSPI_ClockPhaseSecondEdge;
-    masterConfig.pinCfg                         = kLPSPI_SdoInSdiOut;
+    // masterConfig.pinCfg                         = kLPSPI_SdoInSdiOut;
     masterConfig.baudRate = ONBOARD_ADC_SPI_BAUDRATE;
     masterConfig.whichPcs = kLPSPI_Pcs1;
     
@@ -566,8 +566,8 @@ static void bsp_core_init_photo_adc_cs_gpio(void)
     const clock_root_config_t rgpioClkCfg =
     {
         .clockOff = false,
-        .mux = 0, // 24Mhz Mcore root buswake clock
-        .div = 1
+        .mux = 1, // 24Mhz Mcore root buswake clock
+        .div = 4
     };
 
     CLOCK_SetRootClock(PHOTO_ADC_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
@@ -601,8 +601,8 @@ static void bsp_core_init_photo_switch_gpio(void)
     const clock_root_config_t rgpioClkCfg =
     {
         .clockOff = false,
-        .mux = 0, // 24Mhz Mcore root buswake clock
-        .div = 1
+        .mux = 1, // 24Mhz Mcore root buswake clock
+        .div = 4
     };
 
     CLOCK_SetRootClock(PHOTO_SW_GPIO_CS_CLOCK_ROOT, &rgpioClkCfg);
@@ -651,28 +651,15 @@ static void bsp_core_init_photo_switch_gpio(void)
 //     RGPIO_PinInit(PHOTO_ADC_GPIO_PORT, PHOTO_ADC_GPIO_SPI_CV_PIN, &photo_ADC_CV_config);
 // }
 
-// static void bsp_core_init_tim(void)
-// {
-//     tpm_config_t tpmInfo;
+static void bsp_core_init_tim(void)
+{
+    const clock_root_config_t lptpmClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0,
+	    .div = 1
+    };
 
-//     const clock_root_config_t lptpmClkCfg =
-//     {
-//         .clockOff = false,
-// 	    .mux = 0,
-// 	    .div = 1
-//     };
-
-//     CLOCK_SetRootClock(PHOTO_ADC_TIM_CLOCK_ROOT, &lptpmClkCfg);
-//     CLOCK_EnableClock(PHOTO_ADC_TIM_CLOCK_GATE);
-
-//     TPM_GetDefaultConfig(&tpmInfo);
-
-//     /* TPM clock divide by TPM_PRESCALER */
-//     tpmInfo.prescale = PHOTO_ADC_TIM_PRESCALER;
-
-//     /* Initialize TPM module */
-//     TPM_Init(PHOTO_ADC_TIM_BASE, &tpmInfo);
-
-//     /* Set timer period */
-//     TPM_SetTimerPeriod(PHOTO_ADC_TIM_BASE, USEC_TO_COUNT(PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ / (1U << tpmInfo.prescale)));
-// }
+    CLOCK_SetRootClock(PHOTO_ADC_TIM_CLOCK_ROOT, &lptpmClkCfg);
+    CLOCK_EnableClock(PHOTO_ADC_TIM_CLOCK_GATE);
+}

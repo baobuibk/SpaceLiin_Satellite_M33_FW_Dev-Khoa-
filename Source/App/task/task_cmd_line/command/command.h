@@ -28,6 +28,7 @@ int CMD_SOL_CTL(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);
+int CMD_EXP_START(int argc, char *argv[]);
 
 /* :::::::::: Test Laser Command :::::::: */
 int CMD_LASER_SET(int argc, char *argv[]);

@@ -130,7 +130,7 @@ uint32_t bsp_onboard_adc_init()
 	// ((1 << 10) - 1) << 2: Enable 10 pin, start at pin 2
 	ret = bsp_onboard_adc_config(&onboard_adc_dev1, (((1 << 10) - 1) << 2));
 
-	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
+	spi_io_onboard_adc_config(onboard_adc_dev1.spi, 0);
 
 	if (ret != ERROR_OK)
 	{
@@ -157,7 +157,7 @@ uint32_t bsp_onboard_adc_update_raw()
 	
 	ret = ad4114_read_all(&onboard_adc_dev1, 5000u, &out_mask_adc1, adc1_raw);
 
-	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
+	spi_io_onboard_adc_config(onboard_adc_dev1.spi, 0);
 
 	if (ret != ERROR_OK)
 	{
@@ -358,7 +358,7 @@ static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip)
     }
     else
     {
-        temp_cfgr1 |= (LPSPI_CFGR1_PINCFG(kLPSPI_SdiInSdoOut));
+        temp_cfgr1 |= (LPSPI_CFGR1_PINCFG(kLPSPI_SdoInSdiOut));
     }
     
     base->CFGR1 = temp_cfgr1;
@@ -374,7 +374,7 @@ static uint32_t spi_io_onboard_adc_config(SPI_Io_t *me, uint8_t is_flip)
     base->TCR = temp_tcr;
 
     /* Enable SPI again */
-    base->CR |= LPSPI_CR_MEN_MASK;
+    base->CR |= (LPSPI_CR_MEN_MASK);
 
     osSemaphoreGiven(&me->lock);
 
