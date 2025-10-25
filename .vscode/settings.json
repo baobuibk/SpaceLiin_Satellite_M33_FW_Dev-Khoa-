@@ -98,6 +98,7 @@
     "fsl_tpm.h": "c",
     "delay.h": "c",
     "bsp_photo.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "system_data.h": "c"
   }
 }

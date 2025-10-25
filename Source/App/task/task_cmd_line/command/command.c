@@ -44,6 +44,7 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test LASER Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "laser_set", 				CMD_LASER_SET,				" : Switch on/off a channel" },
 	{ "laser_dac", 				CMD_LASER_DAC,				" : Set DAC output volt" },
+	{ "laser_current", 			CMD_LASER_CURRENT,			" : Switch on/off a channel" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test PHOTO Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "photo_set", 				CMD_PHOTO_SET,				" : Switch on/off a channel" },
@@ -354,6 +355,22 @@ int CMD_LASER_DAC(int argc, char *argv[])
 	}
 		
 	bsp_laser_int_set_dac(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_LASER_CURRENT(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint16_t current = bsp_laser_int_current_adc_polling();
+		
+	bsp_debug_console_printf("> CURRENT: %duA\n", current);
 
 	// Return success.
 	return CMDLINE_OK;

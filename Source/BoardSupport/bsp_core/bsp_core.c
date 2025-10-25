@@ -790,7 +790,7 @@ static int bsp_core_init_laser_adc(void)
 
     /* 1) Go to power-down first (clean start), then wait */
     base->MCR |= SAR_ADC_MCR_PWDN_MASK;
-    _tiny_delay(2000); /* small guard; if MSR has status, wait for POWER_DOWN */
+    _tiny_delay(10000); /* small guard; if MSR has status, wait for POWER_DOWN */
     (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_POWER_DOWN << 0), 100000u);
 
     /* 2) Make sure calibration uses the default ADC clock (ADCLKSE = 0) */
@@ -813,7 +813,8 @@ static int bsp_core_init_laser_adc(void)
 
     /* 4) Exit power-down -> IDLE */
     base->MCR &= ~SAR_ADC_MCR_PWDN_MASK;
-    (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_IDLE << 0), 200000u);
+    _tiny_delay(10000);
+    (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_IDLE << 0), 500000u);
 
     /* 5) Start calibration and wait to complete */
     base->MCR |= SAR_ADC_MCR_CALSTART_MASK;
@@ -835,8 +836,8 @@ static int bsp_core_init_laser_adc(void)
     /* 7) Ensure Normal (one-shot) mode (MODE = 0) */
     base->MCR &= ~SAR_ADC_MCR_MODE_MASK;
 
-    /* 8) Leave interrupts masked; user will poll on EOC/ECH or read PCDR */
-    /* Ready for: set NCMR bit -> set NSTART -> poll -> read PCDR[ch] */
+    // /* 8) Leave interrupts masked; user will poll on EOC/ECH or read PCDR */
+    // /* Ready for: set NCMR bit -> set NSTART -> poll -> read PCDR[ch] */
 
     return 0;
 }

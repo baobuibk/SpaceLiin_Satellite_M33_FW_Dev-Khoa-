@@ -283,18 +283,26 @@ uint16_t bsp_laser_int_current_adc_polling(void)
 {
     bsp_laser_int_current_trigger_adc();
 
-	uint16_t timeout = 2000;
+	uint32_t timeout = 2000;
     while ((ADC1->ISR & (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK)) == 0u)
 	{
 		timeout--;
 
 		if (timeout == 0)
 		{
-			return 0;
+			return 0x0;
 		}
 	}
 
-    return bsp_laser_int_current_read_adc_data();
+	uint16_t raw_adc = bsp_laser_int_current_read_adc_data();
+
+	// float temp = ((float)raw_adc * 1800.0) / (4095.0);	//mV x 1 times
+	// temp /= (5.97 * 30.0);
+
+	float temp = (float)raw_adc * 2.454273811;
+	return (uint16_t)(temp);
+
+    // return raw_adc;
 
 	// return 0;
 }
@@ -314,13 +322,13 @@ uint16_t bsp_laser_ext_current_adc_polling(void)
 		}
 	}
 
-	uint16_t raw_adc = bsp_laser_ext_current_read_adc_data();
+	// uint16_t raw_adc = bsp_laser_ext_current_read_adc_data();
 
-	float temp = (adc_val * ADC_VREF * 10) / ADC_MAX;	//mV x 10 times
-	temp /= ADC_RES_SHUNT;
-	return (uint16_t)(temp);
+	// float temp = ((float)raw_adc * 1800.0) / (4095.0);	//mV x 1 times
+	// temp /= (5.97 * 30.0);
+	// return (uint16_t)(temp);
 
-    return raw_adc;
+	return bsp_laser_ext_current_read_adc_data();
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
