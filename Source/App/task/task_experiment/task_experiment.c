@@ -87,7 +87,7 @@ void Task_Experiment(void *pvParameters)
         DAC_code_from_percent = (uint8_t)((((float)s_exp_profile.laser_intensity * 256.0) / 100.0) - 1.0);
 
         bsp_photo_setup_timmer(s_exp_profile.sampling_rate_khz);
-        bsp_laser_setup_timmer(s_exp_profile.sampling_rate_khz);
+        // bsp_laser_setup_timmer(s_exp_profile.sampling_rate_khz);
 
         for (current_channel = 0; current_channel < 24; current_channel++)
         {
@@ -98,7 +98,7 @@ void Task_Experiment(void *pvParameters)
             bsp_photo_int_sw_on(current_channel + 1);
 
             bsp_photo_spi_irq_init();
-            bsp_laser_start_timer();
+            // bsp_laser_start_timer();
             bsp_photo_start_timer();
 
             vTaskDelayUntil(&exp_last_delay, pre_delay);

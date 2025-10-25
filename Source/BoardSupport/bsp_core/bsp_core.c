@@ -43,7 +43,7 @@ static void bsp_core_init_photo_switch_gpio(void);
 static void bsp_core_init_tim(void);
 
 static void bsp_core_init_laser_adc_tim(void);
-static int bsp_core_adc_init_normal(void);
+static int bsp_core_init_laser_adc(void);
 
 /*******************************************************************************
  * Variables
@@ -79,8 +79,8 @@ void bsp_core_init(void)
     // bsp_core_init_gpio();
     bsp_core_init_tim();
 
-    bsp_core_init_laser_adc_tim();
-    // bsp_core_adc_init_normal();
+    // bsp_core_init_laser_adc_tim();
+    bsp_core_init_laser_adc();
 }
 
 /*!
@@ -647,99 +647,99 @@ static void bsp_core_init_laser_adc_tim(void)
     CLOCK_EnableClock(LASER_ADC_TIM_CLOCK_GATE);
 }
 
-// #include "MIMX9352_cm33.h"   // Provides SAR_ADC_Type and base pointers (e.g., ADC1)
+#include "MIMX9352_cm33.h"   // Provides SAR_ADC_Type and base pointers (e.g., ADC1)
 
-// /* ===========================
-//  *  Minimal bitfield defines
-//  *  (verify against your RM)
-//  * =========================== */
+/* ===========================
+ *  Minimal bitfield defines
+ *  (verify against your RM)
+ * =========================== */
 
-// /* MCR – Main Configuration */
-// // #define SAR_ADC_MCR_PWDN_MASK        (1u << 0)   /* 1 = Power down */
-// // #define SAR_ADC_MCR_ADCLKSE_MASK     (1u << 8)   /* 1 = ADCLK = Bus clock, 0 = Internal/aux */
-// // #define SAR_ADC_MCR_CALSTART_MASK    (1u << 14)  /* 1 = Start calibration */
-// // #define SAR_ADC_MCR_NSTART_MASK      (1u << 24)  /* 1 = Start normal conversion sequence */
-// // #define SAR_ADC_MCR_MODE_MASK        (1u << 29)  /* 0 = Normal (one-shot), 1 = Scan/loop */
+/* MCR – Main Configuration */
+// #define SAR_ADC_MCR_PWDN_MASK        (1u << 0)   /* 1 = Power down */
+// #define SAR_ADC_MCR_ADCLKSE_MASK     (1u << 8)   /* 1 = ADCLK = Bus clock, 0 = Internal/aux */
+// #define SAR_ADC_MCR_CALSTART_MASK    (1u << 14)  /* 1 = Start calibration */
+// #define SAR_ADC_MCR_NSTART_MASK      (1u << 24)  /* 1 = Start normal conversion sequence */
+// #define SAR_ADC_MCR_MODE_MASK        (1u << 29)  /* 0 = Normal (one-shot), 1 = Scan/loop */
 
-// /* MSR – Main Status (used for “status == idle/pd” if your RM exposes it) */
-// // #define SAR_ADC_MSR_ADCSTATUS_MASK   (0x7u << 0) /* Optional: status field (IDLE/PD/etc.) */
-// #define SAR_ADC_STATUS_IDLE          (0u)
-// #define SAR_ADC_STATUS_POWER_DOWN    (1u)
+/* MSR – Main Status (used for “status == idle/pd” if your RM exposes it) */
+// #define SAR_ADC_MSR_ADCSTATUS_MASK   (0x7u << 0) /* Optional: status field (IDLE/PD/etc.) */
+#define SAR_ADC_STATUS_IDLE          (0u)
+#define SAR_ADC_STATUS_POWER_DOWN    (1u)
 
-// /* CALSTAT – Calibration Status */
-// #define SAR_ADC_CALSTAT_BUSY_MASK    (1u << 0)   /* 1 = Calibration in progress */
-// #define SAR_ADC_CALSTAT_FAIL_MASK    (1u << 1)   /* 1 = Calibration failed */
+/* CALSTAT – Calibration Status */
+#define SAR_ADC_CALSTAT_BUSY_MASK    (1u << 0)   /* 1 = Calibration in progress */
+#define SAR_ADC_CALSTAT_FAIL_MASK    (1u << 1)   /* 1 = Calibration failed */
 
-// /* ISR/IMR – Global interrupt status/mask */
-// // #define SAR_ADC_ISR_ECH_MASK         (1u << 0)   /* End of chain */
-// // #define SAR_ADC_ISR_EOC_MASK         (1u << 1)   /* End of conversion */
-// #define SAR_ADC_ISR_ALL              (0xFFFFFFFFu)
+/* ISR/IMR – Global interrupt status/mask */
+// #define SAR_ADC_ISR_ECH_MASK         (1u << 0)   /* End of chain */
+// #define SAR_ADC_ISR_EOC_MASK         (1u << 1)   /* End of conversion */
+#define SAR_ADC_ISR_ALL              (0xFFFFFFFFu)
 
-// /* CEOCFRx – Channel pending (write-1-to-clear on many NXP SARs) */
-// #define SAR_ADC_CEOCFR_ALL           (0xFFFFFFFFu)
+/* CEOCFRx – Channel pending (write-1-to-clear on many NXP SARs) */
+#define SAR_ADC_CEOCFR_ALL           (0xFFFFFFFFu)
 
-// /* WTIMR – Watchdog interrupt mask (0 = mask all) */
-// #define SAR_ADC_WTIMR_ALL_MASKED     (0u)
+/* WTIMR – Watchdog interrupt mask (0 = mask all) */
+#define SAR_ADC_WTIMR_ALL_MASKED     (0u)
 
-// /* DMAE – DMA enable (0 = disabled) */
-// #define SAR_ADC_DMAE_DISABLE         (0u)
+/* DMAE – DMA enable (0 = disabled) */
+#define SAR_ADC_DMAE_DISABLE         (0u)
 
-// /* PSCR/PSR – Presampling (disable for clean defaults) */
-// #define SAR_ADC_PSCR_PSM_EN_MASK     (1u << 0)   /* 1 = presampling enable */
-// #define SAR_ADC_PSCR_DISABLE         (0u)
+/* PSCR/PSR – Presampling (disable for clean defaults) */
+#define SAR_ADC_PSCR_PSM_EN_MASK     (1u << 0)   /* 1 = presampling enable */
+#define SAR_ADC_PSCR_DISABLE         (0u)
 
-// /* CTRx – Conversion timing
-//    NOTE: Exact bitfields are SoC-specific. The values below are conservative:
-//    - Moderate sample/acquisition window for external source settling
-//    - Default conversion time
-//    Adjust per your RM/AFE requirement.
-// */
-// #define SAR_ADC_CTR0_SAFE_DEFAULT    (0x0000001Fu)  /* Example: ~medium acq time */
-// #define SAR_ADC_CTR1_SAFE_DEFAULT    (0x00000000u)
+/* CTRx – Conversion timing
+   NOTE: Exact bitfields are SoC-specific. The values below are conservative:
+   - Moderate sample/acquisition window for external source settling
+   - Default conversion time
+   Adjust per your RM/AFE requirement.
+*/
+#define SAR_ADC_CTR0_SAFE_DEFAULT    (0x0000001Fu)  /* Example: ~medium acq time */
+#define SAR_ADC_CTR1_SAFE_DEFAULT    (0x00000000u)
 
-// /* NCMR/JCMR – Channel masks: leave cleared at init */
-// #define SAR_ADC_NCMR_NONE            (0u)
-// #define SAR_ADC_JCMR_NONE            (0u)
+/* NCMR/JCMR – Channel masks: leave cleared at init */
+#define SAR_ADC_NCMR_NONE            (0u)
+#define SAR_ADC_JCMR_NONE            (0u)
 
-// /* USROFSGN – Neutral user gain/offset */
-// #define SAR_ADC_USROFSGN_NEUTRAL     (0x00000000u)
+/* USROFSGN – Neutral user gain/offset */
+#define SAR_ADC_USROFSGN_NEUTRAL     (0x00000000u)
 
-// /* PDEDR – Power-down exit delay (ADC clock cycles). 32 is a safe default. */
-// #define SAR_ADC_PDEDR_DEFAULT        (32u)
+/* PDEDR – Power-down exit delay (ADC clock cycles). 32 is a safe default. */
+#define SAR_ADC_PDEDR_DEFAULT        (32u)
 
-// /* Result formatting (PCDR width is 12-bit on i.MX93 SAR) */
-// #define SAR_ADC_PCDR_MASK_12B        (0x0FFFu)
+/* Result formatting (PCDR width is 12-bit on i.MX93 SAR) */
+#define SAR_ADC_PCDR_MASK_12B        (0x0FFFu)
 
-// /* ===========================
-//  *  Small local helpers
-//  * =========================== */
-// static inline void _tiny_delay(volatile uint32_t n)
-// {
-//     while (n--) __NOP();
-// }
+/* ===========================
+ *  Small local helpers
+ * =========================== */
+static inline void _tiny_delay(volatile uint32_t n)
+{
+    while (n--) __NOP();
+}
 
-// static bool _wait_bits_cleared(volatile uint32_t *reg, uint32_t mask, uint32_t iters)
-// {
-//     while (iters--)
-//     {
-//         if ( ((*reg) & mask) == 0u ) return true;
-//         __NOP();
-//     }
-//     return false;
-// }
+static bool _wait_bits_cleared(volatile uint32_t *reg, uint32_t mask, uint32_t iters)
+{
+    while (iters--)
+    {
+        if ( ((*reg) & mask) == 0u ) return true;
+        __NOP();
+    }
+    return false;
+}
 
-// static bool _wait_status_equals(volatile uint32_t *reg, uint32_t mask, uint32_t expect, uint32_t iters)
-// {
-//     while (iters--)
-//     {
-//         if ( ((*reg) & mask) == expect ) return true;
-//         __NOP();
-//     }
-//     return false;
-// }
+static bool _wait_status_equals(volatile uint32_t *reg, uint32_t mask, uint32_t expect, uint32_t iters)
+{
+    while (iters--)
+    {
+        if ( ((*reg) & mask) == expect ) return true;
+        __NOP();
+    }
+    return false;
+}
 
 /* ============================================================
- *  bsp_core_adc_init_normal()
+ *  bsp_core_init_laser_adc()
  *
  *  What this does:
  *    - Masks/clears all interrupts and pending flags
@@ -762,90 +762,90 @@ static void bsp_core_init_laser_adc_tim(void)
  *   -2 on timeout waiting for calibration to end
  *   -3 on calibration failure
  * ============================================================ */
-static int bsp_core_adc_init_normal(void)
+static int bsp_core_init_laser_adc(void)
 {
-    // const clock_root_config_t lpadcClkCfg =
-    // {
-    //     .clockOff = false,
-	//     .mux = 0,
-	//     .div = 1
-    // };
+    const clock_root_config_t lpadcClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0,
+	    .div = 1
+    };
 
-    // CLOCK_SetRootClock(LASER_IMX_ADC_CLOCK_ROOT, &lpadcClkCfg);
-    // CLOCK_EnableClock(LASER_IMX_ADC_CLOCK_GATE);
+    CLOCK_SetRootClock(LASER_IMX_ADC_CLOCK_ROOT, &lpadcClkCfg);
+    CLOCK_EnableClock(LASER_IMX_ADC_CLOCK_GATE);
 
-    // SAR_ADC_Type *base = LASER_IMX_ADC_BASE;
+    SAR_ADC_Type *base = LASER_IMX_ADC_BASE;
 
-    // if (!base) return -1;
+    if (!base) return -1;
 
-    // /* 0) Globally mask interrupts and clear any sticky status/pending flags */
-    // base->IMR    = 0u;                  /* Mask global EOC/ECH/etc. */
-    // base->CIMR0  = 0u;                  /* Mask per-channel interrupts (0..31) */
-    // base->CIMR1  = 0u;                  /* Mask per-channel interrupts (32..63) */
-    // base->WTIMR  = SAR_ADC_WTIMR_ALL_MASKED;
-    // base->ISR    = SAR_ADC_ISR_ALL;     /* W1C */
-    // base->CEOCFR0 = SAR_ADC_CEOCFR_ALL; /* W1C pending by channel (0..31) */
-    // base->CEOCFR1 = SAR_ADC_CEOCFR_ALL; /* W1C pending by channel (32..63) */
-    // base->DMAE   = SAR_ADC_DMAE_DISABLE;
+    /* 0) Globally mask interrupts and clear any sticky status/pending flags */
+    base->IMR    = 0u;                  /* Mask global EOC/ECH/etc. */
+    base->CIMR0  = 0u;                  /* Mask per-channel interrupts (0..31) */
+    base->CIMR1  = 0u;                  /* Mask per-channel interrupts (32..63) */
+    base->WTIMR  = SAR_ADC_WTIMR_ALL_MASKED;
+    base->ISR    = SAR_ADC_ISR_ALL;     /* W1C */
+    base->CEOCFR0 = SAR_ADC_CEOCFR_ALL; /* W1C pending by channel (0..31) */
+    base->CEOCFR1 = SAR_ADC_CEOCFR_ALL; /* W1C pending by channel (32..63) */
+    base->DMAE   = SAR_ADC_DMAE_DISABLE;
 
-    // /* 1) Go to power-down first (clean start), then wait */
-    // base->MCR |= SAR_ADC_MCR_PWDN_MASK;
-    // _tiny_delay(2000); /* small guard; if MSR has status, wait for POWER_DOWN */
-    // (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_POWER_DOWN << 0), 100000u);
+    /* 1) Go to power-down first (clean start), then wait */
+    base->MCR |= SAR_ADC_MCR_PWDN_MASK;
+    _tiny_delay(2000); /* small guard; if MSR has status, wait for POWER_DOWN */
+    (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_POWER_DOWN << 0), 100000u);
 
-    // /* 2) Make sure calibration uses the default ADC clock (ADCLKSE = 0) */
-    // base->MCR &= ~SAR_ADC_MCR_ADCLKSE_MASK;
+    /* 2) Make sure calibration uses the default ADC clock (ADCLKSE = 0) */
+    base->MCR &= ~SAR_ADC_MCR_ADCLKSE_MASK;
 
-    // /* 3) Program safe analog front-end defaults */
-    // base->PSCR   = SAR_ADC_PSCR_DISABLE;      /* presampling off */
-    // base->PSR0   = 0u;
-    // base->PSR1   = 0u;
-    // base->CTR0   = SAR_ADC_CTR0_SAFE_DEFAULT; /* moderate sample window */
-    // base->CTR1   = SAR_ADC_CTR1_SAFE_DEFAULT;
-    // base->USROFSGN = SAR_ADC_USROFSGN_NEUTRAL;/* no user gain/offset */
-    // base->PDEDR  = SAR_ADC_PDEDR_DEFAULT;     /* power-up settling guard */
+    /* 3) Program safe analog front-end defaults */
+    base->PSCR   = SAR_ADC_PSCR_DISABLE;      /* presampling off */
+    base->PSR0   = 0u;
+    base->PSR1   = 0u;
+    base->CTR0   = SAR_ADC_CTR0_SAFE_DEFAULT; /* moderate sample window */
+    base->CTR1   = SAR_ADC_CTR1_SAFE_DEFAULT;
+    base->USROFSGN = SAR_ADC_USROFSGN_NEUTRAL;/* no user gain/offset */
+    base->PDEDR  = SAR_ADC_PDEDR_DEFAULT;     /* power-up settling guard */
 
-    // /* Clear channel masks (no channel selected yet) */
-    // base->NCMR0  = SAR_ADC_NCMR_NONE;
-    // base->NCMR1  = SAR_ADC_NCMR_NONE;
-    // base->JCMR0  = SAR_ADC_JCMR_NONE;
-    // base->JCMR1  = SAR_ADC_JCMR_NONE;
+    /* Clear channel masks (no channel selected yet) */
+    base->NCMR0  = SAR_ADC_NCMR_NONE;
+    base->NCMR1  = SAR_ADC_NCMR_NONE;
+    base->JCMR0  = SAR_ADC_JCMR_NONE;
+    base->JCMR1  = SAR_ADC_JCMR_NONE;
 
-    // /* 4) Exit power-down -> IDLE */
-    // base->MCR &= ~SAR_ADC_MCR_PWDN_MASK;
-    // (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_IDLE << 0), 200000u);
+    /* 4) Exit power-down -> IDLE */
+    base->MCR &= ~SAR_ADC_MCR_PWDN_MASK;
+    (void)_wait_status_equals(&base->MSR, SAR_ADC_MSR_ADCSTATUS_MASK, (SAR_ADC_STATUS_IDLE << 0), 200000u);
 
-    // /* 5) Start calibration and wait to complete */
-    // base->MCR |= SAR_ADC_MCR_CALSTART_MASK;
+    /* 5) Start calibration and wait to complete */
+    base->MCR |= SAR_ADC_MCR_CALSTART_MASK;
 
-    // /* Prefer CALSTAT if available; fall back to MSR-calbusy if needed */
-    // if (!_wait_bits_cleared(&base->CALSTAT, SAR_ADC_CALSTAT_BUSY_MASK, 2000000u))
-    // {
-    //     /* ~2M poll iterations; adjust for your core clock if needed */
-    //     return -2; /* calibration timeout */
-    // }
-    // if (base->CALSTAT & SAR_ADC_CALSTAT_FAIL_MASK)
-    // {
-    //     return -3; /* calibration failed: check VREF/analog rails/noise */
-    // }
+    /* Prefer CALSTAT if available; fall back to MSR-calbusy if needed */
+    if (!_wait_bits_cleared(&base->CALSTAT, SAR_ADC_CALSTAT_BUSY_MASK, 2000000u))
+    {
+        /* ~2M poll iterations; adjust for your core clock if needed */
+        return -2; /* calibration timeout */
+    }
+    if (base->CALSTAT & SAR_ADC_CALSTAT_FAIL_MASK)
+    {
+        return -3; /* calibration failed: check VREF/analog rails/noise */
+    }
 
-    // /* 6) Select bus clock for better control (post-cal) */
-    // base->MCR |= SAR_ADC_MCR_ADCLKSE_MASK;
+    /* 6) Select bus clock for better control (post-cal) */
+    base->MCR |= SAR_ADC_MCR_ADCLKSE_MASK;
 
-    // /* 7) Ensure Normal (one-shot) mode (MODE = 0) */
-    // base->MCR &= ~SAR_ADC_MCR_MODE_MASK;
+    /* 7) Ensure Normal (one-shot) mode (MODE = 0) */
+    base->MCR &= ~SAR_ADC_MCR_MODE_MASK;
 
-    // /* 8) Leave interrupts masked; user will poll on EOC/ECH or read PCDR */
-    // /* Ready for: set NCMR bit -> set NSTART -> poll -> read PCDR[ch] */
+    /* 8) Leave interrupts masked; user will poll on EOC/ECH or read PCDR */
+    /* Ready for: set NCMR bit -> set NSTART -> poll -> read PCDR[ch] */
 
-    // return 0;
+    return 0;
 }
 
 /* ===========================
  *  Example usage (polling):
  * ===========================
  *
- * // After bsp_core_adc_init_normal(ADC1) succeeds:
+ * // After bsp_core_init_laser_adc(ADC1) succeeds:
  * static inline uint16_t adc_read_channel_blocking(SAR_ADC_Type *adc, uint8_t ch)
  * {
  *     // 1) Select one channel in normal sequence

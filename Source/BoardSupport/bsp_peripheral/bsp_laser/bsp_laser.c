@@ -4,7 +4,7 @@
 #include "bsp_laser.h"
 #include "bsp.h"
 
-#include "do.h"
+// #include "do.h"
 
 #include "fsl_tpm.h"
 
@@ -25,13 +25,6 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static uint16_t laser_current[24 * 128] = {0};
-
-static uint32_t laser_adc_set_count;
-static uint32_t laser_adc_count;
-
-static uint8_t  is_laser_tim_run = 0;
-
 adg1414_dev_t laser_int_dev =
 {
 		.spi = &onboard_adc_spi,
@@ -58,6 +51,13 @@ static int8_t map_int_LD_position(int x);
 static int8_t map_ext_LD_position(int x);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+uint16_t laser_current[32 * 2] = {0};
+
+uint32_t laser_adc_set_count;
+uint32_t laser_adc_count;
+
+uint8_t  is_laser_tim_run = 0;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void bsp_laser_init(void)
 {
@@ -133,7 +133,7 @@ void bsp_laser_setup_timmer(uint32_t sampling_rate_khz)
 {
 	tpm_config_t exp_tpm_config;
 
-	laser_adc_set_count = 24 * 128;
+	laser_adc_set_count = 32 * 2;
 	laser_adc_count = 0;
 
 	TPM_GetDefaultConfig(&exp_tpm_config);
@@ -147,13 +147,13 @@ void bsp_laser_setup_timmer(uint32_t sampling_rate_khz)
     TPM_Init(LASER_ADC_TIM_BASE, &exp_tpm_config);
 
 	/* Set timer period */
-    TPM_SetTimerPeriod(LASER_ADC_TIM_BASE, USEC_TO_COUNT(exp_period_us, LASER_ADC_TIM_CLK_FREQ / (1U << exp_tpm_config.prescale)));
+    // TPM_SetTimerPeriod(LASER_ADC_TIM_BASE, USEC_TO_COUNT(exp_period_us, LASER_ADC_TIM_CLK_FREQ / (1U << exp_tpm_config.prescale)));
 
-    TPM_EnableInterrupts(LASER_ADC_TIM_BASE, kTPM_TimeOverflowInterruptEnable);
+    // TPM_EnableInterrupts(LASER_ADC_TIM_BASE, kTPM_TimeOverflowInterruptEnable);
 
-	NVIC_ClearPendingIRQ(LASER_ADC_TIM_IRQn);
-    NVIC_SetPriority   	(LASER_ADC_TIM_IRQn, 4);
-    NVIC_EnableIRQ     	(LASER_ADC_TIM_IRQn);
+	// NVIC_ClearPendingIRQ(LASER_ADC_TIM_IRQn);
+    // NVIC_SetPriority   	(LASER_ADC_TIM_IRQn, 4);
+    // NVIC_EnableIRQ     	(LASER_ADC_TIM_IRQn);
 }
 
 void bsp_laser_start_timer(void)
@@ -185,32 +185,32 @@ void bsp_laser_start_timer(void)
 //     base->SC &= ~TPM_SC_CMOD_MASK;
 // }
 
-void TPM3_IRQHandler(void);
-void TPM3_IRQHandler(void)
-{
-	/* Clear interrupt flag.*/
-	LASER_ADC_TIM_BASE->STATUS = kTPM_TimeOverflowFlag;
+// void TPM3_IRQHandler(void);
+// void TPM3_IRQHandler(void)
+// {
+// 	/* Clear interrupt flag.*/
+// 	LASER_ADC_TIM_BASE->STATUS = kTPM_TimeOverflowFlag;
 	
-	laser_current[laser_adc_count] = bsp_laser_int_current_adc_polling();
-	laser_adc_count += 1;
+// 	laser_current[laser_adc_count] = bsp_laser_int_current_adc_polling();
+// 	laser_adc_count += 1;
 
-	if (laser_adc_count < laser_adc_set_count)
-	{
-		return;
-	}
-	// else if (photo_spi_count >= photo_spi_set_count)
-	// reset the spi count
-	laser_adc_count = 0;
-	is_laser_tim_run = 0;
+// 	if (laser_adc_count < laser_adc_set_count)
+// 	{
+// 		return;
+// 	}
+// 	// else if (photo_spi_count >= photo_spi_set_count)
+// 	// reset the spi count
+// 	laser_adc_count = 0;
+// 	is_laser_tim_run = 0;
 
-	TPM_Type *base = LASER_ADC_TIM_BASE;
+// 	TPM_Type *base = LASER_ADC_TIM_BASE;
 
-	// Stop TPM: disable clock to counter (CMOD = 0). Preserve other bits.
-	base->SC &= ~TPM_SC_CMOD_MASK;
+// 	// Stop TPM: disable clock to counter (CMOD = 0). Preserve other bits.
+// 	base->SC &= ~TPM_SC_CMOD_MASK;
 
-	// Reset counter to 0
-	base->CNT = 0U;
-}
+// 	// Reset counter to 0
+// 	base->CNT = 0U;
+// }
 
 /* ============================================================
  * 1) TRIGGER: select channel and start a one-shot conversion
@@ -219,32 +219,32 @@ void TPM3_IRQHandler(void)
  * ============================================================ */
 void bsp_laser_int_current_trigger_adc(void)
 {
-    // /* Select only channel 1 in the normal sequence */
-    // ADC1->NCMR0 = (1u << 1);
-    // ADC1->NCMR1 = 0u;
-    // ADC1->JCMR0 = 0u;
-    // ADC1->JCMR1 = 0u;
+    /* Select only channel 1 in the normal sequence */
+    ADC1->NCMR0 = (1u << 1);
+    ADC1->NCMR1 = 0u;
+    ADC1->JCMR0 = 0u;
+    ADC1->JCMR1 = 0u;
 
-    // /* Clear any previous status/pending, then start */
-    // ADC1->ISR     = SAR_ADC_ISR_ALL;      /* W1C */
-    // ADC1->CEOCFR0 = SAR_ADC_CEOCFR_ALL;   /* W1C channel-pending */
-    // ADC1->CEOCFR1 = SAR_ADC_CEOCFR_ALL;
-    // ADC1->MCR    |= SAR_ADC_MCR_NSTART_MASK;
+    /* Clear any previous status/pending, then start */
+    ADC1->ISR     = SAR_ADC_ISR_ALL;      /* W1C */
+    ADC1->CEOCFR0 = SAR_ADC_CEOCFR_ALL;   /* W1C channel-pending */
+    ADC1->CEOCFR1 = SAR_ADC_CEOCFR_ALL;
+    ADC1->MCR    |= SAR_ADC_MCR_NSTART_MASK;
 }
 
 void bsp_laser_ext_current_trigger_adc(void) //ext
 {
-    // /* Select only channel 0 in the normal sequence */
-    // ADC1->NCMR0 = (1u << 0);
-    // ADC1->NCMR1 = 0u;
-    // ADC1->JCMR0 = 0u;
-    // ADC1->JCMR1 = 0u;
+    /* Select only channel 0 in the normal sequence */
+    ADC1->NCMR0 = (1u << 0);
+    ADC1->NCMR1 = 0u;
+    ADC1->JCMR0 = 0u;
+    ADC1->JCMR1 = 0u;
 
-    // /* Clear any previous status/pending, then start */
-    // ADC1->ISR     = SAR_ADC_ISR_ALL;      /* W1C */
-    // ADC1->CEOCFR0 = SAR_ADC_CEOCFR_ALL;   /* W1C channel-pending */
-    // ADC1->CEOCFR1 = SAR_ADC_CEOCFR_ALL;
-    // ADC1->MCR    |= SAR_ADC_MCR_NSTART_MASK;
+    /* Clear any previous status/pending, then start */
+    ADC1->ISR     = SAR_ADC_ISR_ALL;      /* W1C */
+    ADC1->CEOCFR0 = SAR_ADC_CEOCFR_ALL;   /* W1C channel-pending */
+    ADC1->CEOCFR1 = SAR_ADC_CEOCFR_ALL;
+    ADC1->MCR    |= SAR_ADC_MCR_NSTART_MASK;
 }
 
 /* ============================================================
@@ -253,24 +253,25 @@ void bsp_laser_ext_current_trigger_adc(void) //ext
  * ============================================================ */
 uint16_t bsp_laser_int_current_read_adc_data(void)
 {
-    // uint16_t v = (uint16_t)(ADC1->PCDR[1] & SAR_ADC_PCDR_MASK_12B);
+    uint16_t v = (uint16_t)(ADC1->PCDR[1] & SAR_ADC_PCDR_MASK_12B);
 
-    // /* Clear EOC/ECH (W1C) */
-    // ADC1->ISR = (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK);
+    /* Clear EOC/ECH (W1C) */
+    ADC1->ISR = (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK);
 
-    // return v;
-	return 0;
+    return v;
+
+	// return 0;
 }
 
 uint16_t bsp_laser_ext_current_read_adc_data(void)
 {
-    // uint16_t v = (uint16_t)(ADC1->PCDR[0] & SAR_ADC_PCDR_MASK_12B);
+    uint16_t v = (uint16_t)(ADC1->PCDR[0] & SAR_ADC_PCDR_MASK_12B);
 
-    // /* Clear EOC/ECH (W1C) in case caller wants to chain calls */
-    // ADC1->ISR = (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK);
+    /* Clear EOC/ECH (W1C) in case caller wants to chain calls */
+    ADC1->ISR = (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK);
 
-    // return v;
-	return 0;
+    return v;
+	// return 0;
 }
 
 /* ============================================================
@@ -280,40 +281,46 @@ uint16_t bsp_laser_ext_current_read_adc_data(void)
  * ============================================================ */
 uint16_t bsp_laser_int_current_adc_polling(void)
 {
-    // bsp_laser_int_current_trigger_adc();
+    bsp_laser_int_current_trigger_adc();
 
-	// uint16_t timeout = 2000;
-    // while ((ADC1->ISR & (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK)) == 0u)
-	// {
-	// 	timeout--;
+	uint16_t timeout = 2000;
+    while ((ADC1->ISR & (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK)) == 0u)
+	{
+		timeout--;
 
-	// 	if (timeout == 0)
-	// 	{
-	// 		return 0;
-	// 	}
-	// }
+		if (timeout == 0)
+		{
+			return 0;
+		}
+	}
 
-    // return bsp_laser_int_current_read_adc_data();
-	return 0;
+    return bsp_laser_int_current_read_adc_data();
+
+	// return 0;
 }
 
 uint16_t bsp_laser_ext_current_adc_polling(void)
 {
-    // bsp_laser_ext_current_trigger_adc();
+    bsp_laser_ext_current_trigger_adc();
 
-	// uint16_t timeout = 2000;
-    // while ((ADC1->ISR & (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK)) == 0u)
-	// {
-	// 	timeout--;
+	uint16_t timeout = 2000;
+    while ((ADC1->ISR & (SAR_ADC_ISR_EOC_MASK | SAR_ADC_ISR_ECH_MASK)) == 0u)
+	{
+		timeout--;
 
-	// 	if (timeout == 0)
-	// 	{
-	// 		return 0;
-	// 	}
-	// }
+		if (timeout == 0)
+		{
+			return 0;
+		}
+	}
 
-    // return bsp_laser_ext_current_read_adc_data();
-	return 0;
+	uint16_t raw_adc = bsp_laser_ext_current_read_adc_data();
+
+	float temp = (adc_val * ADC_VREF * 10) / ADC_MAX;	//mV x 10 times
+	temp /= ADC_RES_SHUNT;
+	return (uint16_t)(temp);
+
+    return raw_adc;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
