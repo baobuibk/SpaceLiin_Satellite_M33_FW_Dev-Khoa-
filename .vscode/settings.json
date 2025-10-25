@@ -97,6 +97,7 @@
     "task_experiment.h": "c",
     "fsl_tpm.h": "c",
     "delay.h": "c",
-    "bsp_photo.h": "c"
+    "bsp_photo.h": "c",
+    "math.h": "c"
   }
 }
