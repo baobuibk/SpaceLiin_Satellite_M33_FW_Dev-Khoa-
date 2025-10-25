@@ -153,4 +153,23 @@
 /* Calculate the clock division based on the PWM frequency to be obtained */
 #define PHOTO_ADC_TIM_PRESCALER         TPM_CalculateCounterClkDiv(PHOTO_ADC_TIM_BASE, 1000000U / PHOTO_ADC_TIM_PERIOD_US, PHOTO_ADC_TIM_CLK_FREQ);
 
+/*********************LASER IMX ADC**********************/
+#define LASER_IMX_ADC_CLOCK_ROOT        kCLOCK_Root_Adc
+#define LASER_IMX_ADC_CLOCK_GATE        kCLOCK_Adc1
+#define LASER_IMX_ADC_CLK_FREQ          CLOCK_GetIpFreq(LASER_IMX_ADC_CLOCK_GATE)
+
+#define LASER_IMX_ADC_BASE              ADC1
+
+/*********************LASER ADC TIM**********************/
+#define LASER_ADC_TIM_CLOCK_ROOT        kCLOCK_Root_Tpm3
+#define LASER_ADC_TIM_CLOCK_GATE        kCLOCK_Tpm3
+#define LASER_ADC_TIM_CLK_FREQ          CLOCK_GetIpFreq(LASER_ADC_TIM_CLOCK_ROOT)
+
+#define LASER_ADC_TIM_BASE              TPM3
+#define LASER_ADC_TIM_IRQn              TPM3_IRQn
+
+#define LASER_ADC_TIM_PERIOD_US         (2U)
+/* Calculate the clock division based on the PWM frequency to be obtained */
+#define LASER_ADC_TIM_PRESCALER         TPM_CalculateCounterClkDiv(LASER_ADC_TIM_BASE, 1000000U / LASER_ADC_TIM_PERIOD_US, LASER_ADC_TIM_CLK_FREQ);
+
 #endif /* _BSP_BOARD_H_ */
