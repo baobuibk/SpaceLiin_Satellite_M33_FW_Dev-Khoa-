@@ -45,6 +45,17 @@ void bsp_laser_init(void)
 	mcp4902_dev_init(&laser_dac_dev, &onboard_adc_spi, &laser_dac_dev.cs, &laser_dac_dev.latch);
 }
 
+void bsp_laser_int_set_dac(uint8_t code)
+{
+	spi_io_set_mode(laser_dac_dev.spi, 0);
+	mcp4902_set_dac(&laser_dac_dev, MCP4902_CHA, code);
+}
+
+uint8_t bsp_laser_int_get_dac(void)
+{
+	return laser_dac_dev.dac_channel[MCP4902_CHA];
+}
+
 void bsp_laser_int_sw_on(uint8_t channel)
 {
 	uint8_t real_channel = map_int_LD_position(channel);
@@ -63,17 +74,6 @@ void bsp_laser_int_all_sw_off(void)
 {
 	spi_io_set_mode(laser_int_dev.spi, 1);
 	adg1414_chain_all_sw_off(&laser_int_dev);
-}
-
-void bsp_laser_int_set_dac(uint8_t code)
-{
-	spi_io_set_mode(laser_dac_dev.spi, 0);
-	mcp4902_set_dac(&laser_dac_dev, MCP4902_CHA, code);
-}
-
-uint8_t bsp_laser_int_get_dac(void)
-{
-	return laser_dac_dev.dac_channel[MCP4902_CHA];
 }
 
 void bsp_laser_ext_set_dac(uint8_t code)
@@ -105,6 +105,11 @@ void bsp_laser_int_all_sw_off(void)
 {
 	spi_io_set_mode(laser_ext_dev.spi, 1);
 	adg1414_chain_all_sw_off(&laser_ext_dev);
+}
+
+void bsp_laser_read_current()
+{
+	
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
