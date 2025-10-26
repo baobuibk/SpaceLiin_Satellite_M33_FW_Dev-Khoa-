@@ -28,6 +28,9 @@ static void bsp_core_init_can(void);
 static void bsp_core_init_io_expander_i2c(void);
 static void bsp_core_init_tec_cs_gpio(void);
 
+static void bsp_core_init_sensor_i2c(void);
+static void bsp_core_init_sensor_en_gpio(void);
+
 static void bsp_core_init_onboard_adc_spi(void);
 static void bsp_core_init_onboard_adc_cs_gpio(void);
 
@@ -238,6 +241,50 @@ static void bsp_core_init_tec_cs_gpio(void)
     RGPIO_PinInit(GPIO3, 31, &TEC_CS_config);
     RGPIO_PinInit(GPIO3, 28, &TEC_CS_config);
     RGPIO_PinInit(GPIO3, 30, &TEC_CS_config);
+}
+
+i2c_io_t sensor_i2c =
+{
+		.ui32I2cPort = 4
+};
+static void bsp_core_init_sensor_i2c(void)
+{
+    lpi2c_master_config_t i2c_masterConfig;
+
+    /* clang-format off */
+    const clock_root_config_t lpi2cClkCfg =
+    {
+        .clockOff = false,
+	    .mux = 0, // 24MHz oscillator source
+	    .div = 1
+    };
+    /* clang-format on */
+
+    CLOCK_SetRootClock(I2C_SENSOR_CLOCK_ROOT, &lpi2cClkCfg);
+    CLOCK_EnableClock(I2C_SENSOR_CLOCK_GATE);
+
+    /*
+     * i2c_masterConfig.debugEnable = false;
+     * i2c_masterConfig.ignoreAck = false;
+     * i2c_masterConfig.pinConfig = kLPI2C_2PinOpenDrain;
+     * i2c_masterConfig.baudRate_Hz = 100000U;
+     * i2c_masterConfig.busIdleTimeout_ns = 0;
+     * i2c_masterConfig.pinLowTimeout_ns = 0;
+     * i2c_masterConfig.sdaGlitchFilterWidth_ns = 0;
+     * i2c_masterConfig.sclGlitchFilterWidth_ns = 0;
+     */
+    LPI2C_MasterGetDefaultConfig(&i2c_masterConfig);
+
+    /* Change the default baudrate configuration */
+    i2c_masterConfig.baudRate_Hz = I2C_SENSOR_BAUDRATE_HZ;
+
+    /* Initialize the LPI2C master peripheral */
+    LPI2C_MasterInit(I2C_SENSOR_BASE, &i2c_masterConfig, I2C_SENSOR_CLK_FREQ);
+}
+
+static void bsp_core_init_sensor_en_gpio(void)
+{
+    ;
 }
 
 SPI_Io_t onboard_adc_spi =

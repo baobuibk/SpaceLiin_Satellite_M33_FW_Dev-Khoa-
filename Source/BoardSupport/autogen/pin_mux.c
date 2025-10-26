@@ -225,7 +225,32 @@ void BOARD_InitPins(void)
                         IOMUXC_PAD_DSE(15U) |
                         IOMUXC_PAD_FSEL1(2U) |
                         IOMUXC_PAD_PD_MASK);
-                        
+
+    /* I2C SENSOR Init Pin. */
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO03__LPI2C4_SCL, 1U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO02__LPI2C4_SDA, 1U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO03__LPI2C4_SCL, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_OD_MASK);
+    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO02__LPI2C4_SDA, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_OD_MASK);
+
+    IOMUXC_SetPinMux(IOMUXC_PAD_SD3_DATA3__GPIO3_IO25, 0U);
+    IOMUXC_SetPinMux(IOMUXC_PAD_ENET2_MDC__GPIO4_IO14, 0U);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_SD3_DATA3__GPIO3_IO25, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
+
+    IOMUXC_SetPinConfig(IOMUXC_PAD_ENET2_MDC__GPIO4_IO14, 
+                        IOMUXC_PAD_DSE(15U) |
+                        IOMUXC_PAD_FSEL1(2U) |
+                        IOMUXC_PAD_PD_MASK);
 }
 
 /***********************************************************************************************************************
