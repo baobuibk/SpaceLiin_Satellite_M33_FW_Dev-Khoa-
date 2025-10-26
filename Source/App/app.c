@@ -10,7 +10,7 @@
 
 /* Task includes. */
 #include "task_cmd_line.h"
-#include "task_test_can.h"
+// #include "task_test_can.h"
 #include "task_update_onboard_adc.h"
 #include "task_experiment.h"
 
@@ -63,7 +63,7 @@ static void Task_Init(void *pvParameters)
 
         /* Init board peripheral. */
         bsp_debug_console_init();
-        bsp_libcsp_can_init();
+        // bsp_libcsp_can_init();
         bsp_expander_init();
         bsp_heater_init();
         bsp_onboard_adc_init();

@@ -71,9 +71,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can/cmd_test_can.c"
 
-    "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.c"
+    # "${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi/cmd_test_spi.c"
 
-    "${UserSourceDirPath}/App/task/task_test_can/task_test_can.c"
+    # "${UserSourceDirPath}/App/task/task_test_can/task_test_can.c"
 
     "${UserSourceDirPath}/App/task/task_update_onboard_adc/task_update_onboard_adc.c"
 
@@ -87,11 +87,11 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console/bsp_debug_console.c"
 
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
+    # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can/bsp_libcsp_can.c"
 
     # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
 
-    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
+    # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser/bsp_laser.c"
 
@@ -176,7 +176,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_can
     ${UserSourceDirPath}/App/task/task_cmd_line/command/cmd_test_spi
 
-    ${UserSourceDirPath}/App/task/task_test_can
+    # ${UserSourceDirPath}/App/task/task_test_can
     ${UserSourceDirPath}/App/task/task_update_onboard_adc
     ${UserSourceDirPath}/App/task/task_experiment
 
@@ -189,9 +189,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_core
 
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
-    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
+    # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
     # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
-    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
+    # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
