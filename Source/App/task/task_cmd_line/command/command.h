@@ -35,6 +35,10 @@ int CMD_LASER_SET(int argc, char *argv[]);
 int CMD_LASER_DAC(int argc, char *argv[]);
 int CMD_LASER_CURRENT(int argc, char *argv[]);
 
+int CMD_EXT_SET(int argc, char *argv[]);
+int CMD_EXT_DAC(int argc, char *argv[]);
+int CMD_EXT_CURRENT(int argc, char *argv[]);
+
 /* :::::::::: Test Photo Command :::::::: */
 int CMD_PHOTO_SET(int argc, char *argv[]);
 

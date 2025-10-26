@@ -46,6 +46,10 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "laser_dac", 				CMD_LASER_DAC,				" : Set DAC output volt" },
 	{ "laser_current", 			CMD_LASER_CURRENT,			" : Switch on/off a channel" },
 
+	{ "ext_set", 				CMD_EXT_SET,				" : Switch on/off a channel" },
+	{ "ext_dac", 				CMD_EXT_DAC,				" : Set DAC output volt" },
+	{ "ext_current", 			CMD_EXT_CURRENT,			" : Switch on/off a channel" },
+
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test PHOTO Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "photo_set", 				CMD_PHOTO_SET,				" : Switch on/off a channel" },
 
@@ -371,6 +375,99 @@ int CMD_LASER_CURRENT(int argc, char *argv[])
 	uint16_t current = bsp_laser_int_current_adc_polling();
 		
 	bsp_debug_console_printf("> CURRENT: %duA\n", current);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_EXT_SET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm[2];
+
+	receive_argm[0] = atoi(argv[1]);
+	receive_argm[1] = atoi(argv[2]);
+
+	if ((receive_argm[1] < 0) || (receive_argm[1] > 1))
+		return CMDLINE_INVALID_ARG;
+
+	if (!strcmp(argv[1], "all"))
+	{
+		if (receive_argm[1] == 1)
+		{
+			for (uint8_t i = 1; i < 25; i++)
+			{
+				bsp_laser_ext_sw_on(i);
+			}
+			
+		}
+		else
+		{
+			bsp_laser_ext_all_sw_off();
+		}
+		
+		// Return success.
+		return CMDLINE_OK;
+	}
+	else if ((receive_argm[0] < 1) || (receive_argm[0] > 24))
+	{
+		return CMDLINE_INVALID_ARG;
+	}
+		
+	bsp_laser_ext_all_sw_off();
+	
+	if (receive_argm[1] == 1)
+	{
+		bsp_laser_ext_sw_on(receive_argm[0]);
+	}
+	else
+	{
+		bsp_laser_ext_sw_off(receive_argm[0]);
+	}
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_EXT_DAC(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > UINT8_MAX))
+	{
+		return CMDLINE_INVALID_ARG;
+	}
+		
+	bsp_laser_ext_set_dac(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_EXT_CURRENT(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint16_t current = bsp_laser_ext_current_adc_polling();
+		
+	bsp_debug_console_printf("> EXT CURRENT: %duA\n", current);
 
 	// Return success.
 	return CMDLINE_OK;
