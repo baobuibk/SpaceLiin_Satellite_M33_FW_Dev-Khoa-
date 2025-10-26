@@ -5,6 +5,7 @@
 #include "timers.h"
 
 /* BoardSupport includes. */
+#include "app.h"
 #include "bsp.h"
 
 /* Task includes. */
@@ -35,7 +36,7 @@ static TaskHandle_t Task_Init_Handle = NULL;
 /*!
  * @brief Application entry point.
  */
-int app_main(void)
+void app_main(void)
 {
     /* Init board hardware. */
     BSP_Init();

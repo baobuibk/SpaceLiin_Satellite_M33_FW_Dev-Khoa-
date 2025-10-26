@@ -99,6 +99,8 @@
     "delay.h": "c",
     "bsp_photo.h": "c",
     "math.h": "c",
-    "system_data.h": "c"
+    "system_data.h": "c",
+    "pca9685.h": "c",
+    "app.h": "c"
   }
 }
