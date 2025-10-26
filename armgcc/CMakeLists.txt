@@ -91,7 +91,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor/bsp_spi_sensor.c"
 
-    # "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor/bsp_i2c_sensor.c"
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser/bsp_laser.c"
 
@@ -146,6 +146,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/Drivers/Devices/MCP4902/mcp4902.c"
 
+    "${UserSourceDirPath}/Drivers/Devices/slf3s_flow/sl3s_flow.c"
+
     # MiddleWare
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osMalloc.c"
@@ -191,7 +193,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_debug_console
     # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_libcsp_can
     # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_spi_sensor
-    # ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_i2c_sensor
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_laser
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_expander
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
@@ -243,6 +245,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Drivers/Devices/AD4114
     ${UserSourceDirPath}/Drivers/Devices/ADG1414BR
     ${UserSourceDirPath}/Drivers/Devices/MCP4902
+    ${UserSourceDirPath}/Drivers/Devices/slf3s_flow
 
     # MiddleWare
     # ${UserSourceDirPath}/MiddleWare/FreeRTOS

@@ -60,11 +60,13 @@ static void Task_Init(void *pvParameters)
         spi_io_init(&photo_adc_spi);
 
         i2c_io_init(&io_expander_i2c);
+        i2c_io_init(&sensor_i2c);
 
         /* Init board peripheral. */
         bsp_debug_console_init();
         // bsp_libcsp_can_init();
         bsp_expander_init();
+        bsp_i2c_sensor_init();
         bsp_heater_init();
         bsp_onboard_adc_init();
         bsp_laser_init();

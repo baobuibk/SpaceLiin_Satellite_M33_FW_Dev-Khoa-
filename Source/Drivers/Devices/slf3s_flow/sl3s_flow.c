@@ -7,7 +7,7 @@
  */
 
 #include "slf3s_flow.h"
-#include "stm32f7xx.h"  // For uint types if needed
+// #include "stm32f7xx.h"  // For uint types if needed
 #include <string.h>     // For memcpy
 
 // CRC-8 table (precomputed for polynomial 0x31, init 0xFF)

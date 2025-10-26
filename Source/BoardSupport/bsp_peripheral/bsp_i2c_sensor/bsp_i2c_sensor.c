@@ -4,7 +4,7 @@
 #include "timers.h"
 
 /* Board Support includes. */
-#include "bsp_board.h"
+#include "bsp_core.h"
 #include "bsp_i2c_sensor.h"
 
 /* Component includes. */
@@ -23,19 +23,18 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void bsp_i2c_sensor_init()
 {
-	i2c_sensor_handle.ui32I2cPort = 6;
+	do_set(&sensor_en0_gpio);
+	do_set(&sensor_en1_gpio);
 
-    bmp390_device.p_i2c = &i2c_sensor_handle;
+	TickType_t last_delay = xTaskGetTickCount();
+	vTaskDelayUntil(&last_delay, pdMS_TO_TICKS(200));
 
-	// BMP390_init();
+	(void)slf3s_init(&sensor_i2c, true);
 }
 
-void bsp_i2c_sensor_read_value(Sensor_Read_typedef read_type)
+void Flow_sensor_read(slf3s_readings_t* p_value)
 {
-	vTaskSuspendAll();          // stops task switches, ISRs still run
-	BMP390_init();
-	BMP390_read_value(read_type);
-	xTaskResumeAll();
+	slf3s_read_all(&sensor_i2c, p_value);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

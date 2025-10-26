@@ -67,6 +67,9 @@ void bsp_core_init(void)
     bsp_core_init_io_expander_i2c();
     bsp_core_init_tec_cs_gpio();
 
+    bsp_core_init_sensor_i2c();
+    bsp_core_init_sensor_en_gpio();
+
     bsp_core_init_onboard_adc_spi();
     bsp_core_init_onboard_adc_cs_gpio();
 
@@ -282,9 +285,53 @@ static void bsp_core_init_sensor_i2c(void)
     LPI2C_MasterInit(I2C_SENSOR_BASE, &i2c_masterConfig, I2C_SENSOR_CLK_FREQ);
 }
 
+do_t sensor_en0_gpio =
+{
+    .port = 4,
+    .pin  = I2C_SENSOR_GPIO_EN0_PIN,
+    .bStatus = false,
+};
+do_t sensor_en1_gpio =
+{
+    .port = 3,
+    .pin  = I2C_SENSOR_GPIO_EN1_PIN,
+    .bStatus = false,
+};
 static void bsp_core_init_sensor_en_gpio(void)
 {
-    ;
+    /* Define the init structure for the output LED pin*/
+    rgpio_pin_config_t sensor_cs_config =
+    {
+        kRGPIO_DigitalOutput,
+        0,
+    };
+
+    /* Board pin, clock, debug console init */
+    /* clang-format off */
+
+    const clock_root_config_t rgpioClkCfg =
+    {
+        .clockOff = false,
+        .mux = 0, // 24Mhz Mcore root buswake clock
+        .div = 1
+    };
+
+    CLOCK_SetRootClock(I2C_SENSOR_GPIO_EN0_CLOCK_ROOT, &rgpioClkCfg);
+    CLOCK_EnableClock(I2C_SENSOR_GPIO_EN0_CLOCK_GATE);
+
+    /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+    I2C_SENSOR_GPIO_EN0_PORT->PCNS = 0x0;
+
+    RGPIO_PinInit(I2C_SENSOR_GPIO_EN0_PORT, I2C_SENSOR_GPIO_EN0_PIN, &sensor_cs_config);
+
+    CLOCK_SetRootClock(I2C_SENSOR_GPIO_EN1_CLOCK_ROOT, &rgpioClkCfg);
+    CLOCK_EnableClock(I2C_SENSOR_GPIO_EN1_CLOCK_GATE);
+
+    /* Set PCNS register value to 0x0 to prepare the RGPIO initialization */
+    I2C_SENSOR_GPIO_EN1_PORT->PCNS = 0x0;
+
+    /* Init output LED GPIO. */
+    RGPIO_PinInit(I2C_SENSOR_GPIO_EN1_PORT, I2C_SENSOR_GPIO_EN1_PIN, &sensor_cs_config);
 }
 
 SPI_Io_t onboard_adc_spi =
