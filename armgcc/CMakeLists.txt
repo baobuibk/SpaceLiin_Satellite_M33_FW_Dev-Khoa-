@@ -103,6 +103,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo/bsp_photo.c"
 
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_solenoid/bsp_solenoid.c"
+
     # Components
 
     "${UserSourceDirPath}/Drivers/Components/delay/nxp/nxp_delay.c"
@@ -199,6 +201,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_heater
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_solenoid
 
     # Component
     ${UserSourceDirPath}/Drivers/Components/error_codes

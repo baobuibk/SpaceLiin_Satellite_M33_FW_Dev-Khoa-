@@ -25,6 +25,7 @@ int CMD_HTR_SET(int argc, char *argv[]);
 
 /* :::::::::: Solenoid Command :::::::: */
 int CMD_SOL_CTL(int argc, char *argv[]);
+int CMD_VALVE_SET(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);

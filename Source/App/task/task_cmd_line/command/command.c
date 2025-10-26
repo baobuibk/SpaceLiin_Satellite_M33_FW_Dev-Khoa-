@@ -34,6 +34,7 @@ tCmdLineEntry g_psCmdTable[] =
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Solenoid Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "sol_ctl", 				CMD_SOL_CTL,				" : Clear/Set Sol n output" },
+	{ "valve_set", 				CMD_VALVE_SET,				" : Set Sol valve direction" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
@@ -48,7 +49,7 @@ tCmdLineEntry g_psCmdTable[] =
 
 	{ "ext_set", 				CMD_EXT_SET,				" : Switch on/off a channel" },
 	{ "ext_dac", 				CMD_EXT_DAC,				" : Set DAC output volt" },
-	{ "ext_current", 			CMD_EXT_CURRENT,			" : Switch on/off a channel" },
+	// { "ext_current", 			CMD_EXT_CURRENT,			" : Switch on/off a channel" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test PHOTO Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "photo_set", 				CMD_PHOTO_SET,				" : Switch on/off a channel" },
@@ -220,6 +221,36 @@ int CMD_SOL_CTL(int argc, char *argv[])
 	};
 
 	bsp_expander_ctrl(sol_map[receive_argm[0] - 1], receive_argm[1]);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_VALVE_SET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 1) || (receive_argm > 2))
+		return CMDLINE_INVALID_ARG;
+
+	Valve_switch(receive_argm);
+
+	if (receive_argm == 1)
+	{
+		bsp_debug_console_send_string("> PIN A = 1, PIN B = 0\n> ");
+	}
+	else
+	{
+		bsp_debug_console_send_string("> PIN A = 0, PIN B = 1\n> ");
+	}
 
 	// Return success.
 	return CMDLINE_OK;
@@ -400,7 +431,7 @@ int CMD_EXT_SET(int argc, char *argv[])
 	{
 		if (receive_argm[1] == 1)
 		{
-			for (uint8_t i = 1; i < 25; i++)
+			for (uint8_t i = 1; i < 9; i++)
 			{
 				bsp_laser_ext_sw_on(i);
 			}
@@ -414,7 +445,7 @@ int CMD_EXT_SET(int argc, char *argv[])
 		// Return success.
 		return CMDLINE_OK;
 	}
-	else if ((receive_argm[0] < 1) || (receive_argm[0] > 24))
+	else if ((receive_argm[0] < 1) || (receive_argm[0] > 8))
 	{
 		return CMDLINE_INVALID_ARG;
 	}

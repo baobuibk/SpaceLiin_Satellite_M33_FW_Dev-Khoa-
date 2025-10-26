@@ -1,21 +1,8 @@
-#ifndef _BSUPPORT_H_
-#define _BSUPPORT_H_
+#ifndef _BSP_SOLENOID_H_
+#define _BSP_SOLENOID_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* User includes. */
-#include "system_data.h"
-
-#include "bsp_core.h"
-#include "bsp_board.h"
-#include "bsp_debug_console.h"
-// #include "bsp_libcsp_can.h"
-#include "bsp_expander.h"
-#include "bsp_i2c_sensor.h"
-#include "bsp_heater.h"
-#include "bsp_onboard_adc.h"
-#include "bsp_laser.h"
-#include "bsp_photo.h"
-#include "bsp_solenoid.h"
+#include "stdint.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -24,8 +11,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void BSP_Init(void);
+void Valve_switch(uint32_t direction);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-#endif /* _BSUPPORT_H_ */
+#endif /* _BSP_SOLENOID_H_ */
