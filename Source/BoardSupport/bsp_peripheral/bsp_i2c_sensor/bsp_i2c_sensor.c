@@ -6,6 +6,7 @@
 /* Board Support includes. */
 #include "bsp_core.h"
 #include "bsp_i2c_sensor.h"
+#include "bsp_debug_console.h"
 
 /* Component includes. */
 #include "i2c_io.h"
@@ -29,7 +30,10 @@ void bsp_i2c_sensor_init()
 	TickType_t last_delay = xTaskGetTickCount();
 	vTaskDelayUntil(&last_delay, pdMS_TO_TICKS(200));
 
-	(void)slf3s_init(&sensor_i2c, true);
+	if (slf3s_init(&sensor_i2c, true) != SLF3S_OK)
+	{
+		bsp_debug_console_send_string("> SLF3S FLOW SENSOR FAIL TO INIT\n> ");
+	}
 }
 
 void Flow_sensor_read(slf3s_readings_t* p_value)

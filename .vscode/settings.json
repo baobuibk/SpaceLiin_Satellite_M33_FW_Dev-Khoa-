@@ -104,6 +104,7 @@
     "app.h": "c",
     "slf3s_flow.h": "c",
     "bsp_solenoid.h": "c",
-    "cmd_test_can.h": "c"
+    "cmd_test_can.h": "c",
+    "queue.h": "c"
   }
 }
