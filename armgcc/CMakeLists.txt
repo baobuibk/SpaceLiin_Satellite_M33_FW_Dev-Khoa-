@@ -153,6 +153,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/Drivers/Devices/slf3s_flow/sl3s_flow.c"
 
+    "${UserSourceDirPath}/Drivers/Devices/BMP390/bmp390.c"
+
     # MiddleWare
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osMalloc.c"
@@ -253,6 +255,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Drivers/Devices/ADG1414BR
     ${UserSourceDirPath}/Drivers/Devices/MCP4902
     ${UserSourceDirPath}/Drivers/Devices/slf3s_flow
+    ${UserSourceDirPath}/Drivers/Devices/BMP390
 
     # MiddleWare
     # ${UserSourceDirPath}/MiddleWare/FreeRTOS

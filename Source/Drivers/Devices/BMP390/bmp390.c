@@ -4,11 +4,11 @@
 #include <string.h>
 #include <math.h>
 
-#include "board.h"
-
-//#include "sensor_interface.h"
-
+/* Board Support includes. */
 #include "bmp390.h"
+
+/* Component includes. */
+// #include "i2c_io.h"
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // #define BMP390_ADDR                     0xEE
@@ -34,6 +34,16 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+typedef enum _Sensor_Read_typedef_
+{
+	/* :::::::::: BMP390 Read Data Type :::::::: */
+	SENSOR_READ_TEMP,
+	SENSOR_READ_PRESSURE,
+	SENSOR_READ_ALTITUDE,
+	SENSOR_READ_BMP390,
+
+} Sensor_Read_typedef;
+
 typedef enum _Sensor_common_read_state_typedef_
 {
 	SENSOR_READ_RESET_STATE,
@@ -42,25 +52,6 @@ typedef enum _Sensor_common_read_state_typedef_
 	SENSOR_PROCESS_DATA_STATE,
 
 } Sensor_common_read_state_typedef;
-
-// typedef struct _BMP390_uncomp_data_typedef_
-// {
-// 	uint16_t NVM_PAR_T1;
-// 	uint16_t NVM_PAR_T2;
-// 	uint16_t NVM_PAR_T3;
-// 	uint16_t NVM_PAR_P1;
-// 	uint16_t NVM_PAR_P2;
-// 	uint16_t NVM_PAR_P3;
-// 	uint16_t NVM_PAR_P4;
-// 	uint16_t NVM_PAR_P5;
-// 	uint16_t NVM_PAR_P6;
-// 	uint16_t NVM_PAR_P7;
-// 	uint16_t NVM_PAR_P8;
-// 	uint16_t NVM_PAR_P9;
-// 	uint16_t NVM_PAR_P10;
-// 	uint16_t NVM_PAR_P11;
-
-// } BMP390_uncomp_data_typedef;
 
 typedef struct _BMP390_uncomp_data_typedef_
 {
@@ -84,21 +75,21 @@ typedef struct _BMP390_uncomp_data_typedef_
 
 typedef struct _BMP390_comp_data_typedef_
 {
-	double PAR_T1;
-	double PAR_T2;
-	double PAR_T3;
+	float PAR_T1;
+	float PAR_T2;
+	float PAR_T3;
 
-	double PAR_P1;
-	double PAR_P2;
-	double PAR_P3;
-	double PAR_P4;
-	double PAR_P5;
-	double PAR_P6;
-	double PAR_P7;
-	double PAR_P8;
-	double PAR_P9;
-	double PAR_P10;
-	double PAR_P11;
+	float PAR_P1;
+	float PAR_P2;
+	float PAR_P3;
+	float PAR_P4;
+	float PAR_P5;
+	float PAR_P6;
+	float PAR_P7;
+	float PAR_P8;
+	float PAR_P9;
+	float PAR_P10;
+	float PAR_P11;
 
 } BMP390_comp_data_typedef;
 
@@ -110,18 +101,11 @@ typedef struct _BMP390_data_typedef_
 } BMP390_data_typedef;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static uint8_t Sensor_temp_buffer[30] = {0};
-static uint8_t Sensor_Read_State = 0;
-//static uint8_t Sensor_Read_Value_State = 0;
-//static uint8_t Sensor_Init_State = 0;
-//static uint8_t Sensor_Bus_Busy_count = 0;
-//static uint8_t Sensor_Bus_Busy_count_limit = 100;
-
-static BMP390_data_typedef BMP390_data;
+static BMP390_comp_data_typedef BMP390_comp_data;
 
 static uint8_t is_BMP390_Init_Complete  = 0;
-static uint8_t is_BMP390_Write_Complete = 0;
-static uint8_t is_BMP390_Read_Complete  = 0;
+// static uint8_t is_BMP390_Write_Complete = 0;
+// static uint8_t is_BMP390_Read_Complete  = 0;
 static uint8_t is_BMP390_Calib_Complete = 0;
 
 static uint8_t is_BMP390_Data_Complete  = 0;
@@ -135,6 +119,7 @@ static bool BMP390_is_value_ready
 
 static void BMP390_read_uncompensated_value
 (
+	i2c_io_t* p_i2c,
     Sensor_Read_typedef read_type,
 	uint8_t *p_BMP390_RX_buffer
 );
@@ -145,35 +130,55 @@ static void BMP390_compensate_value
 	uint8_t *p_BMP390_RX_buffer
 );
 
-static void BMP390_compensate_temp(double uncomp_temp);
-static void BMP390_compensate_pressure(double uncomp_pressure);
-static void BMP390_compensate_altitude(void);
+static void BMP390_compensate_temp(float uncomp_temp);
+static void BMP390_compensate_pressure(float uncomp_pressure);
+// static void BMP390_compensate_altitude(void);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-double Sensor_Temp = 0.0;
-double Sensor_Pressure = 0.0;
-double Sensor_Altitude = 0.0;
+float Sensor_Temp = 0.0;
+float Sensor_Pressure = 0.0;
+// float Sensor_Altitude = 0.0;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-I2C_Status_t BMP390_Write(uint8_t reg, uint8_t data)
+uint8_t BMP390_Write(i2c_io_t* p_i2c, uint8_t reg, uint8_t TX_data)
 {
-	return I2C_Write(EXP_I2C_SENSOR_HANDLE, BMP390_ADDR, reg, data);
+	uint8_t frame[2] = {reg, TX_data};
+
+	uint32_t n = i2c_io_send(p_i2c, BMP390_ADDR, (const char*)frame, 2);
+
+	return (n == 2) ? 1u : 0u;
 }
 
-I2C_Status_t BMP390_Read(uint8_t reg, uint8_t *pData, uint8_t length)
+uint8_t BMP390_Read(i2c_io_t* p_i2c, uint8_t reg, uint8_t *p_RX_buffer, uint8_t byte_count)
 {
-	return I2C_ReadMulti(EXP_I2C_SENSOR_HANDLE, BMP390_ADDR, reg, pData, length);
+	// 1) Write the register pointer WITHOUT STOP
+    if (i2c_io_send(p_i2c, BMP390_ADDR, (const char*)&reg, 1) != 1u)
+	{
+		return 0u;
+	}
+
+    // 2) Next recv performs a REPEATED-START automatically, then STOP
+    uint32_t n = i2c_io_recv(p_i2c, BMP390_ADDR, (char*)p_RX_buffer, (int)byte_count);
+
+    return (n == (uint32_t)byte_count) ? 1u : 0u;
+}
+
+static inline uint32_t bmp390_unpack20(uint8_t msb, uint8_t mid, uint8_t lsb)
+{
+    return ((uint32_t)msb << 12) | ((uint32_t)mid << 4) | ((uint32_t)lsb >> 4);
 }
 
 /* :::::::::: BMP390 Command :::::::: */
-uint8_t BMP390_init()
+uint8_t BMP390_init(i2c_io_t* p_i2c)
 {
-	I2C_Status_t i2c_return = 0;
+	BMP390_uncomp_data_typedef BMP390_uncomp_data;
 
-	memset(&BMP390_data, 0, sizeof(BMP390_data));
-	memset(Sensor_temp_buffer, 0, sizeof(Sensor_temp_buffer));
+	uint8_t Sensor_temp_buffer[30] = {0};
 
-	i2c_return = BMP390_Read(0x00, Sensor_temp_buffer, 1);
+	memset((void*)&BMP390_uncomp_data, 0, sizeof(BMP390_uncomp_data));
+	memset((void*)&BMP390_comp_data, 0, sizeof(BMP390_comp_data));
+
+	BMP390_Read(p_i2c, 0x00, Sensor_temp_buffer, 1);
 
 	//set oversampling
 	//Sensor_temp_buffer[0] = 11;
@@ -181,141 +186,145 @@ uint8_t BMP390_init()
 	Sensor_temp_buffer[0] |= (0b101 << 2); 	// osr_p [2..0] = 101
 	Sensor_temp_buffer[0] |= (0b010 << 5); 	// osr4_t[5..3] = 010
 
-	BMP390_Write(0x1C, Sensor_temp_buffer[0]);
+	BMP390_Write(p_i2c, 0x1C, Sensor_temp_buffer[0]);
 
 	//set filter
-	BMP390_Read(0x1F, Sensor_temp_buffer, 1);
+	BMP390_Read(p_i2c, 0x1F, Sensor_temp_buffer, 1);
 
 	//Sensor_temp_buffer[0] = (0b111 << 3); // iir_filter[3..1] = 111
 	Sensor_temp_buffer[0] = (0b011 << 3); // iir_filter[3..1] = 011
 	//Sensor_temp_buffer[0] = (0b000 << 3); // iir_filter[3..1] = 000
-	BMP390_Write(0x1F, Sensor_temp_buffer[0]);
+	BMP390_Write(p_i2c, 0x1F, Sensor_temp_buffer[0]);
 
-	BMP390_Read(0x31, Sensor_temp_buffer, 21);
+	BMP390_Read(p_i2c, 0x31, Sensor_temp_buffer, 21);
 
-	BMP390_data.uncomp_data.NVM_PAR_T1 = (Sensor_temp_buffer[1] << 8)
+	BMP390_uncomp_data.NVM_PAR_T1 = (Sensor_temp_buffer[1] << 8)
 			| Sensor_temp_buffer[0];
-	BMP390_data.uncomp_data.NVM_PAR_T2 = (Sensor_temp_buffer[3] << 8)
+	BMP390_uncomp_data.NVM_PAR_T2 = (Sensor_temp_buffer[3] << 8)
 			| Sensor_temp_buffer[2];
-	BMP390_data.uncomp_data.NVM_PAR_T3 = Sensor_temp_buffer[4];
-	BMP390_data.uncomp_data.NVM_PAR_P1 = (Sensor_temp_buffer[6] << 8)
+	BMP390_uncomp_data.NVM_PAR_T3 = Sensor_temp_buffer[4];
+	BMP390_uncomp_data.NVM_PAR_P1 = (Sensor_temp_buffer[6] << 8)
 			| Sensor_temp_buffer[5];
-	BMP390_data.uncomp_data.NVM_PAR_P2 = (Sensor_temp_buffer[8] << 8)
+	BMP390_uncomp_data.NVM_PAR_P2 = (Sensor_temp_buffer[8] << 8)
 			| Sensor_temp_buffer[7];
-	BMP390_data.uncomp_data.NVM_PAR_P3 = Sensor_temp_buffer[9];
-	BMP390_data.uncomp_data.NVM_PAR_P4 = Sensor_temp_buffer[10];
-	BMP390_data.uncomp_data.NVM_PAR_P5 = (Sensor_temp_buffer[12] << 8)
+	BMP390_uncomp_data.NVM_PAR_P3 = Sensor_temp_buffer[9];
+	BMP390_uncomp_data.NVM_PAR_P4 = Sensor_temp_buffer[10];
+	BMP390_uncomp_data.NVM_PAR_P5 = (Sensor_temp_buffer[12] << 8)
 			| Sensor_temp_buffer[11];
-	BMP390_data.uncomp_data.NVM_PAR_P6 = (Sensor_temp_buffer[14] << 8)
+	BMP390_uncomp_data.NVM_PAR_P6 = (Sensor_temp_buffer[14] << 8)
 			| Sensor_temp_buffer[13];
-	BMP390_data.uncomp_data.NVM_PAR_P7 = Sensor_temp_buffer[15];
-	BMP390_data.uncomp_data.NVM_PAR_P8 = Sensor_temp_buffer[16];
-	BMP390_data.uncomp_data.NVM_PAR_P9 = (Sensor_temp_buffer[18] << 8)
+	BMP390_uncomp_data.NVM_PAR_P7 = Sensor_temp_buffer[15];
+	BMP390_uncomp_data.NVM_PAR_P8 = Sensor_temp_buffer[16];
+	BMP390_uncomp_data.NVM_PAR_P9 = (Sensor_temp_buffer[18] << 8)
 			| Sensor_temp_buffer[17];
-	BMP390_data.uncomp_data.NVM_PAR_P10 = Sensor_temp_buffer[19];
-	BMP390_data.uncomp_data.NVM_PAR_P11 = Sensor_temp_buffer[20];
+	BMP390_uncomp_data.NVM_PAR_P10 = Sensor_temp_buffer[19];
+	BMP390_uncomp_data.NVM_PAR_P11 = Sensor_temp_buffer[20];
 
-	double comp_value = 0.00390625f;
-	BMP390_data.comp_data.PAR_T1 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_T1) / comp_value);
+	float comp_value = 0.00390625f;
+	BMP390_comp_data.PAR_T1 =
+			((float) (BMP390_uncomp_data.NVM_PAR_T1) / comp_value);
+
+	BMP390_comp_data.PAR_T1 =
+			((float) (BMP390_uncomp_data.NVM_PAR_T1) / comp_value);
 
 	comp_value = 1073741824.0f;
-	BMP390_data.comp_data.PAR_T2 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_T2) / comp_value);
+	BMP390_comp_data.PAR_T2 =
+			((float) (BMP390_uncomp_data.NVM_PAR_T2) / comp_value);
 
 	comp_value = 281474976710656.0f;
-	BMP390_data.comp_data.PAR_T3 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_T3) / comp_value);
+	BMP390_comp_data.PAR_T3 =
+			((float) (BMP390_uncomp_data.NVM_PAR_T3) / comp_value);
 
 	comp_value = 1048576.0f;
-	BMP390_data.comp_data.PAR_P1 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P1 - 16384)
+	BMP390_comp_data.PAR_P1 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P1 - 16384)
 					/ comp_value);
 
 	comp_value = 536870912.0f;
-	BMP390_data.comp_data.PAR_P2 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P2 - 16384)
+	BMP390_comp_data.PAR_P2 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P2 - 16384)
 					/ comp_value);
 
 	comp_value = 4294967296.0f;
-	BMP390_data.comp_data.PAR_P3 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P3) / comp_value);
+	BMP390_comp_data.PAR_P3 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P3) / comp_value);
 
 	comp_value = 137438953472.0f;
-	BMP390_data.comp_data.PAR_P4 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P4) / comp_value);
+	BMP390_comp_data.PAR_P4 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P4) / comp_value);
 
 	comp_value = 0.125f;
-	BMP390_data.comp_data.PAR_P5 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P5) / comp_value);
+	BMP390_comp_data.PAR_P5 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P5) / comp_value);
 
 	comp_value = 64.0f;
-	BMP390_data.comp_data.PAR_P6 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P6) / comp_value);
+	BMP390_comp_data.PAR_P6 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P6) / comp_value);
 
 	comp_value = 256.0f;
-	BMP390_data.comp_data.PAR_P7 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P7) / comp_value);
+	BMP390_comp_data.PAR_P7 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P7) / comp_value);
 
 	comp_value = 32768.0f;
-	BMP390_data.comp_data.PAR_P8 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P8) / comp_value);
+	BMP390_comp_data.PAR_P8 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P8) / comp_value);
 
 	comp_value = 281474976710656.0f;
-	BMP390_data.comp_data.PAR_P9 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P9) / comp_value);
+	BMP390_comp_data.PAR_P9 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P9) / comp_value);
 
-	BMP390_data.comp_data.PAR_P10 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P10) / comp_value);
+	BMP390_comp_data.PAR_P10 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P10) / comp_value);
 
 	comp_value = 36893488147419103232.0f;
-	BMP390_data.comp_data.PAR_P11 =
-			((double) (BMP390_data.uncomp_data.NVM_PAR_P11) / comp_value);
+	BMP390_comp_data.PAR_P11 =
+			((float) (BMP390_uncomp_data.NVM_PAR_P11) / comp_value);
 
 	
-	memset(Sensor_temp_buffer, 0, sizeof(Sensor_temp_buffer));
+	memset((void*)Sensor_temp_buffer, 0, sizeof(Sensor_temp_buffer));
 
-	BMP390_Read(0x1B, Sensor_temp_buffer, 1);
+	BMP390_Read(p_i2c, 0x1B, Sensor_temp_buffer, 1);
 
 	Sensor_temp_buffer[0] |= 0b00010011;
-	BMP390_Write(0x1B, Sensor_temp_buffer[0]);
+	BMP390_Write(p_i2c, 0x1B, Sensor_temp_buffer[0]);
 
-	BMP390_read_uncompensated_value(SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
+	// BMP390_read_uncompensated_value(p_i2c, SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
 
-	BMP390_compensate_value(SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
+	// BMP390_compensate_value(SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
 
 	//is_sensor_read_enable = false;
-	Sensor_Read_State = 0;
 
 	is_BMP390_Init_Complete = true;
 	return 1;
 }
 
-uint8_t BMP390_read_value(Sensor_Read_typedef read_type)
+uint8_t BMP390_read_value(i2c_io_t* p_i2c, bmp390_data_t* p_data)
 {
-	memset(Sensor_temp_buffer, 0, sizeof(Sensor_temp_buffer));
+	uint8_t Sensor_temp_buffer[30] = {0};
 
-	BMP390_Read(0x1B, Sensor_temp_buffer, 1);
+	BMP390_Read(p_i2c, 0x1B, Sensor_temp_buffer, 1);
 
 	Sensor_temp_buffer[0] |= 0b00010011;
-	BMP390_Write(0x1B, Sensor_temp_buffer[0]);
+	BMP390_Write(p_i2c, 0x1B, Sensor_temp_buffer[0]);
 
-	BMP390_Read(BMP390_STATUS_REG_ADDR,
+	BMP390_Read(p_i2c, BMP390_STATUS_REG_ADDR,
 			Sensor_temp_buffer, 1);
 
 
-	if (BMP390_is_value_ready(read_type, Sensor_temp_buffer) == false)
+	if (BMP390_is_value_ready(SENSOR_READ_BMP390, Sensor_temp_buffer) == false)
 	{
 		return 0;
 	}
 
-	BMP390_read_uncompensated_value(read_type, &Sensor_temp_buffer[1]);
+	BMP390_read_uncompensated_value(p_i2c, SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
 
 
-	BMP390_compensate_value(read_type, &Sensor_temp_buffer[1]);
+	BMP390_compensate_value(SENSOR_READ_BMP390, &Sensor_temp_buffer[1]);
+
+	p_data->Temp 	 = Sensor_Temp;
+	p_data->Pressure = Sensor_Pressure;
 
 	//is_sensor_read_enable = false;
-	Sensor_Read_State = 0;
 
 	is_BMP390_Data_Complete = true;
 	return 1;
@@ -379,16 +388,16 @@ static bool BMP390_is_value_ready(Sensor_Read_typedef read_type, uint8_t *p_stat
 	return 0;
 }
 
-static void BMP390_read_uncompensated_value(Sensor_Read_typedef read_type, uint8_t *p_BMP390_RX_buffer)
+static void BMP390_read_uncompensated_value(i2c_io_t* p_i2c, Sensor_Read_typedef read_type, uint8_t *p_BMP390_RX_buffer)
 {
 	if (read_type == SENSOR_READ_TEMP)
     {
-		BMP390_Read(BMP390_TEMP_REG_ADDR_BASE,
+		BMP390_Read(p_i2c, BMP390_TEMP_REG_ADDR_BASE,
 				p_BMP390_RX_buffer, BMP390_TEMP_REG_SIZE);
 		return;
 	}
 
-	BMP390_Read(BMP390_READ_ALL_ADDR_BASE,
+	BMP390_Read(p_i2c, BMP390_READ_ALL_ADDR_BASE,
 			p_BMP390_RX_buffer, BMP390_READ_ALL_REG_SIZE);
 }
 
@@ -403,23 +412,24 @@ static void BMP390_compensate_value(Sensor_Read_typedef read_type, uint8_t *p_BM
 		break;
 
 	case SENSOR_READ_PRESSURE:
+		BMP390_compensate_temp(
+					(p_BMP390_RX_buffer[5] << 16) | (p_BMP390_RX_buffer[4] << 8)
+							| p_BMP390_RX_buffer[3]);
 		BMP390_compensate_pressure(
 				(p_BMP390_RX_buffer[2] << 16) | (p_BMP390_RX_buffer[1] << 8)
 						| p_BMP390_RX_buffer[0]);
-		BMP390_compensate_temp(
-				(p_BMP390_RX_buffer[5] << 16) | (p_BMP390_RX_buffer[4] << 8)
-						| p_BMP390_RX_buffer[3]);
 		break;
 
 	case SENSOR_READ_ALTITUDE:
 	case SENSOR_READ_BMP390:
-		BMP390_compensate_pressure(
-				(p_BMP390_RX_buffer[2] << 16) | (p_BMP390_RX_buffer[1] << 8)
-						| p_BMP390_RX_buffer[0]);
 		BMP390_compensate_temp(
 				(p_BMP390_RX_buffer[5] << 16) | (p_BMP390_RX_buffer[4] << 8)
 						| p_BMP390_RX_buffer[3]);
-		BMP390_compensate_altitude();
+
+		BMP390_compensate_pressure(
+				(p_BMP390_RX_buffer[2] << 16) | (p_BMP390_RX_buffer[1] << 8)
+						| p_BMP390_RX_buffer[0]);
+		// BMP390_compensate_altitude();
 		break;
 
 	default:
@@ -427,51 +437,51 @@ static void BMP390_compensate_value(Sensor_Read_typedef read_type, uint8_t *p_BM
 	}
 }
 
-static void BMP390_compensate_temp(double uncomp_temp)
+static void BMP390_compensate_temp(float uncomp_temp)
 {
-	double PAR_T1;
-	double PAR_T2;
+	float PAR_T1;
+	float PAR_T2;
 
-	PAR_T1 = (uncomp_temp - BMP390_data.comp_data.PAR_T1);
-	PAR_T2 = (PAR_T1 * BMP390_data.comp_data.PAR_T2);
+	PAR_T1 = (uncomp_temp - BMP390_comp_data.PAR_T1);
+	PAR_T2 = (PAR_T1 * BMP390_comp_data.PAR_T2);
 
-	Sensor_Temp = PAR_T2 + (PAR_T1 * PAR_T1) * BMP390_data.comp_data.PAR_T3;
+	Sensor_Temp = PAR_T2 + (PAR_T1 * PAR_T1) * BMP390_comp_data.PAR_T3;
 }
 
-static void BMP390_compensate_pressure(double uncomp_pressure)
+static void BMP390_compensate_pressure(float uncomp_pressure)
 {
-	double PAR_T1;
-	double PAR_T2;
-	double PAR_T3;
+	float PAR_T1;
+	float PAR_T2;
+	float PAR_T3;
 
-	double PAR_OUT1;
-	double PAR_OUT2;
-	double PAR_OUT3;
+	float PAR_OUT1;
+	float PAR_OUT2;
+	float PAR_OUT3;
 
-	PAR_T1 = BMP390_data.comp_data.PAR_P6 * (Sensor_Temp);
-	PAR_T2 = BMP390_data.comp_data.PAR_P7 * (Sensor_Temp * Sensor_Temp);
-	PAR_T3 = BMP390_data.comp_data.PAR_P8 * (Sensor_Temp * Sensor_Temp * Sensor_Temp);
+	PAR_T1 = BMP390_comp_data.PAR_P6 * (Sensor_Temp);
+	PAR_T2 = BMP390_comp_data.PAR_P7 * (Sensor_Temp * Sensor_Temp);
+	PAR_T3 = BMP390_comp_data.PAR_P8 * (Sensor_Temp * Sensor_Temp * Sensor_Temp);
 
-	PAR_OUT1 = BMP390_data.comp_data.PAR_P5 + PAR_T1 + PAR_T2 + PAR_T3;
+	PAR_OUT1 = BMP390_comp_data.PAR_P5 + PAR_T1 + PAR_T2 + PAR_T3;
 
-	PAR_T1 = BMP390_data.comp_data.PAR_P2 * (Sensor_Temp);
-	PAR_T2 = BMP390_data.comp_data.PAR_P3 * (Sensor_Temp * Sensor_Temp);
-	PAR_T3 = BMP390_data.comp_data.PAR_P4 * (Sensor_Temp * Sensor_Temp * Sensor_Temp);
+	PAR_T1 = BMP390_comp_data.PAR_P2 * (Sensor_Temp);
+	PAR_T2 = BMP390_comp_data.PAR_P3 * (Sensor_Temp * Sensor_Temp);
+	PAR_T3 = BMP390_comp_data.PAR_P4 * (Sensor_Temp * Sensor_Temp * Sensor_Temp);
 	
-	PAR_OUT2 = uncomp_pressure * (BMP390_data.comp_data.PAR_P1 + PAR_T1 + PAR_T2 + PAR_T3);
+	PAR_OUT2 = uncomp_pressure * (BMP390_comp_data.PAR_P1 + PAR_T1 + PAR_T2 + PAR_T3);
 
 	PAR_T1 = uncomp_pressure * uncomp_pressure;
-	PAR_T2 = BMP390_data.comp_data.PAR_P9 + BMP390_data.comp_data.PAR_P10 * Sensor_Temp;
+	PAR_T2 = BMP390_comp_data.PAR_P9 + BMP390_comp_data.PAR_P10 * Sensor_Temp;
 	PAR_T3 = PAR_T1 * PAR_T2;
-	PAR_OUT3 = PAR_T3 + (uncomp_pressure * uncomp_pressure * uncomp_pressure) * BMP390_data.comp_data.PAR_P11;
+	PAR_OUT3 = PAR_T3 + (uncomp_pressure * uncomp_pressure * uncomp_pressure) * BMP390_comp_data.PAR_P11;
 
 	Sensor_Pressure = PAR_OUT1 + PAR_OUT2 + PAR_OUT3;
 }
 
-static void BMP390_compensate_altitude(void)
-{
-	float atmospheric = Sensor_Pressure / 100.0F;
- 	Sensor_Altitude =  44330.0 * (1.0 - pow(atmospheric / SEALEVEL_PRESSURE_HPA, 0.1903));
-}
+// static void BMP390_compensate_altitude(void)
+// {
+// 	float atmospheric = Sensor_Pressure / 100.0F;
+//  	Sensor_Altitude =  44330.0 * (1.0 - pow(atmospheric / SEALEVEL_PRESSURE_HPA, 0.1903));
+// }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

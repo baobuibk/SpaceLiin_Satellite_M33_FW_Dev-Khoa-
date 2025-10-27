@@ -29,6 +29,7 @@ int CMD_HTR_SET(int argc, char *argv[]);
 int CMD_SOL_CTL(int argc, char *argv[]);
 int CMD_VALVE_SET(int argc, char *argv[]);
 int CMD_FLOW_GET(int argc, char *argv[]);
+int CMD_BMP_GET(int argc, char *argv[]);
 
 /* :::::::::: Pump Command :::::::: */
 int CMD_PUMP_ENABLE(int argc, char *argv[]);

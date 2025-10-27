@@ -21,6 +21,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static void double_to_string(double value, char *buffer, uint8_t precision);
+static void float_to_string(float value, char *buffer, uint8_t precision);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 tCmdLineEntry g_psCmdTable[] =
@@ -40,6 +41,7 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "sol_ctl", 				CMD_SOL_CTL,				" : Clear/Set Sol n output" },
 	{ "valve_set", 				CMD_VALVE_SET,				" : Set Sol valve direction" },
 	{ "flow_get", 				CMD_FLOW_GET,				" : Get flow sensor data" },
+	{ "bmp_get", 				CMD_BMP_GET,				" : Get BMP sensor data" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pump Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "pump_enable", 			CMD_PUMP_ENABLE,			" : Enable pump" },
@@ -326,6 +328,30 @@ int CMD_FLOW_GET(int argc, char *argv[])
 	double_to_string((double)flow_data.temp, temp_string, 3);
 
 	bsp_debug_console_printf("> FLOW: %s µl/min, TEMP: %s C\n> ", flow_string, temp_string);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_BMP_GET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	bmp390_data_t bmp_data;
+
+	BMP390_sensor_read(&bmp_data);
+
+	char pressure_string[16] = {0};
+	char temperature_string[16] = {0};
+
+	float_to_string((bmp_data.Pressure / 100.0), pressure_string, 3);
+	float_to_string(bmp_data.Temp, temperature_string, 3);
+	
+	bsp_debug_console_printf("> BMP P: %s hPa, T: %s C\n\r", pressure_string, temperature_string);
 
 	// Return success.
 	return CMDLINE_OK;
@@ -851,6 +877,61 @@ static void double_to_string(double value, char *buffer, uint8_t precision)
 
             *buffer++ = (char)('0' + digit);
             fractional_part -= (double)digit;
+            if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
+        }
+    }
+
+    *buffer = '\0';
+}
+
+static void float_to_string(float value, char *buffer, uint8_t precision)
+{
+    /* Sign */
+    if (value < 0.0)
+    {
+        *buffer++ = '-';
+        value = -value;
+    }
+
+    /* Split into integer and fractional parts */
+    uint32_t integer_part  = (uint32_t)value;          /* NOTE: clips to 32-bit range */
+    float   fractional_part = value - (float)integer_part;
+    if (fractional_part < 0.0) fractional_part = 0.0;  /* guard tiny FP negatives */
+
+    /* Integer -> string (in place, no sprintf) */
+    if (integer_part == 0U)
+    {
+        *buffer++ = '0';
+    }
+    else
+    {
+        char rev[10];  /* max 10 digits for uint32_t */
+        uint8_t n = 0;
+        while (integer_part != 0U)
+        {
+            rev[n++] = (char)('0' + (integer_part % 10U));
+            integer_part /= 10U;
+        }
+        while (n--)
+        {
+            *buffer++ = rev[n];
+        }
+    }
+
+    /* Fractional part (truncate, no rounding) */
+    if (precision > 0U)
+    {
+        *buffer++ = '.';
+        for (uint8_t i = 0; i < precision; i++)
+        {
+            fractional_part *= 10.0;
+            uint8_t digit = (uint8_t)fractional_part;
+
+            /* Clamp against rare FP edge (e.g., 9.999999 -> 10) */
+            if (digit > 9U) digit = 9U;
+
+            *buffer++ = (char)('0' + digit);
+            fractional_part -= (float)digit;
             if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
         }
     }

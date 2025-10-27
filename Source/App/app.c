@@ -83,7 +83,7 @@ static void Task_Init(void *pvParameters)
         /* Task Create */
         xTaskCreate(Task_Experiment, "Task_Experiment", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
         // xTaskCreate(Task_Test_CAN, "Task_Test_CAN", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY, NULL);
-        xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
+        xTaskCreate(Task_CMD_Line, "Task_CMD_Line", configMINIMAL_STACK_SIZE + 38 + 128, NULL, Task_CMD_Line_PRIORITY - 1, NULL);
         // xTaskCreate(Task_Update_Onboard_ADC, "Task_Update_Onboard_ADC", configMINIMAL_STACK_SIZE + 38 + 128, NULL, Task_CMD_Line_PRIORITY - 2, NULL);
 
         vTaskDelete(Task_Init_Handle);
