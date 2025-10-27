@@ -14,7 +14,7 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Bartels mp-Highdriver registers */
-#define I2C_HIGHDRIVER_ADRESS (0x78) // Default adress for mp-Highdriver
+#define I2C_HIGHDRIVER_ADRESS (0x3C) // Default adress for mp-Highdriver
 #define I2C_DEVICEID  0x00
 #define I2C_POWERMODE 0x01
 #define I2C_FREQUENCY 0x02
@@ -144,7 +144,8 @@ static void Highdriver_setvoltage(uint8_t _voltage) // Set new amplitude (_volta
         0x00, // P1
         0x00, // P2
         0x00, // P3
-        (uint8_t)(bPumpState[0] ? nPumpVoltageByte[0] : 0x00), // P4
+        // (uint8_t)(bPumpState[0] ? nPumpVoltageByte[0] : 0x00), // P4
+        nPumpVoltageByte[0], // P4
         0x01  // UPDATE
     };
     _mp_i2c_write_block(I2C_PVOLTAGE, block, sizeof(block));
@@ -186,6 +187,9 @@ static void Highdriver_setfrequency(uint16_t _frequency) // set pump frequency (
 
     uint8_t v = nFrequencyByte;
     _mp_i2c_write_block(I2C_FREQUENCY, &v, 1);
+
+    v = 0x01;
+    _mp_i2c_write_block(I2C_UPDATEVOLTAGE, &v, 1);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
