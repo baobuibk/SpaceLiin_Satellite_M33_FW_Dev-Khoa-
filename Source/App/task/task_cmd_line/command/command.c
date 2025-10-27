@@ -30,6 +30,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "pwr_htr_en", 			CMD_PWR_HTR_EN,				" : Heater power control" },
 	{ "pwr_las_en", 			CMD_PWR_LAS_EN,				" : Laser power control" },
 	{ "pwr_phot_en", 			CMD_PWR_PHOT_EN,			" : Photo power control" },
+	{ "pwr_tec_en", 			CMD_PWR_TEC_EN,				" : Laser power control" },
+	{ "pwr_pump_en", 			CMD_PWR_PUMP_EN,			" : Photo power control" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Heater Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "htr_set", 				CMD_HTR_SET,				" : Set heater n duty cycle" },
@@ -166,6 +168,48 @@ int CMD_PWR_PHOT_EN(int argc, char *argv[])
 		return CMDLINE_INVALID_ARG;
 
 	bsp_expander_ctrl(POW_ONOFF_PHOTO, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PWR_TEC_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_TEC, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PWR_PUMP_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_HD4, receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;

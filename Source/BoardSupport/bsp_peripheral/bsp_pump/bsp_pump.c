@@ -37,28 +37,10 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/* Driver context */
-typedef struct
-{
-    i2c_io_t   *i2c;        /* required: your I2C instance */
-    uint8_t     addr;       /* 7-bit I2C address (default 0x78) */
-
-    /* Optional enable pin via your DO API.
-       If provided, driver will assert it when powered on and deassert on power off. */
-    do_t       *en_pin;     /* can be NULL if not used */
-
-    /* Cached last settings (for convenience) */
-    uint8_t     freq_byte;  /* encoded frequency byte written to MPHD_REG_FREQUENCY */
-    uint8_t     amp[4];     /* P1..P4 amplitude bytes (0..31) */
-    bool        pump_on;    /* logical enable/disable for writing amp values */
-} mp_highdriver_t;
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 bool    bPumpState[4];
 uint8_t nPumpVoltageByte[4];
 uint8_t nFrequencyByte;
-
-static mp_highdriver_t mp_highdriver_dev;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static void Highdriver_init(void);

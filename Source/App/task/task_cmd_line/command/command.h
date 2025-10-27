@@ -19,6 +19,8 @@ int CMD_PWR_SOL_EN(int argc, char *argv[]);
 int CMD_PWR_HTR_EN(int argc, char *argv[]);
 int CMD_PWR_LAS_EN(int argc, char *argv[]);
 int CMD_PWR_PHOT_EN(int argc, char *argv[]);
+int CMD_PWR_TEC_EN(int argc, char *argv[]);
+int CMD_PWR_PUMP_EN(int argc, char *argv[]);
 
 /* :::::::::: Heater Command :::::::: */
 int CMD_HTR_SET(int argc, char *argv[]);
