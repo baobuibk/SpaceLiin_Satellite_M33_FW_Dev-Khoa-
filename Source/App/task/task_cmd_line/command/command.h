@@ -28,6 +28,11 @@ int CMD_SOL_CTL(int argc, char *argv[]);
 int CMD_VALVE_SET(int argc, char *argv[]);
 int CMD_FLOW_GET(int argc, char *argv[]);
 
+/* :::::::::: Pump Command :::::::: */
+int CMD_PUMP_ENABLE(int argc, char *argv[]);
+int CMD_PUMP_FREQ(int argc, char *argv[]);
+int CMD_PUMP_VOLT(int argc, char *argv[]);
+
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);
 int CMD_EXP_START(int argc, char *argv[]);

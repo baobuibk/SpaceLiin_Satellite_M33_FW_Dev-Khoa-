@@ -39,6 +39,11 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "valve_set", 				CMD_VALVE_SET,				" : Set Sol valve direction" },
 	{ "flow_get", 				CMD_FLOW_GET,				" : Get flow sensor data" },
 
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pump Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "pump_enable", 			CMD_PUMP_ENABLE,			" : Enable pump" },
+	{ "pump_freq", 				CMD_PUMP_FREQ,				" : Set pump freq" },
+	{ "pump_volt", 				CMD_PUMP_VOLT,				" : Set pump volt" },
+
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
 
@@ -277,6 +282,69 @@ int CMD_FLOW_GET(int argc, char *argv[])
 	double_to_string((double)flow_data.temp, temp_string, 3);
 
 	bsp_debug_console_printf("> FLOW: %s µl/min, TEMP: %s C\n> ", flow_string, temp_string);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_ENABLE(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_set_enable(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_FREQ(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 50) || (receive_argm > 800))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_Set_Freq(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_VOLT(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 250))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_set_Voltage(receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;

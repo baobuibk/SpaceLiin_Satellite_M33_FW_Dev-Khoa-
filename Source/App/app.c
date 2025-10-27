@@ -61,6 +61,7 @@ static void Task_Init(void *pvParameters)
 
         i2c_io_init(&io_expander_i2c);
         i2c_io_init(&sensor_i2c);
+        i2c_io_init(&pump_i2c);
 
         /* Init board peripheral. */
         bsp_debug_console_init();
@@ -71,6 +72,7 @@ static void Task_Init(void *pvParameters)
         bsp_onboard_adc_init();
         bsp_laser_init();
         bsp_photo_init();
+        bsp_pump_init();
 
         // Pull up RAM SPI nCS
         bsp_expander_ctrl(RAM_SPI_nCS, 1);
