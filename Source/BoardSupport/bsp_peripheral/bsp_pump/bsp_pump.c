@@ -57,8 +57,7 @@ void bsp_pump_init()
 
 	do_set(&pump_en_gpio);
 
-	TickType_t last_delay = xTaskGetTickCount();
-	vTaskDelayUntil(&last_delay, pdMS_TO_TICKS(200));
+	vTaskDelay(pdMS_TO_TICKS(200));
 
     Highdriver_init();
 }
