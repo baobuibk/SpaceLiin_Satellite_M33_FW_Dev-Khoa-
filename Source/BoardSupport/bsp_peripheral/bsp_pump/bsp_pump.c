@@ -130,6 +130,9 @@ static void Highdriver_enable(uint8_t is_enable)
 {
     uint8_t v = (is_enable != 0) ? 0x01u : 0x00u;   // normalize to 0/1
     _mp_i2c_write_block(I2C_POWERMODE, &v, 1);      // writes [0x01, v]
+
+    v = 0x01;
+    _mp_i2c_write_block(I2C_UPDATEVOLTAGE, &v, 1);
 }
 
 static void Highdriver_setvoltage(uint8_t _voltage) // Set new amplitude (_voltage [Vpp])
