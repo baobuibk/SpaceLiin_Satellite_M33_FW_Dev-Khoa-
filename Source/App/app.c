@@ -67,7 +67,7 @@ static void Task_Init(void *pvParameters)
         bsp_debug_console_init();
         // bsp_libcsp_can_init();
         bsp_expander_init();
-        // bsp_i2c_sensor_init();
+        bsp_i2c_sensor_init();
         bsp_heater_init();
         bsp_onboard_adc_init();
         bsp_laser_init();
