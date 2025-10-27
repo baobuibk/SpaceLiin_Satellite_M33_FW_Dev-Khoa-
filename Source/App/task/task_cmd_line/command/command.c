@@ -20,6 +20,9 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static void double_to_string(double value, char *buffer, uint8_t precision);
+static void float_to_string(float value, char *buffer, uint8_t precision);
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 tCmdLineEntry g_psCmdTable[] =
 {
@@ -28,6 +31,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "pwr_htr_en", 			CMD_PWR_HTR_EN,				" : Heater power control" },
 	{ "pwr_las_en", 			CMD_PWR_LAS_EN,				" : Laser power control" },
 	{ "pwr_phot_en", 			CMD_PWR_PHOT_EN,			" : Photo power control" },
+	{ "pwr_tec_en", 			CMD_PWR_TEC_EN,				" : Laser power control" },
+	{ "pwr_pump_en", 			CMD_PWR_PUMP_EN,			" : Photo power control" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Heater Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "htr_set", 				CMD_HTR_SET,				" : Set heater n duty cycle" },
@@ -35,6 +40,13 @@ tCmdLineEntry g_psCmdTable[] =
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Solenoid Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "sol_ctl", 				CMD_SOL_CTL,				" : Clear/Set Sol n output" },
 	{ "valve_set", 				CMD_VALVE_SET,				" : Set Sol valve direction" },
+	{ "flow_get", 				CMD_FLOW_GET,				" : Get flow sensor data" },
+	{ "bmp_get", 				CMD_BMP_GET,				" : Get BMP sensor data" },
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pump Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "pump_enable", 			CMD_PUMP_ENABLE,			" : Enable pump" },
+	{ "pump_freq", 				CMD_PUMP_FREQ,				" : Set pump freq" },
+	{ "pump_volt", 				CMD_PUMP_VOLT,				" : Set pump volt" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
@@ -163,6 +175,48 @@ int CMD_PWR_PHOT_EN(int argc, char *argv[])
 	return CMDLINE_OK;
 }
 
+int CMD_PWR_TEC_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_TEC, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PWR_PUMP_EN(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	bsp_expander_ctrl(POW_ONOFF_HD4, receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
 /* :::::::::: Heater Command :::::::: */
 int CMD_HTR_SET(int argc, char *argv[])
 {
@@ -251,6 +305,116 @@ int CMD_VALVE_SET(int argc, char *argv[])
 	{
 		bsp_debug_console_send_string("> PIN A = 0, PIN B = 1\n> ");
 	}
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_FLOW_GET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	slf3s_readings_t flow_data;
+
+	Flow_sensor_read(&flow_data);
+
+	char flow_string[16];
+	char temp_string[16];
+	double_to_string((double)flow_data.flow, flow_string, 3);
+	double_to_string((double)flow_data.temp, temp_string, 3);
+
+	bsp_debug_console_printf("> FLOW: %s µl/min, TEMP: %s C\n> ", flow_string, temp_string);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_BMP_GET(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 1)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 1)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	bmp390_data_t bmp_data;
+
+	BMP390_sensor_read(&bmp_data);
+
+	char pressure_string[16] = {0};
+	char temperature_string[16] = {0};
+
+	float_to_string((bmp_data.Pressure / 100.0), pressure_string, 3);
+	float_to_string(bmp_data.Temp, temperature_string, 3);
+	
+	bsp_debug_console_printf("> BMP P: %s hPa, T: %s C\n\r", pressure_string, temperature_string);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_ENABLE(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_set_enable(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_FREQ(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 50) || (receive_argm > 800))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_Set_Freq(receive_argm);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
+int CMD_PUMP_VOLT(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm;
+
+	receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 250))
+		return CMDLINE_INVALID_ARG;
+
+	I2C_HD_Pump_set_Voltage(receive_argm);
 
 	// Return success.
 	return CMDLINE_OK;
@@ -666,4 +830,114 @@ int CMD_READ_TEMP(int argc, char *argv[])
 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static void double_to_string(double value, char *buffer, uint8_t precision)
+{
+    /* Sign */
+    if (value < 0.0)
+    {
+        *buffer++ = '-';
+        value = -value;
+    }
+
+    /* Split into integer and fractional parts */
+    uint32_t integer_part  = (uint32_t)value;          /* NOTE: clips to 32-bit range */
+    double   fractional_part = value - (double)integer_part;
+    if (fractional_part < 0.0) fractional_part = 0.0;  /* guard tiny FP negatives */
+
+    /* Integer -> string (in place, no sprintf) */
+    if (integer_part == 0U)
+    {
+        *buffer++ = '0';
+    }
+    else
+    {
+        char rev[10];  /* max 10 digits for uint32_t */
+        uint8_t n = 0;
+        while (integer_part != 0U)
+        {
+            rev[n++] = (char)('0' + (integer_part % 10U));
+            integer_part /= 10U;
+        }
+        while (n--)
+        {
+            *buffer++ = rev[n];
+        }
+    }
+
+    /* Fractional part (truncate, no rounding) */
+    if (precision > 0U)
+    {
+        *buffer++ = '.';
+        for (uint8_t i = 0; i < precision; i++)
+        {
+            fractional_part *= 10.0;
+            uint8_t digit = (uint8_t)fractional_part;
+
+            /* Clamp against rare FP edge (e.g., 9.999999 -> 10) */
+            if (digit > 9U) digit = 9U;
+
+            *buffer++ = (char)('0' + digit);
+            fractional_part -= (double)digit;
+            if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
+        }
+    }
+
+    *buffer = '\0';
+}
+
+static void float_to_string(float value, char *buffer, uint8_t precision)
+{
+    /* Sign */
+    if (value < 0.0)
+    {
+        *buffer++ = '-';
+        value = -value;
+    }
+
+    /* Split into integer and fractional parts */
+    uint32_t integer_part  = (uint32_t)value;          /* NOTE: clips to 32-bit range */
+    float   fractional_part = value - (float)integer_part;
+    if (fractional_part < 0.0) fractional_part = 0.0;  /* guard tiny FP negatives */
+
+    /* Integer -> string (in place, no sprintf) */
+    if (integer_part == 0U)
+    {
+        *buffer++ = '0';
+    }
+    else
+    {
+        char rev[10];  /* max 10 digits for uint32_t */
+        uint8_t n = 0;
+        while (integer_part != 0U)
+        {
+            rev[n++] = (char)('0' + (integer_part % 10U));
+            integer_part /= 10U;
+        }
+        while (n--)
+        {
+            *buffer++ = rev[n];
+        }
+    }
+
+    /* Fractional part (truncate, no rounding) */
+    if (precision > 0U)
+    {
+        *buffer++ = '.';
+        for (uint8_t i = 0; i < precision; i++)
+        {
+            fractional_part *= 10.0;
+            uint8_t digit = (uint8_t)fractional_part;
+
+            /* Clamp against rare FP edge (e.g., 9.999999 -> 10) */
+            if (digit > 9U) digit = 9U;
+
+            *buffer++ = (char)('0' + digit);
+            fractional_part -= (float)digit;
+            if (fractional_part < 0.0) fractional_part = 0.0; /* guard drift */
+        }
+    }
+
+    *buffer = '\0';
+}
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

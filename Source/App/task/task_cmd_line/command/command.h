@@ -19,6 +19,8 @@ int CMD_PWR_SOL_EN(int argc, char *argv[]);
 int CMD_PWR_HTR_EN(int argc, char *argv[]);
 int CMD_PWR_LAS_EN(int argc, char *argv[]);
 int CMD_PWR_PHOT_EN(int argc, char *argv[]);
+int CMD_PWR_TEC_EN(int argc, char *argv[]);
+int CMD_PWR_PUMP_EN(int argc, char *argv[]);
 
 /* :::::::::: Heater Command :::::::: */
 int CMD_HTR_SET(int argc, char *argv[]);
@@ -26,6 +28,13 @@ int CMD_HTR_SET(int argc, char *argv[]);
 /* :::::::::: Solenoid Command :::::::: */
 int CMD_SOL_CTL(int argc, char *argv[]);
 int CMD_VALVE_SET(int argc, char *argv[]);
+int CMD_FLOW_GET(int argc, char *argv[]);
+int CMD_BMP_GET(int argc, char *argv[]);
+
+/* :::::::::: Pump Command :::::::: */
+int CMD_PUMP_ENABLE(int argc, char *argv[]);
+int CMD_PUMP_FREQ(int argc, char *argv[]);
+int CMD_PUMP_VOLT(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);

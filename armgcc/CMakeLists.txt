@@ -105,6 +105,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
     "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_solenoid/bsp_solenoid.c"
 
+    "${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_pump/bsp_pump.c"
+
+
     # Components
 
     "${UserSourceDirPath}/Drivers/Components/delay/nxp/nxp_delay.c"
@@ -149,6 +152,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${UserSourceDirPath}/Drivers/Devices/MCP4902/mcp4902.c"
 
     "${UserSourceDirPath}/Drivers/Devices/slf3s_flow/sl3s_flow.c"
+
+    "${UserSourceDirPath}/Drivers/Devices/BMP390/bmp390.c"
 
     # MiddleWare
     # "${UserSourceDirPath}/MiddleWare/FlightSystem/os/freertos/osDelay.c"
@@ -202,6 +207,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_onboard_adc
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_photo
     ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_solenoid
+    ${UserSourceDirPath}/BoardSupport/bsp_peripheral/bsp_pump
 
     # Component
     ${UserSourceDirPath}/Drivers/Components/error_codes
@@ -249,6 +255,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${UserSourceDirPath}/Drivers/Devices/ADG1414BR
     ${UserSourceDirPath}/Drivers/Devices/MCP4902
     ${UserSourceDirPath}/Drivers/Devices/slf3s_flow
+    ${UserSourceDirPath}/Drivers/Devices/BMP390
 
     # MiddleWare
     # ${UserSourceDirPath}/MiddleWare/FreeRTOS
