@@ -454,14 +454,14 @@ static void bsp_core_init_onboard_adc_spi(void)
      * masterConfig->enableInputDelay               = false;
      */
     LPSPI_MasterGetDefaultConfig(&masterConfig);
-    masterConfig.pcsToSckDelayInNanoSec         = 0;
-    masterConfig.lastSckToPcsDelayInNanoSec     = 0;
-    masterConfig.betweenTransferDelayInNanoSec  = 0;
+    masterConfig.baudRate                       = ONBOARD_ADC_SPI_BAUDRATE;
+    masterConfig.pcsToSckDelayInNanoSec         = (1000000000U / masterConfig.baudRate) / 2U;
+    masterConfig.lastSckToPcsDelayInNanoSec     = (1000000000U / masterConfig.baudRate) / 2U;
+    masterConfig.betweenTransferDelayInNanoSec  = (1000000000U / masterConfig.baudRate) / 2U;
     masterConfig.direction                      = kLPSPI_MsbFirst;
     masterConfig.cpol                           = kLPSPI_ClockPolarityActiveLow;
     masterConfig.cpha                           = kLPSPI_ClockPhaseSecondEdge;
     // masterConfig.pinCfg                         = kLPSPI_SdoInSdiOut;
-    masterConfig.baudRate = ONBOARD_ADC_SPI_BAUDRATE;
     masterConfig.whichPcs = kLPSPI_Pcs1;
     
     srcClock_Hz = ONBOARD_ADC_SPI_CLK_FREQ;

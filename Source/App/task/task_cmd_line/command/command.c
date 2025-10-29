@@ -49,6 +49,7 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "pump_volt", 				CMD_PUMP_VOLT,				" : Set pump volt" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NTC Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+	{ "adc_id", 				CMD_GET_ADC_ID,				" : Get onboard adc id" },
 	{ "temp_ntc", 				CMD_GET_TEMP_NTC,			" : Get NTC temp value" },
 
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test EXP Command ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -421,6 +422,32 @@ int CMD_PUMP_VOLT(int argc, char *argv[])
 }
 
 /* :::::::::: NTC Command :::::::: */
+int CMD_GET_ADC_ID(int argc, char *argv[])
+{
+    /* CMD Input Guard */
+    if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	else if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int receive_argm = atoi(argv[1]);
+
+	if ((receive_argm < 0) || (receive_argm > 1))
+		return CMDLINE_INVALID_ARG;
+
+	uint32_t ret = 0;
+	// int32_t temp = 0;
+	uint16_t id = 0;
+
+	bsp_onboard_adc_chip_id(receive_argm, &id);
+
+	bsp_debug_console_printf("> UPDATE RETURN: %d\n", ret);
+	bsp_debug_console_printf("> CHIP ID: %x\n", id);
+
+	// Return success.
+	return CMDLINE_OK;
+}
+
 int CMD_GET_TEMP_NTC(int argc, char *argv[])
 {
     /* CMD Input Guard */
@@ -430,6 +457,11 @@ int CMD_GET_TEMP_NTC(int argc, char *argv[])
 		return CMDLINE_TOO_MANY_ARGS;
 
 	int receive_argm;
+
+	bsp_onboard_adc_update_raw();
+	bsp_onboard_adc_update_volt();
+
+	bsp_convert_NTC();
 
 	if (!strcmp(argv[1], "all"))
 	{

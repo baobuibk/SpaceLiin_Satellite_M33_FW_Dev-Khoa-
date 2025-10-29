@@ -14,6 +14,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 uint32_t bsp_onboard_adc_init();
+uint32_t bsp_onboard_adc_chip_id(uint8_t chip, uint16_t* p_id);
 
 uint32_t bsp_onboard_adc_update_raw();
 void bsp_onboard_adc_update_volt();

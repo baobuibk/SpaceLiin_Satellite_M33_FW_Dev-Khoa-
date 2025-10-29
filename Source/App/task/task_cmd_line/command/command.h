@@ -37,6 +37,7 @@ int CMD_PUMP_FREQ(int argc, char *argv[]);
 int CMD_PUMP_VOLT(int argc, char *argv[]);
 
 /* :::::::::: NTC Command :::::::: */
+int CMD_GET_ADC_ID(int argc, char *argv[]);
 int CMD_GET_TEMP_NTC(int argc, char *argv[]);
 int CMD_EXP_START(int argc, char *argv[]);
 

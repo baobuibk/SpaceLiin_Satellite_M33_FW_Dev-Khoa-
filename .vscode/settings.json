@@ -105,6 +105,7 @@
     "slf3s_flow.h": "c",
     "bsp_solenoid.h": "c",
     "cmd_test_can.h": "c",
-    "bsp_pump.h": "c"
+    "bsp_pump.h": "c",
+    "text_encoding": "c"
   }
 }

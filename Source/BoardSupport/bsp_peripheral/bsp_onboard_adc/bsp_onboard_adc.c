@@ -101,12 +101,12 @@ ad4114_t onboard_adc_dev1 =
 uint32_t bsp_onboard_adc_init()
 {
 	uint32_t ret;
-	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 1);
+	spi_io_onboard_adc_config(&onboard_adc_spi, 1);
 	ret = ad4114_init(&onboard_adc_dev0, &onboard_adc_spi, &onboard_adc0_cs);
 
 	if (ret != ERROR_OK)
 	{
-		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
+		spi_io_onboard_adc_config(&onboard_adc_spi, 0);
 		return ret;
 	}
 
@@ -115,7 +115,7 @@ uint32_t bsp_onboard_adc_init()
 
 	if (ret != ERROR_OK)
 	{
-		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
+		spi_io_onboard_adc_config(&onboard_adc_spi, 0);
 		return ret;
 	}
 
@@ -123,14 +123,14 @@ uint32_t bsp_onboard_adc_init()
 
 	if (ret != ERROR_OK)
 	{
-		spi_io_onboard_adc_config(onboard_adc_dev0.spi, 0);
+		spi_io_onboard_adc_config(&onboard_adc_spi, 0);
 		return ret;
 	}
 
 	// ((1 << 10) - 1) << 2: Enable 10 pin, start at pin 2
 	ret = bsp_onboard_adc_config(&onboard_adc_dev1, (((1 << 10) - 1) << 2));
 
-	spi_io_onboard_adc_config(onboard_adc_dev1.spi, 0);
+	spi_io_onboard_adc_config(&onboard_adc_spi, 0);
 
 	if (ret != ERROR_OK)
 	{
@@ -140,6 +140,22 @@ uint32_t bsp_onboard_adc_init()
     return ERROR_OK;
 }
 
+uint32_t bsp_onboard_adc_chip_id(uint8_t chip, uint16_t* p_id)
+{
+    spi_io_onboard_adc_config(&onboard_adc_spi, 1);
+
+    if (chip == 0)
+	{
+		return ad4114_read_id(&onboard_adc_dev0, p_id);
+	}
+	else
+	{
+		return ad4114_read_id(&onboard_adc_dev1, p_id);
+	}
+
+    spi_io_onboard_adc_config(&onboard_adc_spi, 0);
+}
+
 uint32_t bsp_onboard_adc_update_raw()
 {
 	uint16_t out_mask_adc0, out_mask_adc1 = 0;
@@ -147,7 +163,7 @@ uint32_t bsp_onboard_adc_update_raw()
 
 	spi_io_onboard_adc_config(onboard_adc_dev0.spi, 1);
 
-    ret = ad4114_read_all(&onboard_adc_dev0, 5000u, &out_mask_adc0, adc0_raw);
+    ret = ad4114_read_all(&onboard_adc_dev0, 500u, &out_mask_adc0, adc0_raw);
 
 	if (ret != ERROR_OK)
 	{
@@ -155,7 +171,7 @@ uint32_t bsp_onboard_adc_update_raw()
 		return ret;
 	}
 	
-	ret = ad4114_read_all(&onboard_adc_dev1, 5000u, &out_mask_adc1, adc1_raw);
+	ret = ad4114_read_all(&onboard_adc_dev1, 500u, &out_mask_adc1, adc1_raw);
 
 	spi_io_onboard_adc_config(onboard_adc_dev1.spi, 0);
 
